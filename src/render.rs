@@ -137,7 +137,9 @@ fn parenthesize(node: &Expr) -> String {
         Expr::Integer(_, _)
         | Expr::Symbol { .. }
         | Expr::Call { .. }
-        | Expr::Sqrt { .. } => expr_inner(node),
+        | Expr::Sqrt { .. }
+        | Expr::Abs { .. }
+        | Expr::Binary { op: BinOp::Pow, .. } => expr_inner(node),
         _ => format!("({})", expr_inner(node)),
     }
 }
