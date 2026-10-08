@@ -1,0 +1,106 @@
+% PureMath v0.1 broad mathematical feature demonstration
+% File execution only prints explicit \print expressions.
+
+\import{algebra}
+
+% Definitions, exact rationals, powers, roots, and reusable functions.
+x := 12
+f(t) := t^2 + 1
+\print{f(3)}
+\print{\frac{7}{12} + \frac{5}{18}}
+\print{\sqrt{144}}
+\print{\abs{-\frac{15}{4}}}
+\print{double(21)}
+
+% Piecewise and recursion.
+positive_magnitude(t) :=
+\begin{cases}
+t & t >= 0 \\
+-t & t < 0
+\end{cases}
+\print{positive_magnitude(-9)}
+
+fact(n) :=
+\begin{cases}
+1 & n = 0 \\
+n \cdot fact(n-1) & n > 0
+\end{cases}
+\print{fact(6)}
+
+fib(n) :=
+\begin{cases}
+0 & n = 0 \\
+1 & n = 1 \\
+fib(n-1) + fib(n-2) & n > 1
+\end{cases}
+\print{fib(10)}
+
+% Sets, relations, ranges, and indexed aggregation.
+S := {1,2,3}
+T := {2,3,4}
+\print{S \cup T}
+\print{S \cap T}
+\print{T \setminus S}
+\print{2 \in S}
+\print{S \subseteq {1,2,3,4}}
+\print{\range{3}{7}}
+\print{\sum_{i=1}^{10} i}
+\print{\prod_{i=1}^{5} i}
+\print{\card{S}}
+
+% Vectors and matrices.
+v := \vec{1,2,3}
+w := \vec{4,5,6}
+\print{v + w}
+\print{\dot{v}{w}}
+\print{\norm{v}}
+
+A := \begin{pmatrix}
+1 & 2 \\
+3 & 4
+\end{pmatrix}
+\print{A + A}
+\print{A^2}
+\print{\transpose{A}}
+\print{\det{A}}
+\print{\inverse{A}}
+\print{\rank{A}}
+\print{\trace{A}}
+
+% Number theory and combinatorics.
+\print{5!}
+\print{\binom{5}{2}}
+\print{\perm{5}{2}}
+\print{\gcd{84}{30}}
+\print{\lcm{12}{18}}
+
+% Integer rounding and elementary functions.
+\print{\floor{\frac{-7}{3}}}
+\print{\ceil{\frac{-7}{3}}}
+\print{\sin{0}}
+\print{\cos{0}}
+\print{\tan{0}}
+\print{\ln{1}}
+\print{\exp{0}}
+\print{\pi}
+\print{\e}
+
+% Statistics.
+data := \vec{1,2,3,4}
+\print{\mean{data}}
+\print{\variance{data}}
+\print{\stdev{data}}
+
+% Symbolic substitution and calculus.
+\print{\subs{x=3}{x^2 + 1}}
+\print{\diff{x^3 + 2*x}{x}}
+\print{\int_{0}^{3} x^2}
+\print{\lim_{x\to 2} x^2}
+
+% Exact linear/quadratic equation solving.
+\print{\solve{3*x + 6 = 0}{x}}
+\print{\solve{x^2 - 5*x + 6 = 0}{x}}
+
+% Deliberately unevaluated symbolic mathematics.
+\print{\sin{x}}
+\print{\int x^2}
