@@ -648,6 +648,36 @@ impl<'a> Evaluator<'a> {
                     _ => Err(Diagnostic::at("transpose requires a matrix", span)),
                 }
             }
+            "\\inverse" | "\\inv" => {
+                require(1)?;
+                match self.eval_expr(&args[0], locals)? {
+                    Value::Matrix(matrix) => inverse_matrix(&matrix)
+                        .map(Value::Matrix)
+                        .map_err(Diagnostic::new),
+                    _ => Err(Diagnostic::at("inverse requires a matrix", span)),
+                }
+            }
+            "\\rank" => {
+                require(1)?;
+                match self.eval_expr(&args[0], locals)? {
+                    Value::Matrix(matrix) => Ok(Value::Rational(Rational::integer(
+                        rank_matrix(&matrix).map_err(Diagnostic::new)? as i128,
+                    ))),
+                    _ => Err(Diagnostic::at("rank requires a matrix", span)),
+                }
+            }
+            "\\card" | "\\cardinality" => {
+                require(1)?;
+                match self.eval_expr(&args[0], locals)? {
+                    Value::Set(values) | Value::Vector(values) => {
+                        Ok(Value::Rational(Rational::integer(values.len() as i128)))
+                    }
+                    Value::Matrix(rows) => Ok(Value::Rational(Rational::integer(
+                        rows.iter().map(Vec::len).sum::<usize>() as i128,
+                    ))),
+                    _ => Err(Diagnostic::at("cardinality requires a set, vector, or matrix", span)),
+                }
+            }
             "\\trace" => {
                 require(1)?;
                 match self.eval_expr(&args[0], locals)? {
@@ -1086,6 +1116,98 @@ fn trace_matrix(m: &[Vec<Value>]) -> Result<Rational, String> {
         out = out.add(value)?;
     }
     Ok(out)
+}
+
+fn inverse_matrix(m: &[Vec<Value>]) -> Result<Vec<Vec<Value>>, String> {
+    if m.is_empty() || m.len() != m[0].len() {
+        return Err("inverse requires a non-empty square matrix".into());
+    }
+    let n = m.len();
+    let mut aug = vec![vec![Rational::integer(0); n * 2]; n];
+    for i in 0..n {
+        if m[i].len() != n {
+            return Err("inverse requires a square matrix".into());
+        }
+        for j in 0..n {
+            let Value::Rational(value) = &m[i][j] else {
+                return Err("matrix contains a non-exact element".into());
+            };
+            aug[i][j] = value.clone();
+        }
+        aug[i][n + i] = Rational::integer(1);
+    }
+
+    for col in 0..n {
+        let pivot = (col..n).find(|&row| aug[row][col].num != 0);
+        let Some(pivot) = pivot else {
+            return Err("matrix is singular".into());
+        };
+        if pivot != col {
+            aug.swap(pivot, col);
+        }
+        let pivot_value = aug[col][col].clone();
+        for j in 0..2 * n {
+            aug[col][j] = aug[col][j].div(&pivot_value)?;
+        }
+        for row in 0..n {
+            if row == col {
+                continue;
+            }
+            let factor = aug[row][col].clone();
+            if factor.num == 0 {
+                continue;
+            }
+            for j in 0..2 * n {
+                let product = factor.mul(&aug[col][j])?;
+                aug[row][j] = aug[row][j].sub(&product)?;
+            }
+        }
+    }
+    Ok((0..n)
+        .map(|i| (0..n).map(|j| aug[i][n + j].clone().into()).collect())
+        .collect())
+}
+
+fn rank_matrix(m: &[Vec<Value>]) -> Result<usize, String> {
+    if m.is_empty() || m[0].is_empty() {
+        return Ok(0);
+    }
+    let rows = m.len();
+    let cols = m[0].len();
+    let mut a = Vec::with_capacity(rows);
+    for row in m {
+        if row.len() != cols {
+            return Err("matrix rows must have equal length".into());
+        }
+        a.push(
+            row.iter()
+                .map(|value| match value {
+                    Value::Rational(r) => Ok(r.clone()),
+                    _ => Err("matrix contains a non-exact element".into()),
+                })
+                .collect::<Result<Vec<_>, _>>()?,
+        );
+    }
+
+    let mut rank = 0;
+    for col in 0..cols {
+        let Some(pivot) = (rank..rows).find(|&row| a[row][col].num != 0) else {
+            continue;
+        };
+        a.swap(rank, pivot);
+        let pivot_value = a[rank][col].clone();
+        for row in (rank + 1)..rows {
+            let factor = a[row][col].div(&pivot_value)?;
+            for j in col..cols {
+                a[row][j] = a[row][j].sub(&factor.mul(&a[rank][j])?)?;
+            }
+        }
+        rank += 1;
+        if rank == rows {
+            break;
+        }
+    }
+    Ok(rank)
 }
 
 fn determinant(m: &[Vec<Value>]) -> Result<Rational, String> {
