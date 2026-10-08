@@ -576,6 +576,8 @@ impl Parser {
             Expr::Set { elements, .. } | Expr::Vector { elements, .. } => {
                 elements.iter().find_map(Self::first_non_constant_symbol)
             }
+            Expr::SetComprehension { domain, condition, .. } => Self::first_non_constant_symbol(domain)
+                .or_else(|| Self::first_non_constant_symbol(condition)),
             Expr::Matrix { rows, .. } => rows
                 .iter()
                 .flat_map(|row| row.iter())
