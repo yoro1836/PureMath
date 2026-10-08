@@ -1,3 +1,5 @@
+#![allow(clippy::needless_range_loop)]
+
 use crate::ast::{BinOp, Expr, Program, Stmt};
 use crate::diagnostics::Diagnostic;
 use crate::env::Environment;
@@ -218,19 +220,26 @@ impl<'a> Evaluator<'a> {
                 ..
             } => self.eval_integral(var, lower.as_deref(), upper.as_deref(), body, expr, locals),
             Expr::Limit {
-                var,
-                target,
-                body,
-                ..
+                var, target, body, ..
             } => self.eval_limit(var, target, body, expr, locals),
             Expr::Abs { expr: inner, span } => match self.eval_expr(inner, locals)? {
-                Value::Rational(v) => Ok(Value::Rational(Rational::new(v.num.checked_abs().ok_or_else(|| Diagnostic::new("integer overflow in absolute value"))?, v.den)
-                    .map_err(Diagnostic::new)?)),
+                Value::Rational(v) => Ok(Value::Rational(
+                    Rational::new(
+                        v.num
+                            .checked_abs()
+                            .ok_or_else(|| Diagnostic::new("integer overflow in absolute value"))?,
+                        v.den,
+                    )
+                    .map_err(Diagnostic::new)?,
+                )),
                 Value::Symbolic(v) => Ok(Value::Symbolic(Expr::Abs {
                     expr: Box::new(v),
                     span: *span,
                 })),
-                other => Err(Diagnostic::at(format!("cannot take absolute value of {}", other), *span)),
+                other => Err(Diagnostic::at(
+                    format!("cannot take absolute value of {}", other),
+                    *span,
+                )),
             },
             Expr::Sqrt { expr: inner, span } => match self.eval_expr(inner, locals)? {
                 Value::Rational(v) if v.num >= 0 => {
@@ -289,7 +298,9 @@ impl<'a> Evaluator<'a> {
                     .and_then(|n| usize::try_from(n).ok())
                     .and_then(|n| n.checked_add(1));
                 if term_count.is_none_or(|count| count > self.max_sum_terms) {
-                    return Err(Diagnostic::new("finite product exceeds evaluation term limit"));
+                    return Err(Diagnostic::new(
+                        "finite product exceeds evaluation term limit",
+                    ));
                 }
                 for i in l.num..=h.num {
                     local.insert(var.to_owned(), Value::Rational(Rational::integer(i)));
@@ -361,29 +372,31 @@ impl<'a> Evaluator<'a> {
             | BinOp::Ge
             | BinOp::In
             | BinOp::Subset
-            | BinOp::SubsetEq => {
-                match compare(op, &a, &b) {
-                    Ok(value) => Ok(Value::Bool(value)),
-                    Err(_) => Ok(Value::Symbolic(Expr::Binary {
-                        op,
-                        lhs: Box::new(value_to_expr(&a, lhs)),
-                        rhs: Box::new(value_to_expr(&b, rhs)),
-                        span,
-                    })),
-                }
-            }
+            | BinOp::SubsetEq => match compare(op, &a, &b) {
+                Ok(value) => Ok(Value::Bool(value)),
+                Err(_) => Ok(Value::Symbolic(Expr::Binary {
+                    op,
+                    lhs: Box::new(value_to_expr(&a, lhs)),
+                    rhs: Box::new(value_to_expr(&b, rhs)),
+                    span,
+                })),
+            },
             BinOp::Union | BinOp::Intersect | BinOp::Difference => {
                 set_binary(op, &a, &b, lhs, rhs, span)
             }
-            BinOp::Add | BinOp::Sub => structured_add_sub(op, &a, &b, lhs, rhs, span),
-            BinOp::Mul => structured_mul(&a, &b, lhs, rhs, span),
+            BinOp::Add | BinOp::Sub => Ok(structured_add_sub(op, &a, &b, lhs, rhs, span)),
+            BinOp::Mul => Ok(structured_mul(&a, &b, lhs, rhs, span)),
             BinOp::Div => numeric_or_symbolic(BinOp::Div, a, b, lhs, rhs, |x, y| x.div(y)),
             BinOp::Pow => match (a, b) {
                 (Value::Rational(x), Value::Rational(y)) if y.is_integer() => {
                     x.powi(y.num).map(Value::Rational).map_err(Diagnostic::new)
                 }
-                (Value::Matrix(matrix), Value::Rational(exp)) if exp.is_integer() && exp.num >= 0 => {
-                    matrix_pow(&matrix, exp.num).map(Value::Matrix).map_err(Diagnostic::new)
+                (Value::Matrix(matrix), Value::Rational(exp))
+                    if exp.is_integer() && exp.num >= 0 =>
+                {
+                    matrix_pow(&matrix, exp.num)
+                        .map(Value::Matrix)
+                        .map_err(Diagnostic::new)
                 }
                 (va, vb) => Ok(Value::Symbolic(Expr::Binary {
                     op,
@@ -404,8 +417,9 @@ impl<'a> Evaluator<'a> {
         original: &Expr,
         locals: &HashMap<String, Value>,
     ) -> Result<Value, Diagnostic> {
-        let antiderivative = integrate_expr(body, var)
-            .ok_or_else(|| Diagnostic::new("integral is outside the exact polynomial integration subset"))?;
+        let antiderivative = integrate_expr(body, var).ok_or_else(|| {
+            Diagnostic::new("integral is outside the exact polynomial integration subset")
+        })?;
         match (lower, upper) {
             (Some(lo), Some(hi)) => {
                 let lo_value = self.eval_expr(lo, locals)?;
@@ -491,10 +505,13 @@ impl<'a> Evaluator<'a> {
             "\\factorial" => {
                 require(1)?;
                 match self.eval_expr(&args[0], locals)? {
-                    Value::Rational(n) if n.is_integer() && n.num >= 0 => {
-                        factorial(n.num).map(Value::Rational).map_err(Diagnostic::new)
-                    }
-                    _ => Err(Diagnostic::at("factorial requires a non-negative integer", span)),
+                    Value::Rational(n) if n.is_integer() && n.num >= 0 => factorial(n.num)
+                        .map(Value::Rational)
+                        .map_err(Diagnostic::new),
+                    _ => Err(Diagnostic::at(
+                        "factorial requires a non-negative integer",
+                        span,
+                    )),
                 }
             }
             "\\binom" | "\\choose" => {
@@ -509,7 +526,10 @@ impl<'a> Evaluator<'a> {
                             .map(Value::Rational)
                             .map_err(Diagnostic::new)
                     }
-                    _ => Err(Diagnostic::at("binomial coefficient requires non-negative integers", span)),
+                    _ => Err(Diagnostic::at(
+                        "binomial coefficient requires non-negative integers",
+                        span,
+                    )),
                 }
             }
             "\\perm" | "\\permutation" => {
@@ -520,9 +540,14 @@ impl<'a> Evaluator<'a> {
                     (Value::Rational(n), Value::Rational(k))
                         if n.is_integer() && k.is_integer() && n.num >= 0 && k.num >= 0 =>
                     {
-                        perm(n.num, k.num).map(Value::Rational).map_err(Diagnostic::new)
+                        perm(n.num, k.num)
+                            .map(Value::Rational)
+                            .map_err(Diagnostic::new)
                     }
-                    _ => Err(Diagnostic::at("permutation requires non-negative integers", span)),
+                    _ => Err(Diagnostic::at(
+                        "permutation requires non-negative integers",
+                        span,
+                    )),
                 }
             }
             "\\gcd" => {
@@ -530,7 +555,9 @@ impl<'a> Evaluator<'a> {
                 let a = self.eval_expr(&args[0], locals)?;
                 let b = self.eval_expr(&args[1], locals)?;
                 match (a, b) {
-                    (Value::Rational(a), Value::Rational(b)) if a.is_integer() && b.is_integer() => {
+                    (Value::Rational(a), Value::Rational(b))
+                        if a.is_integer() && b.is_integer() =>
+                    {
                         Ok(Value::Rational(Rational::integer(gcd_i128(a.num, b.num))))
                     }
                     _ => Err(Diagnostic::at("gcd requires integers", span)),
@@ -541,7 +568,9 @@ impl<'a> Evaluator<'a> {
                 let a = self.eval_expr(&args[0], locals)?;
                 let b = self.eval_expr(&args[1], locals)?;
                 match (a, b) {
-                    (Value::Rational(a), Value::Rational(b)) if a.is_integer() && b.is_integer() => {
+                    (Value::Rational(a), Value::Rational(b))
+                        if a.is_integer() && b.is_integer() =>
+                    {
                         lcm_i128(a.num, b.num)
                             .map(|n| Value::Rational(Rational::integer(n)))
                             .map_err(Diagnostic::new)
@@ -556,7 +585,11 @@ impl<'a> Evaluator<'a> {
                         let q = r.num / r.den;
                         let rem = r.num % r.den;
                         let n = if name == "\\floor" {
-                            if r.num < 0 && rem != 0 { q - 1 } else { q }
+                            if r.num < 0 && rem != 0 {
+                                q - 1
+                            } else {
+                                q
+                            }
                         } else if r.num > 0 && rem != 0 {
                             q + 1
                         } else {
@@ -564,14 +597,23 @@ impl<'a> Evaluator<'a> {
                         };
                         Ok(Value::Rational(Rational::integer(n)))
                     }
-                    _ => Err(Diagnostic::at(format!("{} requires an exact rational", name), span)),
+                    _ => Err(Diagnostic::at(
+                        format!("{} requires an exact rational", name),
+                        span,
+                    )),
                 }
             }
             "\\min" | "\\max" => {
                 if args.is_empty() {
-                    return Err(Diagnostic::at(format!("{} requires at least one argument", name), span));
+                    return Err(Diagnostic::at(
+                        format!("{} requires at least one argument", name),
+                        span,
+                    ));
                 }
-                let values = args.iter().map(|arg| self.eval_expr(arg, locals)).collect::<Result<Vec<_>, _>>()?;
+                let values = args
+                    .iter()
+                    .map(|arg| self.eval_expr(arg, locals))
+                    .collect::<Result<Vec<_>, _>>()?;
                 let mut best: Option<Rational> = None;
                 for value in values {
                     match value {
@@ -579,13 +621,29 @@ impl<'a> Evaluator<'a> {
                             best = Some(match best {
                                 None => r,
                                 Some(current) => {
-                                    let less = r.num.checked_mul(current.den).ok_or_else(|| Diagnostic::new("comparison overflow"))?
-                                        .cmp(&current.num.checked_mul(r.den).ok_or_else(|| Diagnostic::new("comparison overflow"))?);
-                                    if (name == "\\min" && less.is_lt()) || (name == "\\max" && less.is_gt()) { r } else { current }
+                                    let less = r
+                                        .num
+                                        .checked_mul(current.den)
+                                        .ok_or_else(|| Diagnostic::new("comparison overflow"))?
+                                        .cmp(&current.num.checked_mul(r.den).ok_or_else(|| {
+                                            Diagnostic::new("comparison overflow")
+                                        })?);
+                                    if (name == "\\min" && less.is_lt())
+                                        || (name == "\\max" && less.is_gt())
+                                    {
+                                        r
+                                    } else {
+                                        current
+                                    }
                                 }
                             });
                         }
-                        _ => return Err(Diagnostic::at(format!("{} requires exact numeric arguments", name), span)),
+                        _ => {
+                            return Err(Diagnostic::at(
+                                format!("{} requires exact numeric arguments", name),
+                                span,
+                            ))
+                        }
                     }
                 }
                 Ok(Value::Rational(best.expect("non-empty min/max")))
@@ -599,14 +657,20 @@ impl<'a> Evaluator<'a> {
                         let mut out = Rational::integer(0);
                         for (x, y) in a.iter().zip(&b) {
                             let (Value::Rational(x), Value::Rational(y)) = (x, y) else {
-                                return Ok(symbolic(name, &[Value::Vector(a.clone()), Value::Vector(b.clone())]));
+                                return Ok(symbolic(
+                                    name,
+                                    &[Value::Vector(a.clone()), Value::Vector(b.clone())],
+                                ));
                             };
                             let product = x.mul(y).map_err(Diagnostic::new)?;
                             out = out.add(&product).map_err(Diagnostic::new)?;
                         }
                         Ok(Value::Rational(out))
                     }
-                    _ => Err(Diagnostic::at("dot product requires vectors of equal length", span)),
+                    _ => Err(Diagnostic::at(
+                        "dot product requires vectors of equal length",
+                        span,
+                    )),
                 }
             }
             "\\norm" => {
@@ -618,7 +682,10 @@ impl<'a> Evaluator<'a> {
                         for x in &xs {
                             let Value::Rational(x) = x else {
                                 return Ok(Value::Symbolic(Expr::Call {
-                                    callee: Box::new(Expr::Symbol { name: name.to_owned(), span }),
+                                    callee: Box::new(Expr::Symbol {
+                                        name: name.to_owned(),
+                                        span,
+                                    }),
                                     args: vec![args[0].clone()],
                                     span,
                                 }));
@@ -626,18 +693,33 @@ impl<'a> Evaluator<'a> {
                             let sq = x.mul(x).map_err(Diagnostic::new)?;
                             sum = sum.add(&sq).map_err(Diagnostic::new)?;
                         }
-                        self.eval_expr(&Expr::Sqrt { expr: Box::new(value_to_rational_expr(&sum, span)), span }, locals)
+                        self.eval_expr(
+                            &Expr::Sqrt {
+                                expr: Box::new(value_to_rational_expr(&sum, span)),
+                                span,
+                            },
+                            locals,
+                        )
                     }
-                    Value::Rational(x) => self.eval_expr(&Expr::Sqrt { expr: Box::new(value_to_rational_expr(&x.mul(&x).map_err(Diagnostic::new)?, span)), span }, locals),
+                    Value::Rational(x) => self.eval_expr(
+                        &Expr::Sqrt {
+                            expr: Box::new(value_to_rational_expr(
+                                &x.mul(&x).map_err(Diagnostic::new)?,
+                                span,
+                            )),
+                            span,
+                        },
+                        locals,
+                    ),
                     _ => Err(Diagnostic::at("norm requires a vector or number", span)),
                 }
             }
             "\\det" => {
                 require(1)?;
                 match self.eval_expr(&args[0], locals)? {
-                    Value::Matrix(matrix) => {
-                        determinant(&matrix).map(Value::Rational).map_err(Diagnostic::new)
-                    }
+                    Value::Matrix(matrix) => determinant(&matrix)
+                        .map(Value::Rational)
+                        .map_err(Diagnostic::new),
                     _ => Err(Diagnostic::at("determinant requires a matrix", span)),
                 }
             }
@@ -675,13 +757,18 @@ impl<'a> Evaluator<'a> {
                     Value::Matrix(rows) => Ok(Value::Rational(Rational::integer(
                         rows.iter().map(Vec::len).sum::<usize>() as i128,
                     ))),
-                    _ => Err(Diagnostic::at("cardinality requires a set, vector, or matrix", span)),
+                    _ => Err(Diagnostic::at(
+                        "cardinality requires a set, vector, or matrix",
+                        span,
+                    )),
                 }
             }
             "\\trace" => {
                 require(1)?;
                 match self.eval_expr(&args[0], locals)? {
-                    Value::Matrix(matrix) => trace_matrix(&matrix).map(Value::Rational).map_err(Diagnostic::new),
+                    Value::Matrix(matrix) => trace_matrix(&matrix)
+                        .map(Value::Rational)
+                        .map_err(Diagnostic::new),
                     _ => Err(Diagnostic::at("trace requires a matrix", span)),
                 }
             }
@@ -691,7 +778,12 @@ impl<'a> Evaluator<'a> {
                 let xs = match value {
                     Value::Vector(xs) => xs,
                     Value::Set(xs) => xs,
-                    _ => return Err(Diagnostic::at(format!("{} requires a finite set or vector", name), span)),
+                    _ => {
+                        return Err(Diagnostic::at(
+                            format!("{} requires a finite set or vector", name),
+                            span,
+                        ))
+                    }
                 };
                 let numbers = xs
                     .into_iter()
@@ -702,13 +794,18 @@ impl<'a> Evaluator<'a> {
                     .collect::<Result<Vec<_>, _>>()?;
                 match name {
                     "\\mean" => mean(&numbers).map(Value::Rational).map_err(Diagnostic::new),
-                    "\\variance" => variance(&numbers).map(Value::Rational).map_err(Diagnostic::new),
+                    "\\variance" => variance(&numbers)
+                        .map(Value::Rational)
+                        .map_err(Diagnostic::new),
                     _ => {
                         let v = variance(&numbers).map_err(Diagnostic::new)?;
-                        self.eval_expr(&Expr::Sqrt {
-                            expr: Box::new(value_to_rational_expr(&v, span)),
-                            span,
-                        }, locals)
+                        self.eval_expr(
+                            &Expr::Sqrt {
+                                expr: Box::new(value_to_rational_expr(&v, span)),
+                                span,
+                            },
+                            locals,
+                        )
                     }
                 }
             }
@@ -718,15 +815,21 @@ impl<'a> Evaluator<'a> {
                     Expr::Symbol { name, .. } => name.clone(),
                     _ => return Err(Diagnostic::at("derivative variable must be a symbol", span)),
                 };
-                let derivative = differentiate(&args[0], &var)
-                    .ok_or_else(|| Diagnostic::at("derivative is outside the supported symbolic subset", span))?;
+                let derivative = differentiate(&args[0], &var).ok_or_else(|| {
+                    Diagnostic::at("derivative is outside the supported symbolic subset", span)
+                })?;
                 let derivative = simplifier::simplify(derivative);
                 self.eval_expr(&derivative, locals)
             }
             "\\subs" | "\\substitute" => {
                 require(2)?;
                 let (var, replacement) = match &args[0] {
-                    Expr::Binary { op: BinOp::Eq, lhs, rhs, .. } => {
+                    Expr::Binary {
+                        op: BinOp::Eq,
+                        lhs,
+                        rhs,
+                        ..
+                    } => {
                         let Expr::Symbol { name, .. } = lhs.as_ref() else {
                             return Err(Diagnostic::at("substitution must use x=value", span));
                         };
@@ -745,13 +848,23 @@ impl<'a> Evaluator<'a> {
                     _ => return Err(Diagnostic::at("solve variable must be a symbol", span)),
                 };
                 let equation = match &args[0] {
-                    Expr::Binary { op: BinOp::Eq, lhs, rhs, .. } => Expr::Binary {
+                    Expr::Binary {
+                        op: BinOp::Eq,
+                        lhs,
+                        rhs,
+                        ..
+                    } => Expr::Binary {
                         op: BinOp::Sub,
                         lhs: lhs.clone(),
                         rhs: rhs.clone(),
                         span,
                     },
-                    _ => return Err(Diagnostic::at("solve expects an equation such as x^2 = 4", span)),
+                    _ => {
+                        return Err(Diagnostic::at(
+                            "solve expects an equation such as x^2 = 4",
+                            span,
+                        ))
+                    }
                 };
                 let coeffs = polynomial_coefficients(&equation, &var, self, locals)?;
                 solve_polynomial(&coeffs, &var, span, self)
@@ -770,10 +883,14 @@ impl<'a> Evaluator<'a> {
                 let a = self.eval_expr(&args[0], locals)?;
                 let b = self.eval_expr(&args[1], locals)?;
                 match (a, b) {
-                    (Value::Rational(a), Value::Rational(b)) if a.is_integer() && b.is_integer() => {
+                    (Value::Rational(a), Value::Rational(b))
+                        if a.is_integer() && b.is_integer() =>
+                    {
                         let mut values = Vec::new();
                         if a.num <= b.num {
-                            let count = b.num.checked_sub(a.num)
+                            let count = b
+                                .num
+                                .checked_sub(a.num)
                                 .and_then(|n| usize::try_from(n).ok())
                                 .and_then(|n| n.checked_add(1))
                                 .ok_or_else(|| Diagnostic::new("range is too large"))?;
@@ -789,18 +906,21 @@ impl<'a> Evaluator<'a> {
                     _ => Err(Diagnostic::at("range requires integer bounds", span)),
                 }
             }
-            "\\tuple" => {
-                Ok(Value::Vector(args.iter().map(|arg| self.eval_expr(arg, locals)).collect::<Result<Vec<_>, _>>()?))
-            }
+            "\\tuple" => Ok(Value::Vector(
+                args.iter()
+                    .map(|arg| self.eval_expr(arg, locals))
+                    .collect::<Result<Vec<_>, _>>()?,
+            )),
             _ => {
-                let values = args.iter().map(|arg| self.eval_expr(arg, locals)).collect::<Result<Vec<_>, _>>()?;
+                let values = args
+                    .iter()
+                    .map(|arg| self.eval_expr(arg, locals))
+                    .collect::<Result<Vec<_>, _>>()?;
                 Ok(symbolic(name, &values))
             }
         }
     }
-
 }
-
 
 fn numeric_or_symbolic<F>(
     op: BinOp,
@@ -838,7 +958,9 @@ fn compare(op: BinOp, a: &Value, b: &Value) -> Result<bool, String> {
             let (Value::Set(left), Value::Set(right)) = (a, b) else {
                 return Err("subset comparison requires sets".into());
             };
-            let contained = left.iter().all(|value| right.iter().any(|item| values_equal(value, item)));
+            let contained = left
+                .iter()
+                .all(|value| right.iter().any(|item| values_equal(value, item)));
             if op == BinOp::Subset {
                 Ok(contained && left.len() < right.len())
             } else {
@@ -859,7 +981,6 @@ fn compare(op: BinOp, a: &Value, b: &Value) -> Result<bool, String> {
                 })
             }
             (Value::Bool(x), Value::Bool(y)) if op == BinOp::Eq => Ok(x == y),
-            _ if op == BinOp::Eq => Ok(values_equal(a, b)),
             _ => Err("comparison requires compatible exact values".into()),
         },
         _ => Err("unsupported comparison".into()),
@@ -873,7 +994,9 @@ fn values_equal(a: &Value, b: &Value) -> bool {
         }
         (Value::Bool(x), Value::Bool(y)) => x == y,
         (Value::Set(x), Value::Set(y)) => {
-            x.len() == y.len() && x.iter().all(|value| y.iter().any(|item| values_equal(value, item)))
+            x.len() == y.len()
+                && x.iter()
+                    .all(|value| y.iter().any(|item| values_equal(value, item)))
         }
         (Value::Vector(x), Value::Vector(y)) => {
             x.len() == y.len() && x.iter().zip(y).all(|(a, b)| values_equal(a, b))
@@ -881,15 +1004,21 @@ fn values_equal(a: &Value, b: &Value) -> bool {
         (Value::Matrix(x), Value::Matrix(y)) => {
             x.len() == y.len()
                 && x.iter().zip(y).all(|(ra, rb)| {
-                    ra.len() == rb.len()
-                        && ra.iter().zip(rb).all(|(a, b)| values_equal(a, b))
+                    ra.len() == rb.len() && ra.iter().zip(rb).all(|(a, b)| values_equal(a, b))
                 })
         }
         _ => a == b,
     }
 }
 
-fn symbolic_binary(op: BinOp, a: &Value, b: &Value, lhs: &Expr, rhs: &Expr, span: crate::diagnostics::Span) -> Value {
+fn symbolic_binary(
+    op: BinOp,
+    a: &Value,
+    b: &Value,
+    lhs: &Expr,
+    rhs: &Expr,
+    span: crate::diagnostics::Span,
+) -> Value {
     Value::Symbolic(simplifier::simplify(Expr::Binary {
         op,
         lhs: Box::new(value_to_expr(a, lhs)),
@@ -909,7 +1038,9 @@ fn structured_add_sub(
     match (a, b) {
         (Value::Rational(x), Value::Rational(y)) => {
             let result = if op == BinOp::Add { x.add(y) } else { x.sub(y) };
-            result.map(Value::Rational).unwrap_or_else(|_| symbolic_binary(op, a, b, lhs, rhs, span))
+            result
+                .map(Value::Rational)
+                .unwrap_or_else(|_| symbolic_binary(op, a, b, lhs, rhs, span))
         }
         (Value::Vector(x), Value::Vector(y)) if x.len() == y.len() => {
             let mut out = Vec::with_capacity(x.len());
@@ -917,7 +1048,11 @@ fn structured_add_sub(
                 let (Value::Rational(rx), Value::Rational(ry)) = (vx, vy) else {
                     return symbolic_binary(op, a, b, lhs, rhs, span);
                 };
-                let value = if op == BinOp::Add { rx.add(ry) } else { rx.sub(ry) };
+                let value = if op == BinOp::Add {
+                    rx.add(ry)
+                } else {
+                    rx.sub(ry)
+                };
                 match value {
                     Ok(v) => out.push(Value::Rational(v)),
                     Err(_) => return symbolic_binary(op, a, b, lhs, rhs, span),
@@ -933,7 +1068,11 @@ fn structured_add_sub(
                     let (Value::Rational(rx), Value::Rational(ry)) = (vx, vy) else {
                         return symbolic_binary(op, a, b, lhs, rhs, span);
                     };
-                    let value = if op == BinOp::Add { rx.add(ry) } else { rx.sub(ry) };
+                    let value = if op == BinOp::Add {
+                        rx.add(ry)
+                    } else {
+                        rx.sub(ry)
+                    };
                     match value {
                         Ok(v) => row.push(Value::Rational(v)),
                         Err(_) => return symbolic_binary(op, a, b, lhs, rhs, span),
@@ -955,23 +1094,38 @@ fn structured_mul(
     span: crate::diagnostics::Span,
 ) -> Value {
     match (a, b) {
-        (Value::Rational(x), Value::Rational(y)) => {
-            x.mul(y).map(Value::Rational).unwrap_or_else(|_| symbolic_binary(BinOp::Mul, a, b, lhs, rhs, span))
-        }
+        (Value::Rational(x), Value::Rational(y)) => x
+            .mul(y)
+            .map(Value::Rational)
+            .unwrap_or_else(|_| symbolic_binary(BinOp::Mul, a, b, lhs, rhs, span)),
         (Value::Rational(s), Value::Vector(v)) | (Value::Vector(v), Value::Rational(s)) => {
-            scale_vector(v, s).map(Value::Vector).unwrap_or_else(|_| symbolic_binary(BinOp::Mul, a, b, lhs, rhs, span))
+            scale_vector(v, s)
+                .map(Value::Vector)
+                .unwrap_or_else(|_| symbolic_binary(BinOp::Mul, a, b, lhs, rhs, span))
         }
         (Value::Rational(s), Value::Matrix(m)) | (Value::Matrix(m), Value::Rational(s)) => {
-            scale_matrix(m, s).map(Value::Matrix).unwrap_or_else(|_| symbolic_binary(BinOp::Mul, a, b, lhs, rhs, span))
+            scale_matrix(m, s)
+                .map(Value::Matrix)
+                .unwrap_or_else(|_| symbolic_binary(BinOp::Mul, a, b, lhs, rhs, span))
         }
-        (Value::Vector(a), Value::Vector(b)) if a.len() == b.len() => {
-            dot_vectors(a, b).map(Value::Rational).unwrap_or_else(|_| symbolic_binary(BinOp::Mul, a, b, lhs, rhs, span))
+        (Value::Vector(left), Value::Vector(right)) if left.len() == right.len() => {
+            dot_vectors(left, right)
+                .map(Value::Rational)
+                .unwrap_or_else(|_| symbolic_binary(BinOp::Mul, a, b, lhs, rhs, span))
         }
-        (Value::Matrix(a), Value::Vector(b)) if !a.is_empty() && a[0].len() == b.len() => {
-            matrix_vector_mul(a, b).map(Value::Vector).unwrap_or_else(|_| symbolic_binary(BinOp::Mul, a, b, lhs, rhs, span))
+        (Value::Matrix(matrix), Value::Vector(vector))
+            if !matrix.is_empty() && matrix[0].len() == vector.len() =>
+        {
+            matrix_vector_mul(matrix, vector)
+                .map(Value::Vector)
+                .unwrap_or_else(|_| symbolic_binary(BinOp::Mul, a, b, lhs, rhs, span))
         }
-        (Value::Matrix(a), Value::Matrix(b)) if !a.is_empty() && !b.is_empty() && a[0].len() == b.len() => {
-            matrix_matrix_mul(a, b).map(Value::Matrix).unwrap_or_else(|_| symbolic_binary(BinOp::Mul, a, b, lhs, rhs, span))
+        (Value::Matrix(left), Value::Matrix(right))
+            if !left.is_empty() && !right.is_empty() && left[0].len() == right.len() =>
+        {
+            matrix_matrix_mul(left, right)
+                .map(Value::Matrix)
+                .unwrap_or_else(|_| symbolic_binary(BinOp::Mul, a, b, lhs, rhs, span))
         }
         _ => symbolic_binary(BinOp::Mul, a, b, lhs, rhs, span),
     }
@@ -1189,7 +1343,7 @@ fn rank_matrix(m: &[Vec<Value>]) -> Result<usize, String> {
                     Value::Rational(r) => Ok(r.clone()),
                     _ => Err("matrix contains a non-exact element".into()),
                 })
-                .collect::<Result<Vec<_>, _>>()?,
+                .collect::<Result<Vec<Rational>, String>>()?,
         );
     }
 
@@ -1224,10 +1378,14 @@ fn determinant(m: &[Vec<Value>]) -> Result<Rational, String> {
         if row.len() != n {
             return Err("determinant requires a square matrix".into());
         }
-        a.push(row.iter().map(|value| match value {
-            Value::Rational(r) => Ok(r.clone()),
-            _ => Err("matrix contains a non-exact element".into()),
-        }).collect::<Result<Vec<_>, _>>()?);
+        a.push(
+            row.iter()
+                .map(|value| match value {
+                    Value::Rational(r) => Ok(r.clone()),
+                    _ => Err("matrix contains a non-exact element".into()),
+                })
+                .collect::<Result<Vec<Rational>, String>>()?,
+        );
     }
     let mut det = Rational::integer(1);
     for col in 0..n {
@@ -1301,7 +1459,9 @@ fn perm(n: i128, k: i128) -> Result<Rational, String> {
     }
     let mut out = 1i128;
     for i in 0..k {
-        out = out.checked_mul(n - i).ok_or("integer overflow in permutation")?;
+        out = out
+            .checked_mul(n - i)
+            .ok_or("integer overflow in permutation")?;
     }
     Ok(Rational::integer(out))
 }
@@ -1322,7 +1482,9 @@ fn lcm_i128(a: i128, b: i128) -> Result<i128, String> {
         return Ok(0);
     }
     let g = gcd_i128(a, b);
-    (a / g).checked_mul(b.checked_abs().ok_or("integer overflow")?).ok_or("integer overflow".into())
+    (a / g)
+        .checked_mul(b.checked_abs().ok_or("integer overflow")?)
+        .ok_or("integer overflow".into())
 }
 
 fn mean(xs: &[Rational]) -> Result<Rational, String> {
@@ -1378,7 +1540,10 @@ fn value_to_rational_expr(value: &Rational, span: crate::diagnostics::Span) -> E
 
 fn call_expr(name: &str, args: Vec<Expr>, span: crate::diagnostics::Span) -> Expr {
     Expr::Call {
-        callee: Box::new(Expr::Symbol { name: name.to_owned(), span }),
+        callee: Box::new(Expr::Symbol {
+            name: name.to_owned(),
+            span,
+        }),
         args,
         span,
     }
@@ -1422,10 +1587,19 @@ fn elementary_exact(name: &str, value: &Value, span: crate::diagnostics::Span) -
         return None;
     };
     match (name, expr) {
-        ("\\sin", Expr::Symbol { name, .. }) if name == "\\pi" => Some(Value::Rational(Rational::integer(0))),
-        ("\\cos", Expr::Symbol { name, .. }) if name == "\\pi" => Some(Value::Rational(Rational::integer(-1))),
-        ("\\ln", Expr::Symbol { name, .. }) if name == "\\e" => Some(Value::Rational(Rational::integer(1))),
-        ("\\exp", Expr::Integer(1, _)) => Some(Value::Symbolic(Expr::Symbol { name: "\\e".to_owned(), span })),
+        ("\\sin", Expr::Symbol { name, .. }) if name == "\\pi" => {
+            Some(Value::Rational(Rational::integer(0)))
+        }
+        ("\\cos", Expr::Symbol { name, .. }) if name == "\\pi" => {
+            Some(Value::Rational(Rational::integer(-1)))
+        }
+        ("\\ln", Expr::Symbol { name, .. }) if name == "\\e" => {
+            Some(Value::Rational(Rational::integer(1)))
+        }
+        ("\\exp", Expr::Integer(1, _)) => Some(Value::Symbolic(Expr::Symbol {
+            name: "\\e".to_owned(),
+            span,
+        })),
         _ => None,
     }
 }
@@ -1435,21 +1609,40 @@ fn contains_symbol(expr: &Expr, var: &str) -> bool {
         Expr::Symbol { name, .. } => name == var,
         Expr::Unary { expr, .. } => contains_symbol(expr, var),
         Expr::Binary { lhs, rhs, .. } => contains_symbol(lhs, var) || contains_symbol(rhs, var),
-        Expr::Call { callee, args, .. } => contains_symbol(callee, var) || args.iter().any(|arg| contains_symbol(arg, var)),
-        Expr::Rational { numerator, denominator, .. } => contains_symbol(numerator, var) || contains_symbol(denominator, var),
-        Expr::Set { elements, .. } | Expr::Vector { elements, .. } => elements.iter().any(|e| contains_symbol(e, var)),
+        Expr::Call { callee, args, .. } => {
+            contains_symbol(callee, var) || args.iter().any(|arg| contains_symbol(arg, var))
+        }
+        Expr::Rational {
+            numerator,
+            denominator,
+            ..
+        } => contains_symbol(numerator, var) || contains_symbol(denominator, var),
+        Expr::Set { elements, .. } | Expr::Vector { elements, .. } => {
+            elements.iter().any(|e| contains_symbol(e, var))
+        }
         Expr::Matrix { rows, .. } => rows.iter().flatten().any(|e| contains_symbol(e, var)),
-        Expr::Integral { body, lower, upper, .. } => {
+        Expr::Integral {
+            body, lower, upper, ..
+        } => {
             contains_symbol(body, var)
                 || lower.as_deref().is_some_and(|e| contains_symbol(e, var))
                 || upper.as_deref().is_some_and(|e| contains_symbol(e, var))
         }
-        Expr::Limit { body, target, .. } => contains_symbol(body, var) || contains_symbol(target, var),
-        Expr::Product { body, lower, upper, .. } | Expr::Sum { body, lower, upper, .. } => {
+        Expr::Limit { body, target, .. } => {
+            contains_symbol(body, var) || contains_symbol(target, var)
+        }
+        Expr::Product {
+            body, lower, upper, ..
+        }
+        | Expr::Sum {
+            body, lower, upper, ..
+        } => {
             contains_symbol(body, var) || contains_symbol(lower, var) || contains_symbol(upper, var)
         }
         Expr::Abs { expr, .. } | Expr::Sqrt { expr, .. } => contains_symbol(expr, var),
-        Expr::Piecewise { branches, .. } => branches.iter().any(|b| contains_symbol(&b.value, var) || contains_symbol(&b.condition, var)),
+        Expr::Piecewise { branches, .. } => branches
+            .iter()
+            .any(|b| contains_symbol(&b.value, var) || contains_symbol(&b.condition, var)),
         Expr::Integer(..) | Expr::Opaque { .. } => false,
     }
 }
@@ -1519,7 +1712,9 @@ fn differentiate(expr: &Expr, var: &str) -> Option<Expr> {
                     span,
                 }),
                 BinOp::Pow => {
-                    let Expr::Integer(n, _) = rhs.as_ref() else { return None; };
+                    let Expr::Integer(n, _) = rhs.as_ref() else {
+                        return None;
+                    };
                     let coefficient = Expr::Integer(*n, span);
                     Some(Expr::Binary {
                         op: BinOp::Mul,
@@ -1542,20 +1737,70 @@ fn differentiate(expr: &Expr, var: &str) -> Option<Expr> {
             }
         }
         Expr::Call { callee, args, .. } if args.len() == 1 => {
-            let Expr::Symbol { name, .. } = callee.as_ref() else { return None; };
+            let Expr::Symbol { name, .. } = callee.as_ref() else {
+                return None;
+            };
             let dx = differentiate(&args[0], var)?;
             let x = args[0].clone();
             match name.as_str() {
-                "\\sin" => Some(Expr::Binary { op: BinOp::Mul, lhs: Box::new(call_expr("\\cos", vec![x], span)), rhs: Box::new(dx), span }),
-                "\\cos" => Some(Expr::Unary { op: crate::ast::UnaryOp::Neg, expr: Box::new(Expr::Binary { op: BinOp::Mul, lhs: Box::new(call_expr("\\sin", vec![x], span)), rhs: Box::new(dx), span }), span }),
-                "\\tan" => Some(Expr::Binary { op: BinOp::Div, lhs: Box::new(dx), rhs: Box::new(Expr::Binary { op: BinOp::Pow, lhs: Box::new(call_expr("\\cos", vec![x], span)), rhs: Box::new(Expr::Integer(2, span)), span }), span }),
-                "\\exp" => Some(Expr::Binary { op: BinOp::Mul, lhs: Box::new(call_expr("\\exp", vec![x], span)), rhs: Box::new(dx), span }),
-                "\\ln" | "\\log" => Some(Expr::Binary { op: BinOp::Div, lhs: Box::new(dx), rhs: Box::new(x), span }),
-                "\\sqrt" => Some(Expr::Binary { op: BinOp::Div, lhs: Box::new(dx), rhs: Box::new(Expr::Binary { op: BinOp::Mul, lhs: Box::new(Expr::Integer(2, span)), rhs: Box::new(call_expr("\\sqrt", vec![x], span)), span }), span }),
+                "\\sin" => Some(Expr::Binary {
+                    op: BinOp::Mul,
+                    lhs: Box::new(call_expr("\\cos", vec![x], span)),
+                    rhs: Box::new(dx),
+                    span,
+                }),
+                "\\cos" => Some(Expr::Unary {
+                    op: crate::ast::UnaryOp::Neg,
+                    expr: Box::new(Expr::Binary {
+                        op: BinOp::Mul,
+                        lhs: Box::new(call_expr("\\sin", vec![x], span)),
+                        rhs: Box::new(dx),
+                        span,
+                    }),
+                    span,
+                }),
+                "\\tan" => Some(Expr::Binary {
+                    op: BinOp::Div,
+                    lhs: Box::new(dx),
+                    rhs: Box::new(Expr::Binary {
+                        op: BinOp::Pow,
+                        lhs: Box::new(call_expr("\\cos", vec![x], span)),
+                        rhs: Box::new(Expr::Integer(2, span)),
+                        span,
+                    }),
+                    span,
+                }),
+                "\\exp" => Some(Expr::Binary {
+                    op: BinOp::Mul,
+                    lhs: Box::new(call_expr("\\exp", vec![x], span)),
+                    rhs: Box::new(dx),
+                    span,
+                }),
+                "\\ln" | "\\log" => Some(Expr::Binary {
+                    op: BinOp::Div,
+                    lhs: Box::new(dx),
+                    rhs: Box::new(x),
+                    span,
+                }),
+                "\\sqrt" => Some(Expr::Binary {
+                    op: BinOp::Div,
+                    lhs: Box::new(dx),
+                    rhs: Box::new(Expr::Binary {
+                        op: BinOp::Mul,
+                        lhs: Box::new(Expr::Integer(2, span)),
+                        rhs: Box::new(call_expr("\\sqrt", vec![x], span)),
+                        span,
+                    }),
+                    span,
+                }),
                 _ => None,
             }
         }
-        Expr::Abs { .. } | Expr::Sqrt { .. } | Expr::Set { .. } | Expr::Vector { .. } | Expr::Matrix { .. } => None,
+        Expr::Abs { .. }
+        | Expr::Sqrt { .. }
+        | Expr::Set { .. }
+        | Expr::Vector { .. }
+        | Expr::Matrix { .. } => None,
         _ => None,
     }
 }
@@ -1563,20 +1808,132 @@ fn differentiate(expr: &Expr, var: &str) -> Option<Expr> {
 fn substitute(expr: &Expr, var: &str, replacement: &Expr) -> Expr {
     match expr {
         Expr::Symbol { name, .. } if name == var => replacement.clone(),
-        Expr::Unary { op, expr, span } => Expr::Unary { op: *op, expr: Box::new(substitute(expr, var, replacement)), span: *span },
-        Expr::Binary { op, lhs, rhs, span } => Expr::Binary { op: *op, lhs: Box::new(substitute(lhs, var, replacement)), rhs: Box::new(substitute(rhs, var, replacement)), span: *span },
-        Expr::Call { callee, args, span } => Expr::Call { callee: Box::new(substitute(callee, var, replacement)), args: args.iter().map(|arg| substitute(arg, var, replacement)).collect(), span: *span },
-        Expr::Rational { numerator, denominator, span } => Expr::Rational { numerator: Box::new(substitute(numerator, var, replacement)), denominator: Box::new(substitute(denominator, var, replacement)), span: *span },
-        Expr::Set { elements, span } => Expr::Set { elements: elements.iter().map(|e| substitute(e, var, replacement)).collect(), span: *span },
-        Expr::Vector { elements, span } => Expr::Vector { elements: elements.iter().map(|e| substitute(e, var, replacement)).collect(), span: *span },
-        Expr::Matrix { rows, span } => Expr::Matrix { rows: rows.iter().map(|row| row.iter().map(|e| substitute(e, var, replacement)).collect()).collect(), span: *span },
-        Expr::Abs { expr, span } => Expr::Abs { expr: Box::new(substitute(expr, var, replacement)), span: *span },
-        Expr::Sqrt { expr, span } => Expr::Sqrt { expr: Box::new(substitute(expr, var, replacement)), span: *span },
-        Expr::Product { var: bound, lower, upper, body, span } if bound != var => Expr::Product { var: bound.clone(), lower: Box::new(substitute(lower, var, replacement)), upper: Box::new(substitute(upper, var, replacement)), body: Box::new(substitute(body, var, replacement)), span: *span },
-        Expr::Sum { var: bound, lower, upper, body, span } if bound != var => Expr::Sum { var: bound.clone(), lower: Box::new(substitute(lower, var, replacement)), upper: Box::new(substitute(upper, var, replacement)), body: Box::new(substitute(body, var, replacement)), span: *span },
-        Expr::Integral { var: bound, lower, upper, body, span } if bound != var => Expr::Integral { var: bound.clone(), lower: lower.as_deref().map(|e| Box::new(substitute(e, var, replacement))), upper: upper.as_deref().map(|e| Box::new(substitute(e, var, replacement))), body: Box::new(substitute(body, var, replacement)), span: *span },
-        Expr::Limit { var: bound, target, body, span } if bound != var => Expr::Limit { var: bound.clone(), target: Box::new(substitute(target, var, replacement)), body: Box::new(substitute(body, var, replacement)), span: *span },
-        Expr::Piecewise { branches, span } => Expr::Piecewise { branches: branches.iter().map(|b| crate::ast::PiecewiseBranch { value: substitute(&b.value, var, replacement), condition: substitute(&b.condition, var, replacement), span: b.span }).collect(), span: *span },
+        Expr::Unary { op, expr, span } => Expr::Unary {
+            op: *op,
+            expr: Box::new(substitute(expr, var, replacement)),
+            span: *span,
+        },
+        Expr::Binary { op, lhs, rhs, span } => Expr::Binary {
+            op: *op,
+            lhs: Box::new(substitute(lhs, var, replacement)),
+            rhs: Box::new(substitute(rhs, var, replacement)),
+            span: *span,
+        },
+        Expr::Call { callee, args, span } => Expr::Call {
+            callee: Box::new(substitute(callee, var, replacement)),
+            args: args
+                .iter()
+                .map(|arg| substitute(arg, var, replacement))
+                .collect(),
+            span: *span,
+        },
+        Expr::Rational {
+            numerator,
+            denominator,
+            span,
+        } => Expr::Rational {
+            numerator: Box::new(substitute(numerator, var, replacement)),
+            denominator: Box::new(substitute(denominator, var, replacement)),
+            span: *span,
+        },
+        Expr::Set { elements, span } => Expr::Set {
+            elements: elements
+                .iter()
+                .map(|e| substitute(e, var, replacement))
+                .collect(),
+            span: *span,
+        },
+        Expr::Vector { elements, span } => Expr::Vector {
+            elements: elements
+                .iter()
+                .map(|e| substitute(e, var, replacement))
+                .collect(),
+            span: *span,
+        },
+        Expr::Matrix { rows, span } => Expr::Matrix {
+            rows: rows
+                .iter()
+                .map(|row| {
+                    row.iter()
+                        .map(|e| substitute(e, var, replacement))
+                        .collect()
+                })
+                .collect(),
+            span: *span,
+        },
+        Expr::Abs { expr, span } => Expr::Abs {
+            expr: Box::new(substitute(expr, var, replacement)),
+            span: *span,
+        },
+        Expr::Sqrt { expr, span } => Expr::Sqrt {
+            expr: Box::new(substitute(expr, var, replacement)),
+            span: *span,
+        },
+        Expr::Product {
+            var: bound,
+            lower,
+            upper,
+            body,
+            span,
+        } if bound != var => Expr::Product {
+            var: bound.clone(),
+            lower: Box::new(substitute(lower, var, replacement)),
+            upper: Box::new(substitute(upper, var, replacement)),
+            body: Box::new(substitute(body, var, replacement)),
+            span: *span,
+        },
+        Expr::Sum {
+            var: bound,
+            lower,
+            upper,
+            body,
+            span,
+        } if bound != var => Expr::Sum {
+            var: bound.clone(),
+            lower: Box::new(substitute(lower, var, replacement)),
+            upper: Box::new(substitute(upper, var, replacement)),
+            body: Box::new(substitute(body, var, replacement)),
+            span: *span,
+        },
+        Expr::Integral {
+            var: bound,
+            lower,
+            upper,
+            body,
+            span,
+        } if bound != var => Expr::Integral {
+            var: bound.clone(),
+            lower: lower
+                .as_deref()
+                .map(|e| Box::new(substitute(e, var, replacement))),
+            upper: upper
+                .as_deref()
+                .map(|e| Box::new(substitute(e, var, replacement))),
+            body: Box::new(substitute(body, var, replacement)),
+            span: *span,
+        },
+        Expr::Limit {
+            var: bound,
+            target,
+            body,
+            span,
+        } if bound != var => Expr::Limit {
+            var: bound.clone(),
+            target: Box::new(substitute(target, var, replacement)),
+            body: Box::new(substitute(body, var, replacement)),
+            span: *span,
+        },
+        Expr::Piecewise { branches, span } => Expr::Piecewise {
+            branches: branches
+                .iter()
+                .map(|b| crate::ast::PiecewiseBranch {
+                    value: substitute(&b.value, var, replacement),
+                    condition: substitute(&b.condition, var, replacement),
+                    span: b.span,
+                })
+                .collect(),
+            span: *span,
+        },
         _ => expr.clone(),
     }
 }
@@ -1585,44 +1942,127 @@ fn integrate_expr(expr: &Expr, var: &str) -> Option<Expr> {
     let span = expr.span();
     match expr {
         Expr::Integer(_, _) | Expr::Rational { .. } if !contains_symbol(expr, var) => {
-            Some(Expr::Binary { op: BinOp::Mul, lhs: Box::new(expr.clone()), rhs: Box::new(Expr::Symbol { name: var.to_owned(), span }), span })
+            Some(Expr::Binary {
+                op: BinOp::Mul,
+                lhs: Box::new(expr.clone()),
+                rhs: Box::new(Expr::Symbol {
+                    name: var.to_owned(),
+                    span,
+                }),
+                span,
+            })
         }
-        Expr::Symbol { name, .. } if name == var => {
-            Some(Expr::Binary { op: BinOp::Div, lhs: Box::new(Expr::Binary { op: BinOp::Pow, lhs: Box::new(expr.clone()), rhs: Box::new(Expr::Integer(2, span)), span }), rhs: Box::new(Expr::Integer(2, span)), span })
+        Expr::Symbol { name, .. } if name == var => Some(Expr::Binary {
+            op: BinOp::Div,
+            lhs: Box::new(Expr::Binary {
+                op: BinOp::Pow,
+                lhs: Box::new(expr.clone()),
+                rhs: Box::new(Expr::Integer(2, span)),
+                span,
+            }),
+            rhs: Box::new(Expr::Integer(2, span)),
+            span,
+        }),
+        Expr::Symbol { .. } => Some(Expr::Binary {
+            op: BinOp::Mul,
+            lhs: Box::new(expr.clone()),
+            rhs: Box::new(Expr::Symbol {
+                name: var.to_owned(),
+                span,
+            }),
+            span,
+        }),
+        Expr::Unary { expr, .. } => integrate_expr(expr, var).map(|inner| Expr::Unary {
+            op: crate::ast::UnaryOp::Neg,
+            expr: Box::new(inner),
+            span,
+        }),
+        Expr::Binary {
+            op: BinOp::Add,
+            lhs,
+            rhs,
+            ..
         }
-        Expr::Symbol { .. } => Some(Expr::Binary { op: BinOp::Mul, lhs: Box::new(expr.clone()), rhs: Box::new(Expr::Symbol { name: var.to_owned(), span }), span }),
-        Expr::Unary { expr, .. } => integrate_expr(expr, var).map(|inner| Expr::Unary { op: crate::ast::UnaryOp::Neg, expr: Box::new(inner), span }),
-        Expr::Binary { op: BinOp::Add, lhs, rhs, .. } | Expr::Binary { op: BinOp::Sub, lhs, rhs, .. } => {
-            Some(Expr::Binary { op: *op, lhs: Box::new(integrate_expr(lhs, var)?), rhs: Box::new(integrate_expr(rhs, var)?), span })
-        }
-        Expr::Binary { op: BinOp::Mul, lhs, rhs, .. } => {
+        | Expr::Binary {
+            op: BinOp::Sub,
+            lhs,
+            rhs,
+            ..
+        } => Some(Expr::Binary {
+            op: if matches!(expr, Expr::Binary { op: BinOp::Add, .. }) {
+                BinOp::Add
+            } else {
+                BinOp::Sub
+            },
+            lhs: Box::new(integrate_expr(lhs, var)?),
+            rhs: Box::new(integrate_expr(rhs, var)?),
+            span,
+        }),
+        Expr::Binary {
+            op: BinOp::Mul,
+            lhs,
+            rhs,
+            ..
+        } => {
             if !contains_symbol(lhs, var) {
                 let inner = integrate_expr(rhs, var)?;
-                Some(Expr::Binary { op: BinOp::Mul, lhs: lhs.clone(), rhs: Box::new(inner), span })
+                Some(Expr::Binary {
+                    op: BinOp::Mul,
+                    lhs: lhs.clone(),
+                    rhs: Box::new(inner),
+                    span,
+                })
             } else if !contains_symbol(rhs, var) {
                 let inner = integrate_expr(lhs, var)?;
-                Some(Expr::Binary { op: BinOp::Mul, lhs: rhs.clone(), rhs: Box::new(inner), span })
+                Some(Expr::Binary {
+                    op: BinOp::Mul,
+                    lhs: rhs.clone(),
+                    rhs: Box::new(inner),
+                    span,
+                })
             } else {
                 None
             }
         }
-        Expr::Binary { op: BinOp::Pow, lhs, rhs, .. } if matches!(lhs.as_ref(), Expr::Symbol { name, .. } if name == var) => {
-            let Expr::Integer(n, _) = rhs.as_ref() else { return None; };
+        Expr::Binary {
+            op: BinOp::Pow,
+            lhs,
+            rhs,
+            ..
+        } if matches!(lhs.as_ref(), Expr::Symbol { name, .. } if name == var) => {
+            let Expr::Integer(n, _) = rhs.as_ref() else {
+                return None;
+            };
             if *n == -1 {
                 Some(call_expr("\\ln", vec![lhs.as_ref().clone()], span))
             } else {
                 let next = n.checked_add(1)?;
                 Some(Expr::Binary {
                     op: BinOp::Div,
-                    lhs: Box::new(Expr::Binary { op: BinOp::Pow, lhs: lhs.clone(), rhs: Box::new(Expr::Integer(next, span)), span }),
+                    lhs: Box::new(Expr::Binary {
+                        op: BinOp::Pow,
+                        lhs: lhs.clone(),
+                        rhs: Box::new(Expr::Integer(next, span)),
+                        span,
+                    }),
                     rhs: Box::new(Expr::Integer(next, span)),
                     span,
                 })
             }
         }
-        Expr::Binary { op: BinOp::Div, lhs, rhs, .. } if !contains_symbol(rhs, var) => {
+        Expr::Binary {
+            op: BinOp::Div,
+            lhs,
+            rhs,
+            ..
+        } if !contains_symbol(rhs, var) => {
             let inner = integrate_expr(lhs, var)?;
-            Some(Expr::Binary { op: BinOp::Div, lhs: Box::new(inner), rhs: rhs.clone(), span })
+            Some(Expr::Binary {
+                op: BinOp::Div,
+                lhs: Box::new(inner),
+                rhs: rhs.clone(),
+                span,
+            })
         }
         _ => None,
     }
@@ -1634,8 +2074,9 @@ fn polynomial_coefficients(
     evaluator: &mut Evaluator<'_>,
     locals: &HashMap<String, Value>,
 ) -> Result<Vec<Rational>, Diagnostic> {
-    let mut out = polynomial(expr, var, evaluator, locals)
-        .ok_or_else(|| Diagnostic::new("solve currently supports polynomial equations of degree at most 2"))?;
+    let mut out = polynomial(expr, var, evaluator, locals).ok_or_else(|| {
+        Diagnostic::new("solve currently supports polynomial equations of degree at most 2")
+    })?;
     while out.len() > 1 && out.last().is_some_and(|x| x.num == 0) {
         out.pop();
     }
@@ -1656,16 +2097,18 @@ fn polynomial(
                 _ => None,
             }
         }
-        Expr::Symbol { name, .. } if name == var => Some(vec![Rational::integer(0), Rational::integer(1)]),
-        Expr::Symbol { .. } => {
-            match evaluator.eval_expr(expr, locals).ok()? {
-                Value::Rational(r) => Some(vec![r]),
-                _ => None,
-            }
+        Expr::Symbol { name, .. } if name == var => {
+            Some(vec![Rational::integer(0), Rational::integer(1)])
         }
+        Expr::Symbol { .. } => match evaluator.eval_expr(expr, locals).ok()? {
+            Value::Rational(r) => Some(vec![r]),
+            _ => None,
+        },
         Expr::Unary { expr, .. } => {
             let mut p = polynomial(expr, var, evaluator, locals)?;
-            for c in &mut p { c.num = c.num.checked_neg()?; }
+            for c in &mut p {
+                c.num = c.num.checked_neg()?;
+            }
             Some(p)
         }
         Expr::Binary { op, lhs, rhs, .. } => {
@@ -1678,35 +2121,43 @@ fn polynomial(
                     for i in 0..n {
                         let av = a.get(i).cloned().unwrap_or_else(|| Rational::integer(0));
                         let bv = b.get(i).cloned().unwrap_or_else(|| Rational::integer(0));
-                        out[i] = if *op == BinOp::Add { av.add(&bv).ok()? } else { av.sub(&bv).ok()? };
+                        out[i] = if *op == BinOp::Add {
+                            av.add(&bv).ok()?
+                        } else {
+                            av.sub(&bv).ok()?
+                        };
                     }
                     Some(out)
                 }
                 BinOp::Mul => {
-                    if a.len() + b.len() > 4 { return None; }
-                    let mut out = vec![Rational::integer(0); a.len()+b.len()-1];
+                    if a.len() + b.len() > 4 {
+                        return None;
+                    }
+                    let mut out = vec![Rational::integer(0); a.len() + b.len() - 1];
                     for (i, x) in a.iter().enumerate() {
                         for (j, y) in b.iter().enumerate() {
                             let product = x.mul(y).ok()?;
-                            out[i+j] = out[i+j].add(&product).ok()?;
+                            out[i + j] = out[i + j].add(&product).ok()?;
                         }
                     }
                     Some(out)
                 }
-                BinOp::Div if b.len() == 1 => {
-                    out_div(&a, &b[0])
-                }
+                BinOp::Div if b.len() == 1 => out_div(&a, &b[0]),
                 BinOp::Pow => {
-                    if b.len() != 1 || !b[0].is_integer() || b[0].num < 0 || b[0].num > 2 { return None; }
+                    if b.len() != 1 || !b[0].is_integer() || b[0].num < 0 || b[0].num > 2 {
+                        return None;
+                    }
                     let mut out = vec![Rational::integer(1)];
                     for _ in 0..b[0].num {
-                        let mut next = vec![Rational::integer(0); out.len()+a.len()-1];
+                        let mut next = vec![Rational::integer(0); out.len() + a.len() - 1];
                         for (i, x) in out.iter().enumerate() {
                             for (j, y) in a.iter().enumerate() {
-                                next[i+j] = next[i+j].add(&x.mul(y).ok()?).ok()?;
+                                next[i + j] = next[i + j].add(&x.mul(y).ok()?).ok()?;
                             }
                         }
-                        if next.len() > 3 { return None; }
+                        if next.len() > 3 {
+                            return None;
+                        }
                         out = next;
                     }
                     Some(out)
@@ -1729,21 +2180,43 @@ fn solve_polynomial(
     evaluator: &mut Evaluator<'_>,
 ) -> Result<Value, Diagnostic> {
     let zero = |r: &Rational| r.num == 0;
-    let c = coeffs.first().cloned().unwrap_or_else(|| Rational::integer(0));
-    let b = coeffs.get(1).cloned().unwrap_or_else(|| Rational::integer(0));
-    let a = coeffs.get(2).cloned().unwrap_or_else(|| Rational::integer(0));
+    let c = coeffs
+        .first()
+        .cloned()
+        .unwrap_or_else(|| Rational::integer(0));
+    let b = coeffs
+        .get(1)
+        .cloned()
+        .unwrap_or_else(|| Rational::integer(0));
+    let a = coeffs
+        .get(2)
+        .cloned()
+        .unwrap_or_else(|| Rational::integer(0));
     if zero(&a) {
         if zero(&b) {
-            return Ok(Value::Symbolic(call_expr("\\solve", vec![
-                value_to_rational_expr(&c, span),
-                Expr::Symbol { name: var.to_owned(), span },
-            ], span)));
+            return Ok(Value::Symbolic(call_expr(
+                "\\solve",
+                vec![
+                    value_to_rational_expr(&c, span),
+                    Expr::Symbol {
+                        name: var.to_owned(),
+                        span,
+                    },
+                ],
+                span,
+            )));
         }
-        let root = b.mul(&Rational::integer(-1)).and_then(|x| c.div(&x)).map_err(Diagnostic::new)?;
+        let root = b
+            .mul(&Rational::integer(-1))
+            .and_then(|x| c.div(&x))
+            .map_err(Diagnostic::new)?;
         return Ok(Value::Set(vec![Value::Rational(root)]));
     }
     let b2 = b.mul(&b).map_err(Diagnostic::new)?;
-    let four_ac = a.mul(&c).and_then(|x| Rational::integer(4).mul(&x)).map_err(Diagnostic::new)?;
+    let four_ac = a
+        .mul(&c)
+        .and_then(|x| Rational::integer(4).mul(&x))
+        .map_err(Diagnostic::new)?;
     let discriminant = b2.sub(&four_ac).map_err(Diagnostic::new)?;
     if discriminant.num < 0 {
         return Ok(Value::Symbolic(call_expr("\\solve", vec![], span)));
@@ -1752,10 +2225,39 @@ fn solve_polynomial(
         expr: Box::new(value_to_rational_expr(&discriminant, span)),
         span,
     };
-    let neg_b = Expr::Unary { op: crate::ast::UnaryOp::Neg, expr: Box::new(value_to_rational_expr(&b, span)), span };
-    let denom = Expr::Binary { op: BinOp::Mul, lhs: Box::new(Expr::Integer(2, span)), rhs: Box::new(value_to_rational_expr(&a, span)), span };
-    let plus = Expr::Binary { op: BinOp::Div, lhs: Box::new(Expr::Binary { op: BinOp::Add, lhs: Box::new(neg_b.clone()), rhs: Box::new(sqrt_expr.clone()), span }), rhs: Box::new(denom.clone()), span };
-    let minus = Expr::Binary { op: BinOp::Div, lhs: Box::new(Expr::Binary { op: BinOp::Sub, lhs: Box::new(neg_b), rhs: Box::new(sqrt_expr), span }), rhs: Box::new(denom), span };
+    let neg_b = Expr::Unary {
+        op: crate::ast::UnaryOp::Neg,
+        expr: Box::new(value_to_rational_expr(&b, span)),
+        span,
+    };
+    let denom = Expr::Binary {
+        op: BinOp::Mul,
+        lhs: Box::new(Expr::Integer(2, span)),
+        rhs: Box::new(value_to_rational_expr(&a, span)),
+        span,
+    };
+    let plus = Expr::Binary {
+        op: BinOp::Div,
+        lhs: Box::new(Expr::Binary {
+            op: BinOp::Add,
+            lhs: Box::new(neg_b.clone()),
+            rhs: Box::new(sqrt_expr.clone()),
+            span,
+        }),
+        rhs: Box::new(denom.clone()),
+        span,
+    };
+    let minus = Expr::Binary {
+        op: BinOp::Div,
+        lhs: Box::new(Expr::Binary {
+            op: BinOp::Sub,
+            lhs: Box::new(neg_b),
+            rhs: Box::new(sqrt_expr),
+            span,
+        }),
+        rhs: Box::new(denom),
+        span,
+    };
     let p = evaluator.eval_expr(&plus, &HashMap::new())?;
     let m = evaluator.eval_expr(&minus, &HashMap::new())?;
     let mut roots = vec![p, m];
