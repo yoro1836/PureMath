@@ -47,6 +47,19 @@ fn expr_inner(node: &Expr) -> String {
                 .join(", ");
             format!("\\{{{}\\}}", body)
         }
+        Expr::Product {
+            var,
+            lower,
+            upper,
+            body,
+            ..
+        } => format!(
+            "\\\\prod_{{{}={}}}^{{{}}} {}",
+            var,
+            expr_inner(lower),
+            expr_inner(upper),
+            expr_inner(body)
+        ),
         Expr::Sum {
             var,
             lower,
@@ -60,6 +73,7 @@ fn expr_inner(node: &Expr) -> String {
             expr_inner(upper),
             expr_inner(body)
         ),
+        Expr::Abs { expr: inner, .. } => format!("\\\\left|{}\\\\right|", expr_inner(inner)),
         Expr::Sqrt { expr: inner, .. } => format!("\\sqrt{{{}}}", expr_inner(inner)),
         Expr::Piecewise { branches, .. } => {
             let rows = branches
