@@ -25,13 +25,33 @@ n \cdot fact(n-1) & n > 0
 
 \frac{1}{3} + \frac{1}{3}
 \sum_{i=1}^{10} i
+\prod_{i=1}^{5} i
 A := \{1,2,3\}
+A \cup \{4\}
+2 \in A
+\vec{1,2,3}
+\begin{pmatrix} 1 & 2 \\ 3 & 4 \end{pmatrix}
 \sqrt{16}
+\abs{-3}
+\det{A}
+\diff{x^3}{x}
+\int_{0}^{1} x^2
+\lim_{x\to 0} x^2
+\solve{x^2 - 4 = 0}{x}
+\binom{5}{2}
+\mean{\vec{1,2,3}}
 \print{f(3)}
 \import{algebra}
 ```
 
 The implementation deliberately does **not** claim to parse all of KaTeX. KaTeX-compatible notation is a surface goal; PureMath maintains its own semantic AST.
+
+The broad prototype currently includes exact indexed sums/products, finite sets and set relations, vectors and matrices, elementary exact functions, number theory/combinatorics helpers, statistics, substitution, symbolic differentiation, exact polynomial integration, direct-substitution limits, and degree-2 polynomial solving.
+
+For a single executable tour of the implemented mathematical surface, run:
+
+./target/release/puremath examples/all_features.pmath
+
 
 Definitions are immutable: a name cannot be defined twice in the same environment. This is intentional and prevents `:=` from becoming hidden reassignment.
 
