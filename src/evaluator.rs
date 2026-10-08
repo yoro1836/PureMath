@@ -176,6 +176,13 @@ impl<'a> Evaluator<'a> {
                     .map(|e| self.eval_expr(e, locals))
                     .collect::<Result<Vec<_>, _>>()?,
             )),
+            Expr::Product {
+                var,
+                lower,
+                upper,
+                body,
+                ..
+            } => self.eval_product(var, lower, upper, body, expr, locals),
             Expr::Sum {
                 var,
                 lower,
@@ -183,6 +190,15 @@ impl<'a> Evaluator<'a> {
                 body,
                 ..
             } => self.eval_sum(var, lower, upper, body, expr, locals),
+            Expr::Abs { expr: inner, span } => match self.eval_expr(inner, locals)? {
+                Value::Rational(v) => Ok(Value::Rational(Rational::new(v.num.abs(), v.den)
+                    .map_err(Diagnostic::new)?)),
+                Value::Symbolic(v) => Ok(Value::Symbolic(Expr::Abs {
+                    expr: Box::new(v),
+                    span: *span,
+                })),
+                other => Err(Diagnostic::at(format!("cannot take absolute value of {}", other), *span)),
+            },
             Expr::Sqrt { expr: inner, .. } => match self.eval_expr(inner, locals)? {
                 Value::Rational(v) if v.is_integer() && v.num >= 0 => {
                     let n = v.num as u128;
@@ -208,6 +224,45 @@ impl<'a> Evaluator<'a> {
                 ))
             }
             Expr::Opaque { .. } => Ok(Value::Symbolic(expr.clone())),
+        }
+    }
+
+    fn eval_product(
+        &mut self,
+        var: &str,
+        lower: &Expr,
+        upper: &Expr,
+        body: &Expr,
+        original: &Expr,
+        locals: &HashMap<String, Value>,
+    ) -> Result<Value, Diagnostic> {
+        let lo = self.eval_expr(lower, locals)?;
+        let hi = self.eval_expr(upper, locals)?;
+        match (lo, hi) {
+            (Value::Rational(l), Value::Rational(h)) if l.is_integer() && h.is_integer() => {
+                if l.num > h.num {
+                    return Ok(Value::Rational(Rational::integer(1)));
+                }
+                let mut acc = Rational::integer(1);
+                let mut local = locals.clone();
+                let term_count = h
+                    .num
+                    .checked_sub(l.num)
+                    .and_then(|n| usize::try_from(n).ok())
+                    .and_then(|n| n.checked_add(1));
+                if term_count.is_none_or(|count| count > self.max_sum_terms) {
+                    return Err(Diagnostic::new("finite product exceeds evaluation term limit"));
+                }
+                for i in l.num..=h.num {
+                    local.insert(var.to_owned(), Value::Rational(Rational::integer(i)));
+                    match self.eval_expr(body, &local)? {
+                        Value::Rational(v) => acc = acc.mul(&v).map_err(Diagnostic::new)?,
+                        _ => return Ok(Value::Symbolic(original.clone())),
+                    }
+                }
+                Ok(Value::Rational(acc))
+            }
+            _ => Ok(Value::Symbolic(original.clone())),
         }
     }
 
