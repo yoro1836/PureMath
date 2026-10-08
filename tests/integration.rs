@@ -156,3 +156,32 @@ fn recursive_call_depth_is_bounded() {
         .execute(&program.statements[0], std::path::Path::new("."))
         .is_err());
 }
+
+#[test]
+fn print_is_runtime_output() {
+    let mut env = Environment::new();
+    assert!(evaluate(r"\print{2 + 3}", &mut env).is_err());
+
+    let program = parse(r"\print{2 + 3}").unwrap();
+    let mut output = Vec::new();
+    let mut runtime = puremath::Runtime::new(&mut env, &mut output);
+    let value = runtime
+        .execute_program(&program, std::path::Path::new("."))
+        .unwrap();
+
+    assert_eq!(value, puremath::value::Value::Unit);
+    assert_eq!(String::from_utf8(output).unwrap(), "5\n");
+}
+
+#[test]
+fn file_definitions_are_not_implicitly_printed() {
+    let mut env = Environment::new();
+    let program = parse("x := 10\nf(x) := x + 1\n\\print{f(x)}").unwrap();
+    let mut output = Vec::new();
+    let mut runtime = puremath::Runtime::new(&mut env, &mut output);
+    runtime
+        .execute_program(&program, std::path::Path::new("."))
+        .unwrap();
+
+    assert_eq!(String::from_utf8(output).unwrap(), "11\n");
+}
