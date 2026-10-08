@@ -30,6 +30,17 @@ impl Parser {
     }
 
     fn parse_statement(&mut self) -> Result<Stmt, Diagnostic> {
+        if self.command_is("print") {
+            let start = self.take().span.start;
+            let expr = self.parse_group_expr()?;
+            let end = expr.span().end;
+            self.expect_eof_or("print statement")?;
+            return Ok(Stmt::Print {
+                expr,
+                span: Span::new(start, end),
+            });
+        }
+
         if self.command_is("import") {
             let start = self.take().span.start;
             let module = self.parse_group_name()?;
