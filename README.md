@@ -79,6 +79,10 @@ evaluator
 
 The next architectural step is elaboration/domain checking and a dedicated Math IR.
 
+Mathematical features are not moved into the runtime merely because their implementations may use runtime services. Probability, random variables, pseudo-random sequences, statistics, and similar constructs remain mathematical semantics or standard-library functionality.
+
+The runtime boundary is reserved for environment-dependent capabilities such as `\\print`, input, files, networking, clocks, OS APIs, entropy sources, and external processes.
+
 ## Source layout
 
 ```text
