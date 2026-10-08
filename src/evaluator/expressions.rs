@@ -117,6 +117,38 @@ impl<'a> Evaluator<'a> {
                     .map(|e| self.eval_expr(e, locals))
                     .collect::<Result<Vec<_>, _>>()?,
             )),
+            Expr::SetComprehension {
+                var,
+                domain,
+                condition,
+                span,
+            } => {
+                let domain_value = self.eval_expr(domain, locals)?;
+                let Value::Set(values) = domain_value else {
+                    return Ok(Value::Symbolic(expr.clone()));
+                };
+                if values.len() > self.max_sum_terms {
+                    return Err(Diagnostic::at(
+                        "set comprehension exceeds evaluation term limit",
+                        *span,
+                    ));
+                }
+                let mut out = Vec::new();
+                let mut local = locals.clone();
+                for value in values {
+                    local.insert(var.clone(), value.clone());
+                    match self.eval_expr(condition, &local)? {
+                        Value::Bool(true) => {
+                            if !out.iter().any(|item| values_equal(item, &value)) {
+                                out.push(value);
+                            }
+                        }
+                        Value::Bool(false) => {}
+                        _ => return Ok(Value::Symbolic(expr.clone())),
+                    }
+                }
+                Ok(Value::Set(out))
+            },
             Expr::Vector { elements, .. } => Ok(Value::Vector(
                 elements
                     .iter()
