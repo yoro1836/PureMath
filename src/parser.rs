@@ -93,6 +93,9 @@ impl Parser {
 
             if is_definition_candidate && self.at(&TokenKind::Assign) {
                 self.take();
+                while self.at(&TokenKind::Newline) {
+                    self.take();
+                }
                 let body = self.parse_expr(0)?;
                 self.expect_eof_or("definition")?;
                 return Ok(Stmt::Definition {
@@ -358,6 +361,9 @@ impl Parser {
         let mut current: Vec<Expr> = Vec::new();
 
         loop {
+            while self.at(&TokenKind::Newline) {
+                self.take();
+            }
             if self.command_is("end") {
                 if !current.is_empty() {
                     rows.push(std::mem::take(&mut current));
@@ -384,6 +390,9 @@ impl Parser {
             if self.at(&TokenKind::Ampersand) {
                 self.take();
                 continue;
+            }
+            while self.at(&TokenKind::Newline) {
+                self.take();
             }
             if self.at(&TokenKind::RowSep) {
                 self.take();
@@ -467,6 +476,9 @@ impl Parser {
     fn parse_cases_body(&mut self, start: usize) -> Result<Expr, Diagnostic> {
         let mut branches = Vec::new();
         loop {
+            while self.at(&TokenKind::Newline) {
+                self.take();
+            }
             if self.command_is("end") {
                 self.take();
                 let end_name = self.parse_group_name()?;
@@ -493,6 +505,9 @@ impl Parser {
                     end,
                 ),
             });
+            while self.at(&TokenKind::Newline) {
+                self.take();
+            }
             if self.at(&TokenKind::RowSep) {
                 self.take();
             } else if !self.command_is("end") {
