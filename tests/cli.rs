@@ -34,7 +34,7 @@ fn version_does_not_start_repl() {
 }
 
 #[test]
-fn file_argument_executes_program() {
+fn file_argument_does_not_implicitly_print_expressions() {
     let path = std::env::temp_dir().join(format!("puremath-cli-{}.pmath", std::process::id()));
     fs::write(&path, "x := 10\nx + 2\n").unwrap();
 
@@ -42,7 +42,7 @@ fn file_argument_executes_program() {
     let _ = fs::remove_file(&path);
 
     assert!(output.status.success());
-    assert_eq!(String::from_utf8_lossy(&output.stdout), "12\n");
+    assert!(output.stdout.is_empty());
 }
 
 #[test]
