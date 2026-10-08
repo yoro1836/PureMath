@@ -19,12 +19,16 @@ pub use parser::Parser;
 pub use runtime::Runtime;
 
 pub fn parse(source: &str) -> Result<Program, Diagnostic> {
-    let tokens = lexer::lex(source)?;
-    Parser::new(tokens).parse_program()
+    let tokens = lexer::lex(source).map_err(|error| error.with_source(source))?;
+    Parser::new(tokens)
+        .parse_program()
+        .map_err(|error| error.with_source(source))
 }
 
 pub fn evaluate(source: &str, env: &mut Environment) -> Result<value::Value, Diagnostic> {
     let program = parse(source)?;
     let evaluator = Evaluator::new(env);
-    evaluator.execute_program(&program)
+    evaluator
+        .execute_program(&program)
+        .map_err(|error| error.with_source(source))
 }

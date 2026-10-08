@@ -118,7 +118,7 @@ fn run_file(path: &Path, ast: bool) -> Result<(), String> {
     for statement in &program.statements {
         runtime
             .execute(statement, base_dir)
-            .map_err(|error| error.to_string())?;
+            .map_err(|error| error.with_source(&source).to_string())?;
     }
 
     runtime

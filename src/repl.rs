@@ -42,13 +42,17 @@ fn eval_line(
     line: &str,
     env: &mut Environment,
 ) -> Result<crate::value::Value, crate::diagnostics::Diagnostic> {
-    let tokens = lexer::lex(line)?;
+    let tokens = lexer::lex(line).map_err(|error| error.with_source(line))?;
     let mut parser = Parser::new(tokens);
-    let program = parser.parse_program()?;
+    let program = parser
+        .parse_program()
+        .map_err(|error| error.with_source(line))?;
     let mut runtime = Runtime::stdout(env);
     let mut last = crate::value::Value::Unit;
     for stmt in &program.statements {
-        last = runtime.execute(stmt, Path::new("."))?;
+        last = runtime
+            .execute(stmt, Path::new("."))
+            .map_err(|error| error.with_source(line))?;
     }
     Ok(last)
 }

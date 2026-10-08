@@ -24,13 +24,17 @@ pub fn load_module(module: &str, env: &mut Environment, base_dir: &Path) -> Resu
     let source = fs::read_to_string(&canonical)
         .map_err(|e| Diagnostic::new(format!("cannot read {}: {}", canonical.display(), e)))?;
     let result = (|| {
-        let tokens = crate::lexer::lex(&source)?;
+        let tokens = crate::lexer::lex(&source).map_err(|error| error.with_source(&source))?;
         let mut parser = Parser::new(tokens);
-        let program = parser.parse_program()?;
+        let program = parser
+            .parse_program()
+            .map_err(|error| error.with_source(&source))?;
         let parent = canonical.parent().unwrap_or(base_dir);
         let mut evaluator = Evaluator::new(env);
         for stmt in &program.statements {
-            evaluator.execute(stmt, parent)?;
+            evaluator
+                .execute(stmt, parent)
+                .map_err(|error| error.with_source(&source))?;
         }
         Ok::<(), Diagnostic>(())
     })();
