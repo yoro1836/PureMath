@@ -70,6 +70,10 @@ pub enum Expr {
         body: Box<Expr>,
         span: Span,
     },
+    Abs {
+        expr: Box<Expr>,
+        span: Span,
+    },
     Sqrt {
         expr: Box<Expr>,
         span: Span,
@@ -122,6 +126,7 @@ impl Expr {
             | Expr::Set { span, .. }
             | Expr::Product { span, .. }
             | Expr::Sum { span, .. }
+            | Expr::Abs { span, .. }
             | Expr::Sqrt { span, .. }
             | Expr::Piecewise { span, .. }
             | Expr::Rational { span, .. } => *span,
