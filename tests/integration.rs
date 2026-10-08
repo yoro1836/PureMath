@@ -203,3 +203,81 @@ fn empty_product_is_one() {
     let mut env = Environment::new();
     assert_eq!(evaluate(r"\prod_{i=5}^{1} i", &mut env).unwrap().to_string(), "1");
 }
+
+
+#[test]
+fn set_relations_and_operations() {
+    let mut env = Environment::new();
+    assert_eq!(evaluate(r"{1,2} \cup {2,3}", &mut env).unwrap().to_string(), r"\{1,2,3\}");
+    assert_eq!(evaluate(r"2 \in {1,2,3}", &mut env).unwrap().to_string(), "true");
+    assert_eq!(evaluate(r"{1,2} \subseteq {1,2,3}", &mut env).unwrap().to_string(), "true");
+    assert_eq!(evaluate(r"{1,2,3} \setminus {2}", &mut env).unwrap().to_string(), r"\{1,3\}");
+}
+
+#[test]
+fn vectors_and_dot_product() {
+    let mut env = Environment::new();
+    assert_eq!(
+        evaluate(r"\vec{1,2,3} + \vec{4,5,6}", &mut env).unwrap().to_string(),
+        r"\left(5, 7, 9\right)"
+    );
+    assert_eq!(
+        evaluate(r"\dot{\vec{1,2,3}}{\vec{4,5,6}}", &mut env).unwrap().to_string(),
+        "32"
+    );
+}
+
+#[test]
+fn matrix_operations() {
+    let mut env = Environment::new();
+    evaluate(
+        r"A := \begin{pmatrix} 1 & 2 \\ 3 & 4 \end{pmatrix}",
+        &mut env,
+    )
+    .unwrap();
+    assert_eq!(evaluate(r"\det{A}", &mut env).unwrap().to_string(), "-2");
+    assert_eq!(
+        evaluate(r"\transpose{A}", &mut env).unwrap().to_string(),
+        r"\begin{pmatrix} 1 & 3 \\ 2 & 4 \end{pmatrix}"
+    );
+    assert_eq!(
+        evaluate(r"A^2", &mut env).unwrap().to_string(),
+        r"\begin{pmatrix} 7 & 10 \\ 15 & 22 \end{pmatrix}"
+    );
+}
+
+#[test]
+fn calculus_primitives() {
+    let mut env = Environment::new();
+    assert_eq!(
+        evaluate(r"\diff{x^3 + 2*x}{x}", &mut env).unwrap().to_string(),
+        r"3 \cdot x^{2} + 2"
+    );
+    assert_eq!(evaluate(r"\int_{0}^{3} x^2", &mut env).unwrap().to_string(), "9");
+    assert_eq!(evaluate(r"\lim_{x\to 2} x^2", &mut env).unwrap().to_string(), "4");
+}
+
+#[test]
+fn solving_and_combinatorics() {
+    let mut env = Environment::new();
+    assert_eq!(
+        evaluate(r"\solve{x^2 - 5*x + 6 = 0}{x}", &mut env)
+            .unwrap()
+            .to_string(),
+        r"\{2,3\}"
+    );
+    assert_eq!(evaluate(r"5!", &mut env).unwrap().to_string(), "120");
+    assert_eq!(evaluate(r"\binom{5}{2}", &mut env).unwrap().to_string(), "10");
+    assert_eq!(evaluate(r"\gcd{84}{30}", &mut env).unwrap().to_string(), "6");
+}
+
+#[test]
+fn statistics_and_integer_functions() {
+    let mut env = Environment::new();
+    assert_eq!(evaluate(r"\mean{\vec{1,2,3,4}}", &mut env).unwrap().to_string(), r"\frac{5}{2}");
+    assert_eq!(evaluate(r"\variance{\vec{1,2,3,4}}", &mut env).unwrap().to_string(), r"\frac{5}{4}");
+    assert_eq!(evaluate(r"\floor{\frac{-7}{3}}", &mut env).unwrap().to_string(), "-3");
+    assert_eq!(evaluate(r"\ceil{\frac{-7}{3}}", &mut env).unwrap().to_string(), "-2");
+    assert_eq!(evaluate(r"\sin{0}", &mut env).unwrap().to_string(), "0");
+    assert_eq!(evaluate(r"\cos{0}", &mut env).unwrap().to_string(), "1");
+}
