@@ -105,6 +105,8 @@ pub enum Value {
     Rational(Rational),
     Bool(bool),
     Set(Vec<Value>),
+    Vector(Vec<Value>),
+    Matrix(Vec<Vec<Value>>),
     Function(Rc<FunctionValue>),
     Symbolic(Expr),
     Unit,
@@ -132,6 +134,22 @@ impl fmt::Display for Value {
                     .collect::<Vec<_>>()
                     .join(",");
                 write!(f, "\\{{{}\\}}", body)
+            }
+            Value::Vector(xs) => {
+                let body = xs
+                    .iter()
+                    .map(ToString::to_string)
+                    .collect::<Vec<_>>()
+                    .join(", ");
+                write!(f, "\\left({}\\right)", body)
+            }
+            Value::Matrix(rows) => {
+                let body = rows
+                    .iter()
+                    .map(|row| row.iter().map(ToString::to_string).collect::<Vec<_>>().join(" & "))
+                    .collect::<Vec<_>>()
+                    .join(" \\\\ ");
+                write!(f, "\\begin{{pmatrix}} {} \\end{{pmatrix}}", body)
             }
             Value::Function(fun) => write!(f, "function({})", fun.params.join(", ")),
             Value::Symbolic(e) => write!(f, "{}", crate::render::expr(e)),
