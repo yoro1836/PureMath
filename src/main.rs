@@ -116,13 +116,9 @@ fn run_file(path: &Path, ast: bool) -> Result<(), String> {
     let mut runtime = Runtime::new(&mut env, io::stdout());
 
     for statement in &program.statements {
-        let value = runtime
+        runtime
             .execute(statement, base_dir)
             .map_err(|error| error.to_string())?;
-
-        if matches!(statement, puremath::Stmt::Expression(_)) {
-            println!("{}", value);
-        }
     }
 
     runtime
