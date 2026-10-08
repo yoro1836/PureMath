@@ -594,10 +594,10 @@ impl<'a> Evaluator<'a> {
                         let mut out = Rational::integer(0);
                         for (x, y) in a.iter().zip(&b) {
                             let (Value::Rational(x), Value::Rational(y)) = (x, y) else {
-                                return Ok(symbolic(name, &[Value::Vector(a), Value::Vector(b)]));
+                                return Ok(symbolic(name, &[Value::Vector(a.clone()), Value::Vector(b.clone())]));
                             };
-                            out = out.mul(y).and_then(|p| out.add(&p)).map_err(Diagnostic::new)?;
-                            out = p_add(out, x, y)?;
+                            let product = x.mul(y).map_err(Diagnostic::new)?;
+                            out = out.add(&product).map_err(Diagnostic::new)?;
                         }
                         Ok(Value::Rational(out))
                     }
