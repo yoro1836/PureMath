@@ -21,9 +21,14 @@ Implemented in this prototype:
 - function application
 - recursive definitions
 - piecewise evaluation
-- finite sums
-- finite sets
+- finite sums and products
+- finite sets and set relations
+- vectors and matrices
 - symbolic preservation
+- substitution
+- basic differentiation / integration / limits
+- low-degree polynomial solving
+- combinatorics, number theory, and statistics helpers
 - simple module imports
 - REPL
 
