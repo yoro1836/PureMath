@@ -27,6 +27,7 @@ n \cdot fact(n-1) & n > 0
 \sum_{i=1}^{10} i
 A := \{1,2,3\}
 \sqrt{16}
+\print{f(3)}
 \import{algebra}
 ```
 
@@ -101,3 +102,14 @@ src/
 ├── simplifier.rs   small symbolic normalization layer
 └── value.rs        exact/symbolic values
 ```
+
+### Explicit output
+
+`\\print{E}` is the explicit stdout interface for programs:
+
+```latex
+x := 10
+\\print{x + 2}
+```
+
+Definitions and imports do not produce implicit file output. Expression statements may still be displayed by the development CLI; explicit program output should use `\\print`.
