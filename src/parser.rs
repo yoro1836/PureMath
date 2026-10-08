@@ -698,7 +698,7 @@ impl Parser {
         }
     }
 
-    fn error_here(&self, message: impl Into<String>) {
+    fn error_here(&self, message: impl Into<String>) -> Diagnostic {
         Diagnostic::at(
             message,
             self.tokens
