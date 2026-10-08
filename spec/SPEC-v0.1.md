@@ -369,3 +369,5 @@ evaluates the mathematical expression `E`, writes its resulting value to standar
 The mathematical evaluator does not perform the side effect directly. Runtime execution supplies the output capability.
 
 An imported declarative module must not use runtime output during module loading.
+
+When executing a `.pmath` file, expression statements are evaluated for their effects on the mathematical environment but their values are not implicitly written to stdout. Program output requires an explicit `\\print{E}` operation. The REPL is a separate interactive interface and may display the result of each entered expression.
