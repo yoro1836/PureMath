@@ -45,7 +45,22 @@ fn file_argument_executes_program() {
     let _ = fs::remove_file(&path);
 
     assert!(output.status.success());
-    assert_eq!(String::from_utf8_lossy(&output.stdout), "10\n12\n");
+    assert_eq!(String::from_utf8_lossy(&output.stdout), "12\n");
+}
+
+#[test]
+fn explicit_print_writes_to_stdout() {
+    let path = std::env::temp_dir().join(format!(
+        "puremath-cli-print-{}.pmath",
+        std::process::id()
+    ));
+    fs::write(&path, "x := 10\n\\print{x + 2}\n").unwrap();
+
+    let output = puremath().arg(&path).output().unwrap();
+    let _ = fs::remove_file(&path);
+
+    assert!(output.status.success());
+    assert_eq!(String::from_utf8_lossy(&output.stdout), "12\n");
 }
 
 #[test]
