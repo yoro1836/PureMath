@@ -64,9 +64,6 @@ pub enum Expr {
         rows: Vec<Vec<Expr>>,
         span: Span,
     },
-        elements: Vec<Expr>,
-        span: Span,
-    },
     Integral {
         var: String,
         lower: Option<Box<Expr>>,
