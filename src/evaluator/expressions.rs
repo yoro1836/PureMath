@@ -63,6 +63,17 @@ impl<'a> Evaluator<'a> {
                     if name.starts_with('\\') {
                         return super::builtins::eval_builtin(self, name, args, *span, locals);
                     }
+                    if self.env.get(name).is_none() {
+                        if let Some(builtin_name) = super::builtins::bare_builtin_name(name) {
+                            return super::builtins::eval_builtin(
+                                self,
+                                builtin_name,
+                                args,
+                                *span,
+                                locals,
+                            );
+                        }
+                    }
                 }
                 let callable = self.eval_expr(callee, locals)?;
                 match callable {
