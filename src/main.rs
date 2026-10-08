@@ -7,7 +7,7 @@ use puremath::{Environment, Evaluator};
 fn main() {
     let mut args = env::args().skip(1);
     let ast = matches!(args.next().as_deref(), Some("--ast"));
-    let path = if ast { args.next() } else { args.next() };
+    let path = args.next();
 
     match path {
         Some(path) => {
