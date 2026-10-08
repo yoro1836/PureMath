@@ -20,11 +20,17 @@ pub struct Diagnostic {
 
 impl Diagnostic {
     pub fn new(message: impl Into<String>) -> Self {
-        Self { message: message.into(), span: None }
+        Self {
+            message: message.into(),
+            span: None,
+        }
     }
 
     pub fn at(message: impl Into<String>, span: Span) -> Self {
-        Self { message: message.into(), span: Some(span) }
+        Self {
+            message: message.into(),
+            span: Some(span),
+        }
     }
 }
 

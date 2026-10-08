@@ -23,19 +23,33 @@ fn equality_is_a_proposition() {
 #[test]
 fn rational_arithmetic_is_exact() {
     let mut env = Environment::new();
-    assert_eq!(evaluate(r"\frac{1}{3} + \frac{1}{3}", &mut env).unwrap().to_string(), r"\frac{2}{3}");
+    assert_eq!(
+        evaluate(r"\frac{1}{3} + \frac{1}{3}", &mut env)
+            .unwrap()
+            .to_string(),
+        r"\frac{2}{3}"
+    );
 }
 
 #[test]
 fn finite_sum() {
     let mut env = Environment::new();
-    assert_eq!(evaluate(r"\sum_{i=1}^{10} i", &mut env).unwrap().to_string(), "55");
+    assert_eq!(
+        evaluate(r"\sum_{i=1}^{10} i", &mut env)
+            .unwrap()
+            .to_string(),
+        "55"
+    );
 }
 
 #[test]
 fn recursive_piecewise() {
     let mut env = Environment::new();
-    evaluate(r"fact(n) := \begin{cases} 1 & n = 0 \\ n \cdot fact(n-1) & n > 0 \end{cases}", &mut env).unwrap();
+    evaluate(
+        r"fact(n) := \begin{cases} 1 & n = 0 \\ n \cdot fact(n-1) & n > 0 \end{cases}",
+        &mut env,
+    )
+    .unwrap();
     assert_eq!(evaluate("fact(5)", &mut env).unwrap().to_string(), "120");
 }
 
@@ -48,7 +62,10 @@ fn symbolic_values_are_preserved() {
 #[test]
 fn comments_are_ignored() {
     let mut env = Environment::new();
-    assert_eq!(evaluate("x := 10 % comment", &mut env).unwrap().to_string(), "10");
+    assert_eq!(
+        evaluate("x := 10 % comment", &mut env).unwrap().to_string(),
+        "10"
+    );
 }
 
 #[test]
@@ -60,7 +77,9 @@ fn parser_produces_multiple_statements() {
 #[test]
 fn latex_surface_tokens_include_cdot() {
     let tokens = lexer::lex(r"x \cdot y").unwrap();
-    assert!(tokens.iter().any(|t| matches!(&t.kind, puremath::lexer::TokenKind::Command(c) if c == "cdot")));
+    assert!(tokens
+        .iter()
+        .any(|t| matches!(&t.kind, puremath::lexer::TokenKind::Command(c) if c == "cdot")));
 }
 
 #[test]
@@ -133,5 +152,7 @@ fn recursive_call_depth_is_bounded() {
     evaluate("loop(x) := loop(x)", &mut env).unwrap();
     let program = puremath::parse("loop(0)").unwrap();
     let mut evaluator = puremath::Evaluator::with_limits(&mut env, 8, 100);
-    assert!(evaluator.execute(&program.statements[0], std::path::Path::new("." )).is_err());
+    assert!(evaluator
+        .execute(&program.statements[0], std::path::Path::new("."))
+        .is_err());
 }

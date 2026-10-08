@@ -10,32 +10,59 @@ pub struct Rational {
 
 impl Rational {
     pub fn new(mut num: i128, mut den: i128) -> Result<Self, String> {
-        if den == 0 { return Err("division by zero".into()); }
+        if den == 0 {
+            return Err("division by zero".into());
+        }
         if den < 0 {
-            num = num.checked_neg().ok_or("integer overflow while normalizing rational")?;
-            den = den.checked_neg().ok_or("integer overflow while normalizing rational")?;
+            num = num
+                .checked_neg()
+                .ok_or("integer overflow while normalizing rational")?;
+            den = den
+                .checked_neg()
+                .ok_or("integer overflow while normalizing rational")?;
         }
         let g = gcd(num.unsigned_abs(), den.unsigned_abs()) as i128;
-        Ok(Self { num: num / g, den: den / g })
+        Ok(Self {
+            num: num / g,
+            den: den / g,
+        })
     }
-    pub fn integer(n: i128) -> Self { Self { num: n, den: 1 } }
-    pub fn is_integer(&self) -> bool { self.den == 1 }
+    pub fn integer(n: i128) -> Self {
+        Self { num: n, den: 1 }
+    }
+    pub fn is_integer(&self) -> bool {
+        self.den == 1
+    }
     pub fn add(&self, rhs: &Self) -> Result<Self, String> {
         let left = self.num.checked_mul(rhs.den).ok_or("integer overflow")?;
         let right = rhs.num.checked_mul(self.den).ok_or("integer overflow")?;
-        Self::new(left.checked_add(right).ok_or("integer overflow")?, self.den.checked_mul(rhs.den).ok_or("integer overflow")?)
+        Self::new(
+            left.checked_add(right).ok_or("integer overflow")?,
+            self.den.checked_mul(rhs.den).ok_or("integer overflow")?,
+        )
     }
     pub fn sub(&self, rhs: &Self) -> Result<Self, String> {
         let left = self.num.checked_mul(rhs.den).ok_or("integer overflow")?;
         let right = rhs.num.checked_mul(self.den).ok_or("integer overflow")?;
-        Self::new(left.checked_sub(right).ok_or("integer overflow")?, self.den.checked_mul(rhs.den).ok_or("integer overflow")?)
+        Self::new(
+            left.checked_sub(right).ok_or("integer overflow")?,
+            self.den.checked_mul(rhs.den).ok_or("integer overflow")?,
+        )
     }
     pub fn mul(&self, rhs: &Self) -> Result<Self, String> {
-        Self::new(self.num.checked_mul(rhs.num).ok_or("integer overflow")?, self.den.checked_mul(rhs.den).ok_or("integer overflow")?)
+        Self::new(
+            self.num.checked_mul(rhs.num).ok_or("integer overflow")?,
+            self.den.checked_mul(rhs.den).ok_or("integer overflow")?,
+        )
     }
     pub fn div(&self, rhs: &Self) -> Result<Self, String> {
-        if rhs.num == 0 { return Err("division by zero".into()); }
-        Self::new(self.num.checked_mul(rhs.den).ok_or("integer overflow")?, self.den.checked_mul(rhs.num).ok_or("integer overflow")?)
+        if rhs.num == 0 {
+            return Err("division by zero".into());
+        }
+        Self::new(
+            self.num.checked_mul(rhs.den).ok_or("integer overflow")?,
+            self.den.checked_mul(rhs.num).ok_or("integer overflow")?,
+        )
     }
     pub fn powi(&self, exp: i128) -> Result<Self, String> {
         if exp < 0 {
@@ -46,16 +73,24 @@ impl Rational {
         let mut e = exp as u128;
         let mut out = Self::integer(1);
         while e > 0 {
-            if e & 1 == 1 { out = out.mul(&base)?; }
+            if e & 1 == 1 {
+                out = out.mul(&base)?;
+            }
             e >>= 1;
-            if e > 0 { base = base.mul(&base)?; }
+            if e > 0 {
+                base = base.mul(&base)?;
+            }
         }
         Ok(out)
     }
 }
 
 fn gcd(mut a: u128, mut b: u128) -> u128 {
-    while b != 0 { let r = a % b; a = b; b = r; }
+    while b != 0 {
+        let r = a % b;
+        a = b;
+        b = r;
+    }
     a.max(1)
 }
 
@@ -77,8 +112,11 @@ pub enum Value {
 
 impl fmt::Display for Rational {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        if self.den == 1 { write!(f, "{}", self.num) }
-        else { write!(f, "\\frac{{{}}}{{{}}}", self.num, self.den) }
+        if self.den == 1 {
+            write!(f, "{}", self.num)
+        } else {
+            write!(f, "\\frac{{{}}}{{{}}}", self.num, self.den)
+        }
     }
 }
 
@@ -88,9 +126,13 @@ impl fmt::Display for Value {
             Value::Rational(r) => write!(f, "{}", r),
             Value::Bool(b) => write!(f, "{}", b),
             Value::Set(xs) => {
-                let body = xs.iter().map(ToString::to_string).collect::<Vec<_>>().join(",");
+                let body = xs
+                    .iter()
+                    .map(ToString::to_string)
+                    .collect::<Vec<_>>()
+                    .join(",");
                 write!(f, "\\{{{}\\}}", body)
-            },
+            }
             Value::Function(fun) => write!(f, "function({})", fun.params.join(", ")),
             Value::Symbolic(e) => write!(f, "{}", crate::render::expr(e)),
             Value::Unit => Ok(()),
@@ -112,9 +154,14 @@ pub fn value_to_expr(value: &Value, fallback: &Expr) -> Expr {
 }
 
 pub fn exact_integer_sqrt(n: u128) -> u128 {
-    if n < 2 { return n; }
+    if n < 2 {
+        return n;
+    }
     let mut x = n;
     let mut y = (x + n / x) / 2;
-    while y < x { x = y; y = (x + n / x) / 2; }
+    while y < x {
+        x = y;
+        y = (x + n / x) / 2;
+    }
     x
 }

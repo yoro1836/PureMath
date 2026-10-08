@@ -46,7 +46,10 @@ pub fn lex(input: &str) -> Result<Vec<Token>, Diagnostic> {
         match bytes[i] as char {
             '\n' => {
                 if paren_depth == 0 && brace_depth == 0 {
-                    out.push(Token { kind: TokenKind::Newline, span: Span::new(i, i + 1) });
+                    out.push(Token {
+                        kind: TokenKind::Newline,
+                        span: Span::new(i, i + 1),
+                    });
                 }
                 i += 1;
             }
@@ -58,7 +61,10 @@ pub fn lex(input: &str) -> Result<Vec<Token>, Diagnostic> {
             }
             '\\' => {
                 if i + 1 < bytes.len() && bytes[i + 1] as char == '\\' {
-                    out.push(Token { kind: TokenKind::RowSep, span: Span::new(i, i + 2) });
+                    out.push(Token {
+                        kind: TokenKind::RowSep,
+                        span: Span::new(i, i + 2),
+                    });
                     i += 2;
                 } else {
                     i += 1;
@@ -67,56 +73,189 @@ pub fn lex(input: &str) -> Result<Vec<Token>, Diagnostic> {
                         i += 1;
                     }
                     if command_start == i {
-                        return Err(Diagnostic::at("expected LaTeX command after backslash", Span::new(start, i)));
+                        return Err(Diagnostic::at(
+                            "expected LaTeX command after backslash",
+                            Span::new(start, i),
+                        ));
                     }
                     let command = input[command_start..i].to_owned();
-                    out.push(Token { kind: TokenKind::Command(command), span: Span::new(start, i) });
+                    out.push(Token {
+                        kind: TokenKind::Command(command),
+                        span: Span::new(start, i),
+                    });
                 }
             }
             ':' if i + 1 < bytes.len() && bytes[i + 1] as char == '=' => {
-                out.push(Token { kind: TokenKind::Assign, span: Span::new(i, i + 2) });
+                out.push(Token {
+                    kind: TokenKind::Assign,
+                    span: Span::new(i, i + 2),
+                });
                 i += 2;
             }
-            '=' => { out.push(Token { kind: TokenKind::Eq, span: Span::new(i, i + 1) }); i += 1; }
+            '=' => {
+                out.push(Token {
+                    kind: TokenKind::Eq,
+                    span: Span::new(i, i + 1),
+                });
+                i += 1;
+            }
             '<' if i + 1 < bytes.len() && bytes[i + 1] as char == '=' => {
-                out.push(Token { kind: TokenKind::Le, span: Span::new(i, i + 2) }); i += 2;
+                out.push(Token {
+                    kind: TokenKind::Le,
+                    span: Span::new(i, i + 2),
+                });
+                i += 2;
             }
             '>' if i + 1 < bytes.len() && bytes[i + 1] as char == '=' => {
-                out.push(Token { kind: TokenKind::Ge, span: Span::new(i, i + 2) }); i += 2;
+                out.push(Token {
+                    kind: TokenKind::Ge,
+                    span: Span::new(i, i + 2),
+                });
+                i += 2;
             }
-            '<' => { out.push(Token { kind: TokenKind::Lt, span: Span::new(i, i + 1) }); i += 1; }
-            '>' => { out.push(Token { kind: TokenKind::Gt, span: Span::new(i, i + 1) }); i += 1; }
-            '+' => { out.push(Token { kind: TokenKind::Plus, span: Span::new(i, i + 1) }); i += 1; }
-            '-' => { out.push(Token { kind: TokenKind::Minus, span: Span::new(i, i + 1) }); i += 1; }
-            '*' => { out.push(Token { kind: TokenKind::Star, span: Span::new(i, i + 1) }); i += 1; }
-            '/' => { out.push(Token { kind: TokenKind::Slash, span: Span::new(i, i + 1) }); i += 1; }
-            '^' => { out.push(Token { kind: TokenKind::Caret, span: Span::new(i, i + 1) }); i += 1; }
-            '(' => { out.push(Token { kind: TokenKind::LParen, span: Span::new(i, i + 1) }); paren_depth += 1; i += 1; }
-            ')' => { out.push(Token { kind: TokenKind::RParen, span: Span::new(i, i + 1) }); paren_depth = paren_depth.saturating_sub(1); i += 1; }
-            '{' => { out.push(Token { kind: TokenKind::LBrace, span: Span::new(i, i + 1) }); brace_depth += 1; i += 1; }
-            '}' => { out.push(Token { kind: TokenKind::RBrace, span: Span::new(i, i + 1) }); brace_depth = brace_depth.saturating_sub(1); i += 1; }
-            ',' => { out.push(Token { kind: TokenKind::Comma, span: Span::new(i, i + 1) }); i += 1; }
-            '_' => { out.push(Token { kind: TokenKind::Underscore, span: Span::new(i, i + 1) }); i += 1; }
-            '&' => { out.push(Token { kind: TokenKind::Ampersand, span: Span::new(i, i + 1) }); i += 1; }
+            '<' => {
+                out.push(Token {
+                    kind: TokenKind::Lt,
+                    span: Span::new(i, i + 1),
+                });
+                i += 1;
+            }
+            '>' => {
+                out.push(Token {
+                    kind: TokenKind::Gt,
+                    span: Span::new(i, i + 1),
+                });
+                i += 1;
+            }
+            '+' => {
+                out.push(Token {
+                    kind: TokenKind::Plus,
+                    span: Span::new(i, i + 1),
+                });
+                i += 1;
+            }
+            '-' => {
+                out.push(Token {
+                    kind: TokenKind::Minus,
+                    span: Span::new(i, i + 1),
+                });
+                i += 1;
+            }
+            '*' => {
+                out.push(Token {
+                    kind: TokenKind::Star,
+                    span: Span::new(i, i + 1),
+                });
+                i += 1;
+            }
+            '/' => {
+                out.push(Token {
+                    kind: TokenKind::Slash,
+                    span: Span::new(i, i + 1),
+                });
+                i += 1;
+            }
+            '^' => {
+                out.push(Token {
+                    kind: TokenKind::Caret,
+                    span: Span::new(i, i + 1),
+                });
+                i += 1;
+            }
+            '(' => {
+                out.push(Token {
+                    kind: TokenKind::LParen,
+                    span: Span::new(i, i + 1),
+                });
+                paren_depth += 1;
+                i += 1;
+            }
+            ')' => {
+                out.push(Token {
+                    kind: TokenKind::RParen,
+                    span: Span::new(i, i + 1),
+                });
+                paren_depth = paren_depth.saturating_sub(1);
+                i += 1;
+            }
+            '{' => {
+                out.push(Token {
+                    kind: TokenKind::LBrace,
+                    span: Span::new(i, i + 1),
+                });
+                brace_depth += 1;
+                i += 1;
+            }
+            '}' => {
+                out.push(Token {
+                    kind: TokenKind::RBrace,
+                    span: Span::new(i, i + 1),
+                });
+                brace_depth = brace_depth.saturating_sub(1);
+                i += 1;
+            }
+            ',' => {
+                out.push(Token {
+                    kind: TokenKind::Comma,
+                    span: Span::new(i, i + 1),
+                });
+                i += 1;
+            }
+            '_' => {
+                out.push(Token {
+                    kind: TokenKind::Underscore,
+                    span: Span::new(i, i + 1),
+                });
+                i += 1;
+            }
+            '&' => {
+                out.push(Token {
+                    kind: TokenKind::Ampersand,
+                    span: Span::new(i, i + 1),
+                });
+                i += 1;
+            }
             c if c.is_ascii_digit() => {
                 let number_start = i;
-                while i < bytes.len() && (bytes[i] as char).is_ascii_digit() { i += 1; }
+                while i < bytes.len() && (bytes[i] as char).is_ascii_digit() {
+                    i += 1;
+                }
                 let raw = &input[number_start..i];
-                let n = raw.parse::<i128>().map_err(|_| Diagnostic::at("integer literal overflow", Span::new(number_start, i)))?;
-                out.push(Token { kind: TokenKind::Int(n), span: Span::new(number_start, i) });
+                let n = raw.parse::<i128>().map_err(|_| {
+                    Diagnostic::at("integer literal overflow", Span::new(number_start, i))
+                })?;
+                out.push(Token {
+                    kind: TokenKind::Int(n),
+                    span: Span::new(number_start, i),
+                });
             }
             c if c.is_ascii_alphabetic() => {
                 let ident_start = i;
                 while i < bytes.len() {
                     let c = bytes[i] as char;
-                    if c.is_ascii_alphanumeric() || c == '_' { i += 1; } else { break; }
+                    if c.is_ascii_alphanumeric() || c == '_' {
+                        i += 1;
+                    } else {
+                        break;
+                    }
                 }
-                out.push(Token { kind: TokenKind::Ident(input[ident_start..i].to_owned()), span: Span::new(ident_start, i) });
+                out.push(Token {
+                    kind: TokenKind::Ident(input[ident_start..i].to_owned()),
+                    span: Span::new(ident_start, i),
+                });
             }
-            _ => return Err(Diagnostic::at(format!("unexpected character {:?}", bytes[i] as char), Span::new(i, i + 1))),
+            _ => {
+                return Err(Diagnostic::at(
+                    format!("unexpected character {:?}", bytes[i] as char),
+                    Span::new(i, i + 1),
+                ))
+            }
         }
     }
 
-    out.push(Token { kind: TokenKind::Eof, span: Span::new(input.len(), input.len()) });
+    out.push(Token {
+        kind: TokenKind::Eof,
+        span: Span::new(input.len(), input.len()),
+    });
     Ok(out)
 }
