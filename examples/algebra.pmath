@@ -1,0 +1,3 @@
+% Standard-library style module
+square(x) := x^2
+cube(x) := x^3
