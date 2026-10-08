@@ -398,7 +398,7 @@ pub(super) fn eval_builtin(
             // When exactly one argument is a Symbol, use the Symbol as the
             // differentiation variable. This keeps both forms compatible.
             let (expr, var) = match (&args[0], &args[1]) {
-                (Expr::Symbol { name, .. }, Expr::Symbol { .. }) => (
+                (Expr::Symbol { .. }, Expr::Symbol { .. }) => (
                     &args[0],
                     match &args[1] {
                         Expr::Symbol { name, .. } => name.clone(),
