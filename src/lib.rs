@@ -7,6 +7,7 @@ pub mod module;
 pub mod parser;
 pub mod render;
 pub mod repl;
+pub mod runtime;
 pub mod simplifier;
 pub mod value;
 
@@ -15,6 +16,7 @@ pub use diagnostics::{Diagnostic, Span};
 pub use env::Environment;
 pub use evaluator::Evaluator;
 pub use parser::Parser;
+pub use runtime::Runtime;
 
 pub fn parse(source: &str) -> Result<Program, Diagnostic> {
     let tokens = lexer::lex(source)?;
