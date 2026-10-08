@@ -281,3 +281,51 @@ fn statistics_and_integer_functions() {
     assert_eq!(evaluate(r"\sin{0}", &mut env).unwrap().to_string(), "0");
     assert_eq!(evaluate(r"\cos{0}", &mut env).unwrap().to_string(), "1");
 }
+
+
+#[test]
+fn matrix_inverse_rank_and_trace() {
+    let mut env = Environment::new();
+    evaluate(
+        r"A := \begin{pmatrix} 1 & 2 \\ 3 & 4 \end{pmatrix}",
+        &mut env,
+    )
+    .unwrap();
+    assert_eq!(
+        evaluate(r"\inverse{A}", &mut env).unwrap().to_string(),
+        r"\begin{pmatrix} -2 & 1 \\ \frac{3}{2} & -\frac{1}{2} \end{pmatrix}"
+    );
+    assert_eq!(evaluate(r"\rank{A}", &mut env).unwrap().to_string(), "2");
+    assert_eq!(evaluate(r"\trace{A}", &mut env).unwrap().to_string(), "5");
+}
+
+#[test]
+fn substitution_and_round_trip_calculus() {
+    let mut env = Environment::new();
+    assert_eq!(
+        evaluate(r"\subs{x=3}{x^2 + 1}", &mut env)
+            .unwrap()
+            .to_string(),
+        "10"
+    );
+    assert_eq!(
+        evaluate(r"\lim_{x\to 2} x^2", &mut env)
+            .unwrap()
+            .to_string(),
+        "4"
+    );
+}
+
+#[test]
+fn broader_number_and_statistics_functions() {
+    let mut env = Environment::new();
+    assert_eq!(evaluate(r"\perm{5}{2}", &mut env).unwrap().to_string(), "20");
+    assert_eq!(evaluate(r"\lcm{12}{18}", &mut env).unwrap().to_string(), "36");
+    assert_eq!(evaluate(r"\range{3}{5}", &mut env).unwrap().to_string(), r"\{3,4,5\}");
+    assert_eq!(
+        evaluate(r"\stdev{\vec{1,2,3,4}}", &mut env)
+            .unwrap()
+            .to_string(),
+        r"\sqrt{\frac{5}{4}}"
+    );
+}
