@@ -315,16 +315,17 @@ fn bare_command_aliases_work_without_backslashes() {
         r"2 \cdot x"
     );
     assert_eq!(
-        evaluate(r"diff{x^3 + 2*x}{x}", &mut env).unwrap().to_string(),
+        evaluate(r"diff{x^3 + 2*x}{x}", &mut env)
+            .unwrap()
+            .to_string(),
         r"3 \cdot x^{2} + 2"
     );
     assert_eq!(evaluate(r"sin{0}", &mut env).unwrap().to_string(), "0");
+    assert_eq!(evaluate(r"sqrt{16}", &mut env).unwrap().to_string(), "4");
     assert_eq!(
-        evaluate(r"sqrt{16}", &mut env).unwrap().to_string(),
-        "4"
-    );
-    assert_eq!(
-        evaluate(r"frac{1}{2} + frac{1}{2}", &mut env).unwrap().to_string(),
+        evaluate(r"frac{1}{2} + frac{1}{2}", &mut env)
+            .unwrap()
+            .to_string(),
         "1"
     );
     assert_eq!(
