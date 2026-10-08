@@ -691,7 +691,7 @@ impl Parser {
                 if self.at(&TokenKind::LBrace) =>
             {
                 true
-            },
+            }
             "sum" | "prod" | "lim" if self.at(&TokenKind::Underscore) => true,
             "int" => true,
             _ => false,
