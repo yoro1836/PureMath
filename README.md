@@ -36,12 +36,29 @@ Definitions are immutable: a name cannot be defined twice in the same environmen
 
 ## CLI
 
+Build and run the prototype:
+
 ```bash
 cargo test
-cargo run
-cargo run -- examples/main.pmath
-cargo run -- --ast examples/main.pmath
+cargo build --release
 ```
+
+Start the REPL by running without a file:
+
+```bash
+./target/release/puremath
+```
+
+Useful CLI options:
+
+```bash
+./target/release/puremath --help
+./target/release/puremath --version
+./target/release/puremath examples/main.pmath
+./target/release/puremath --ast examples/main.pmath
+```
+
+The `--help` and `--version` options exit immediately; they do not start the REPL.
 
 ## Architecture
 
