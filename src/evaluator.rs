@@ -191,7 +191,7 @@ impl<'a> Evaluator<'a> {
                 ..
             } => self.eval_sum(var, lower, upper, body, expr, locals),
             Expr::Abs { expr: inner, span } => match self.eval_expr(inner, locals)? {
-                Value::Rational(v) => Ok(Value::Rational(Rational::new(v.num.abs(), v.den)
+                Value::Rational(v) => Ok(Value::Rational(Rational::new(v.num.checked_abs().ok_or_else(|| Diagnostic::new("integer overflow in absolute value"))?, v.den)
                     .map_err(Diagnostic::new)?)),
                 Value::Symbolic(v) => Ok(Value::Symbolic(Expr::Abs {
                     expr: Box::new(v),
