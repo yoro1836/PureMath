@@ -18,6 +18,10 @@ pub enum Stmt {
         module: String,
         span: Span,
     },
+    Print {
+        expr: Expr,
+        span: Span,
+    },
 }
 
 #[derive(Clone, Debug, PartialEq)]
