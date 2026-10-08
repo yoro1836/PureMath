@@ -533,12 +533,12 @@ fn finite_set_comprehension_evaluates_and_renders() {
         evaluate(r"{x in {1,2,3} | x > 1}", &mut env)
             .unwrap()
             .to_string(),
-        r"\\{2,3\\}"
+        r"\{2,3\}"
     );
     assert_eq!(
         evaluate(r"{x in {1,2,3} | x > 3}", &mut env)
             .unwrap()
             .to_string(),
-        r"\\{\\}"
+        r"\{\}"
     );
 }
