@@ -1,0 +1,6 @@
+% Exact arithmetic and indexed operations
+\print{\frac{7}{12} + \frac{5}{18}}
+\print{\sum_{i=1}^{10} i}
+\print{\prod_{i=1}^{5} i}
+\print{\abs{-\frac{15}{4}}}
+\print{\sqrt{144}}
