@@ -47,7 +47,8 @@ fn file_argument_executes_program() {
 
 #[test]
 fn explicit_print_writes_to_stdout() {
-    let path = std::env::temp_dir().join(format!("puremath-cli-print-{}.pmath", std::process::id()));
+    let path =
+        std::env::temp_dir().join(format!("puremath-cli-print-{}.pmath", std::process::id()));
     fs::write(&path, "x := 10\n\\print{x + 2}\n").unwrap();
 
     let output = puremath().arg(&path).output().unwrap();
