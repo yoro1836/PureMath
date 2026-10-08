@@ -353,11 +353,7 @@ impl Parser {
         Err(self.error_here(format!("unsupported environment: {}", name)))
     }
 
-    fn parse_matrix_body(
-        &mut self,
-        start: usize,
-        environment: String,
-    ) -> Result<Expr, Diagnostic> {
+    fn parse_matrix_body(&mut self, start: usize, environment: String) -> Result<Expr, Diagnostic> {
         let mut rows: Vec<Vec<Expr>> = Vec::new();
         let mut current: Vec<Expr> = Vec::new();
 
@@ -420,12 +416,12 @@ impl Parser {
                 }
                 lower = Some(rhs);
             } else {
-                lower = Some(group);
+                lower = Some(Box::new(group));
             }
         }
         if self.at(&TokenKind::Caret) {
             self.take();
-            upper = Some(self.parse_group_expr()?);
+            upper = Some(Box::new(self.parse_group_expr()?));
         }
         let body = self.parse_expr(0)?;
         if var == "x" {
@@ -448,18 +444,13 @@ impl Parser {
         let var = match self.take().kind {
             TokenKind::Ident(name) => name,
             other => {
-                return Err(
-                    self.error_here(format!("expected limit variable, got {:?}", other))
-                )
+                return Err(self.error_here(format!("expected limit variable, got {:?}", other)))
             }
         };
         match self.take().kind {
             TokenKind::Command(name) if name == "to" => {}
             other => {
-                return Err(self.error_here(format!(
-                    "expected \\to in limit, got {:?}",
-                    other
-                )))
+                return Err(self.error_here(format!("expected \\to in limit, got {:?}", other)))
             }
         }
         let target = self.parse_expr(0)?;
@@ -512,11 +503,7 @@ impl Parser {
 
     fn first_non_constant_symbol(expr: &Expr) -> Option<String> {
         match expr {
-            Expr::Symbol { name, .. }
-                if !matches!(name.as_str(), "\\pi" | "\\e" | "\\infty") =>
-            {
-                Some(name.clone())
-            }
+            Expr::Symbol { name, .. } => Some(name.clone()),
             Expr::Unary { expr, .. } => Self::first_non_constant_symbol(expr),
             Expr::Binary { lhs, rhs, .. } => Self::first_non_constant_symbol(lhs)
                 .or_else(|| Self::first_non_constant_symbol(rhs)),
@@ -555,9 +542,7 @@ impl Parser {
         let var = match self.take().kind {
             TokenKind::Ident(name) => name,
             other => {
-                return Err(
-                    self.error_here(format!("expected product variable, got {:?}", other))
-                )
+                return Err(self.error_here(format!("expected product variable, got {:?}", other)))
             }
         };
         self.expect(TokenKind::Eq)?;
@@ -599,47 +584,6 @@ impl Parser {
             body: Box::new(body),
             span: Span::new(start, end),
         })
-    }
-
-    fn parse_cases(&mut self, start: usize) -> Result<Expr, Diagnostic> {
-        let name = self.parse_group_name()?;
-        if name != "cases" {
-            return Err(self.error_here(format!("unsupported environment: {}", name)));
-        }
-        let mut branches = Vec::new();
-        loop {
-            if self.command_is("end") {
-                self.take();
-                let end_name = self.parse_group_name()?;
-                if end_name != "cases" {
-                    return Err(self.error_here("mismatched cases environment"));
-                }
-                let end = self.previous_span().end;
-                return Ok(Expr::Piecewise {
-                    branches,
-                    span: Span::new(start, end),
-                });
-            }
-            let value = self.parse_expr(0)?;
-            self.expect(TokenKind::Ampersand)?;
-            let condition = self.parse_expr(0)?;
-            let end = condition.span().end;
-            branches.push(PiecewiseBranch {
-                value,
-                condition,
-                span: Span::new(
-                    branches
-                        .last()
-                        .map_or(start, |b: &PiecewiseBranch| b.span.end),
-                    end,
-                ),
-            });
-            if self.at(&TokenKind::RowSep) {
-                self.take();
-            } else if !self.command_is("end") {
-                return Err(self.error_here("expected row separator or \\end{cases}"));
-            }
-        }
     }
 
     fn parse_group_name(&mut self) -> Result<String, Diagnostic> {
