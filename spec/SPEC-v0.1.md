@@ -43,7 +43,38 @@ This layer is intentionally not claimed to be mathematical notation.
 
 ### 2.3 Runtime Interface
 
-Future side-effectful capabilities such as files, networking, time, OS APIs, and external processes. They must be explicitly separated from Core evaluation.
+The Runtime Interface contains capabilities whose meaning depends on the execution environment or on externally observable state.
+
+Examples:
+
+```text
+stdout / \\print
+stdin / \\read
+files
+networking
+current time
+OS/environment APIs
+OS entropy sources
+external processes
+```
+
+These capabilities are explicitly separated from Core evaluation because they introduce external state, side effects, or implementation-environment dependence.
+
+A capability is **not** Runtime merely because its implementation may use runtime machinery. If its meaning is independently definable as a mathematical object, relation, operation, function, distribution, sequence, or transformation, it belongs to Mathematical Core or the mathematical standard library.
+
+For example:
+
+```text
+pseudo-random sequences
+probability distributions
+random variables
+sampling algorithms
+statistics
+```
+
+have mathematical semantics and therefore are not excluded from Core merely because an implementation may use a runtime-provided seed.
+
+An operating-system entropy source used to obtain a seed is Runtime; the resulting mathematical random process is Core/math-library semantics.
 
 ## 3. Syntax admission rule
 
