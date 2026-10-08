@@ -35,10 +35,7 @@ fn version_does_not_start_repl() {
 
 #[test]
 fn file_argument_executes_program() {
-    let path = std::env::temp_dir().join(format!(
-        "puremath-cli-{}.pmath",
-        std::process::id()
-    ));
+    let path = std::env::temp_dir().join(format!("puremath-cli-{}.pmath", std::process::id()));
     fs::write(&path, "x := 10\nx + 2\n").unwrap();
 
     let output = puremath().arg(&path).output().unwrap();
@@ -50,10 +47,7 @@ fn file_argument_executes_program() {
 
 #[test]
 fn explicit_print_writes_to_stdout() {
-    let path = std::env::temp_dir().join(format!(
-        "puremath-cli-print-{}.pmath",
-        std::process::id()
-    ));
+    let path = std::env::temp_dir().join(format!("puremath-cli-print-{}.pmath", std::process::id()));
     fs::write(&path, "x := 10\n\\print{x + 2}\n").unwrap();
 
     let output = puremath().arg(&path).output().unwrap();
@@ -65,13 +59,13 @@ fn explicit_print_writes_to_stdout() {
 
 #[test]
 fn ast_mode_requires_and_reads_file() {
-    let path = std::env::temp_dir().join(format!(
-        "puremath-cli-ast-{}.pmath",
-        std::process::id()
-    ));
+    let path = std::env::temp_dir().join(format!("puremath-cli-ast-{}.pmath", std::process::id()));
     fs::write(&path, "x := 10\n").unwrap();
 
-    let output = puremath().args(["--ast", path.to_str().unwrap()]).output().unwrap();
+    let output = puremath()
+        .args(["--ast", path.to_str().unwrap()])
+        .output()
+        .unwrap();
     let _ = fs::remove_file(&path);
 
     assert!(output.status.success());
@@ -88,7 +82,10 @@ fn missing_ast_file_is_an_error() {
 
 #[test]
 fn unknown_option_is_an_error() {
-    let output = puremath().arg("--definitely-not-an-option").output().unwrap();
+    let output = puremath()
+        .arg("--definitely-not-an-option")
+        .output()
+        .unwrap();
 
     assert_eq!(output.status.code(), Some(2));
     assert!(String::from_utf8_lossy(&output.stderr).contains("unknown option"));
