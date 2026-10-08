@@ -59,9 +59,42 @@ PureMath meaning lives here. Examples: functions, equality, sets, sums, recursiv
 
 Module/file organization such as `\\import{algebra}`.
 
+### Mathematical Standard Library
+
+Reusable mathematical capabilities belong here when they have direct mathematical semantics but are too large or specialized to be primitive Core syntax.
+
+Examples include:
+
+```text
+probability
+statistics
+random variables
+pseudo-random sequences
+sampling
+combinatorics
+advanced numerical methods
+```
+
+A library implementation may use optimized runtime facilities internally, but its observable semantics remain mathematical.
+
 ### Runtime Layer
 
-Future capabilities such as I/O, OS access, networking, clocks, and external calls. These must not silently enter Mathematical Core evaluation.
+Only capabilities whose meaning depends on the external execution environment belong here:
+
+```text
+stdout / \\print
+stdin / \\read
+files
+networking
+current time
+OS/environment APIs
+OS entropy
+external processes
+```
+
+Runtime capabilities must be explicit at the language boundary and must not silently enter Mathematical Core evaluation.
+
+For example, a PRNG defined by a mathematical recurrence is a Core/library construct. An OS entropy source used to seed that recurrence is a Runtime capability.
 
 ## 4. Why this structure matters
 
