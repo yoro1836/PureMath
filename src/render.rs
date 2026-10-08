@@ -24,14 +24,38 @@ fn expr_inner(node: &Expr) -> String {
         } => format!("-{}", parenthesize(inner)),
         Expr::Binary { op, lhs, rhs, .. } => match op {
             BinOp::Div => format!("\\frac{{{}}}{{{}}}", expr_inner(lhs), expr_inner(rhs)),
-            BinOp::Pow => format!("{}^{{{}}}", parenthesize(lhs), expr_inner(rhs)),
-            BinOp::Mul => format!("{} \\cdot {}", parenthesize(lhs), parenthesize(rhs)),
-            BinOp::Add => format!("{} + {}", parenthesize(lhs), parenthesize(rhs)),
-            BinOp::Sub => format!("{} - {}", parenthesize(lhs), parenthesize(rhs)),
-            BinOp::Eq => format!("{} = {}", parenthesize(lhs), parenthesize(rhs)),
-            BinOp::Lt => format!("{} < {}", parenthesize(lhs), parenthesize(rhs)),
+            BinOp::Pow => format!("{}^{{{}}}", format_child(lhs, 30, false), expr_inner(rhs)),
+            BinOp::Mul => format!(
+                "{} \\cdot {}",
+                format_child(lhs, 20, false),
+                format_child(rhs, 20, true)
+            ),
+            BinOp::Add => format!(
+                "{} + {}",
+                format_child(lhs, 10, false),
+                format_child(rhs, 10, true)
+            ),
+            BinOp::Sub => format!(
+                "{} - {}",
+                format_child(lhs, 10, false),
+                format_child(rhs, 10, true)
+            ),
+            BinOp::Eq => format!(
+                "{} = {}",
+                format_child(lhs, 5, false),
+                format_child(rhs, 5, true)
+            ),
+            BinOp::Lt => format!(
+                "{} < {}",
+                format_child(lhs, 5, false),
+                format_child(rhs, 5, true)
+            ),
             BinOp::Le => format!("{} \\le {}", parenthesize(lhs), parenthesize(rhs)),
-            BinOp::Gt => format!("{} > {}", parenthesize(lhs), parenthesize(rhs)),
+            BinOp::Gt => format!(
+                "{} > {}",
+                format_child(lhs, 5, false),
+                format_child(rhs, 5, true)
+            ),
             BinOp::Ge => format!("{} \\ge {}", parenthesize(lhs), parenthesize(rhs)),
             BinOp::Union => format!("{} \\cup {}", parenthesize(lhs), parenthesize(rhs)),
             BinOp::Intersect => format!("{} \\cap {}", parenthesize(lhs), parenthesize(rhs)),
@@ -55,7 +79,11 @@ fn expr_inner(node: &Expr) -> String {
         }
         Expr::Vector { elements, .. } => format!(
             "\\left({}\\right)",
-            elements.iter().map(expr_inner).collect::<Vec<_>>().join(", ")
+            elements
+                .iter()
+                .map(expr_inner)
+                .collect::<Vec<_>>()
+                .join(", ")
         ),
         Expr::Matrix { rows, .. } => {
             let body = rows
@@ -82,10 +110,7 @@ fn expr_inner(node: &Expr) -> String {
             _ => format!("\\int {} \\,d{}", expr_inner(body), var),
         },
         Expr::Limit {
-            var,
-            target,
-            body,
-            ..
+            var, target, body, ..
         } => format!(
             "\\lim_{{{} \\to {}}} {}",
             var,
@@ -132,14 +157,51 @@ fn expr_inner(node: &Expr) -> String {
     }
 }
 
+fn format_child(node: &Expr, parent_precedence: u8, right_side: bool) -> String {
+    let text = expr_inner(node);
+    let precedence = match node {
+        Expr::Binary { op, .. } => match op {
+            BinOp::Eq
+            | BinOp::Lt
+            | BinOp::Le
+            | BinOp::Gt
+            | BinOp::Ge
+            | BinOp::In
+            | BinOp::Subset
+            | BinOp::SubsetEq => 5,
+            BinOp::Union => 7,
+            BinOp::Add | BinOp::Sub => 10,
+            BinOp::Intersect | BinOp::Difference => 8,
+            BinOp::Mul | BinOp::Div => 20,
+            BinOp::Pow => 30,
+        },
+        Expr::Unary { .. } => 25,
+        _ => 40,
+    };
+    if precedence < parent_precedence
+        || (right_side
+            && precedence == parent_precedence
+            && matches!(
+                node,
+                Expr::Binary {
+                    op: BinOp::Sub | BinOp::Div,
+                    ..
+                }
+            ))
+    {
+        format!("({})", text)
+    } else {
+        text
+    }
+}
+
 fn parenthesize(node: &Expr) -> String {
     match node {
         Expr::Integer(_, _)
         | Expr::Symbol { .. }
         | Expr::Call { .. }
         | Expr::Sqrt { .. }
-        | Expr::Abs { .. }
-        | Expr::Binary { op: BinOp::Pow, .. } => expr_inner(node),
+        | Expr::Abs { .. } => expr_inner(node),
         _ => format!("({})", expr_inner(node)),
     }
 }
