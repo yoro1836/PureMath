@@ -355,3 +355,17 @@ mutable assignment
 ```
 
 Their absence is not an inability to compute equivalent algorithms. It is a semantic boundary decision.
+
+## 21. Explicit output
+
+Output is a Runtime Interface operation, not a Mathematical Core operation.
+
+```latex
+\\print{E}
+```
+
+evaluates the mathematical expression `E`, writes its resulting value to standard output, and produces `Unit`.
+
+The mathematical evaluator does not perform the side effect directly. Runtime execution supplies the output capability.
+
+An imported declarative module must not use runtime output during module loading.
