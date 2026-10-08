@@ -299,10 +299,10 @@ fn derivative_accepts_both_argument_orders_and_stays_symbolic() {
 
     evaluate("x := 12", &mut env).unwrap();
     assert_eq!(
-        evaluate(r"\\diff{x^3 + 2*x}{x}", &mut env)
+        evaluate(r"\diff{x^3 + 2*x}{x}", &mut env)
             .unwrap()
             .to_string(),
-        r"3 \\cdot x^{2} + 2"
+        r"3 \cdot x^{2} + 2"
     );
 }
 
