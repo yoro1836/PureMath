@@ -226,7 +226,7 @@ impl<'a> Evaluator<'a> {
                     .checked_sub(l.num)
                     .and_then(|n| usize::try_from(n).ok())
                     .and_then(|n| n.checked_add(1));
-                if term_count.map_or(true, |count| count > self.max_sum_terms) {
+                if term_count.is_none_or(|count| count > self.max_sum_terms) {
                     return Err(Diagnostic::new("finite sum exceeds evaluation term limit"));
                 }
                 for i in l.num..=h.num {
