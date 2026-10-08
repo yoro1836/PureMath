@@ -525,3 +525,20 @@ fn broader_number_and_statistics_functions() {
         r"\sqrt{\frac{5}{4}}"
     );
 }
+
+#[test]
+fn finite_set_comprehension_evaluates_and_renders() {
+    let mut env = Environment::new();
+    assert_eq!(
+        evaluate(r"{x in {1,2,3} | x > 1}", &mut env)
+            .unwrap()
+            .to_string(),
+        r"\\{2,3\\}"
+    );
+    assert_eq!(
+        evaluate(r"{x in {1,2,3} | x > 3}", &mut env)
+            .unwrap()
+            .to_string(),
+        r"\\{\\}"
+    );
+}
