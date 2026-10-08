@@ -285,16 +285,16 @@ fn derivative_accepts_both_argument_orders_and_stays_symbolic() {
     let mut env = Environment::new();
 
     assert_eq!(
-        evaluate(r"\\diff{x}{x^2 + 1}", &mut env)
+        evaluate(r"\diff{x}{x^2 + 1}", &mut env)
             .unwrap()
             .to_string(),
-        r"2 \\cdot x"
+        r"2 \cdot x"
     );
     assert_eq!(
-        evaluate(r"\\diff{x^3 + 2*x}{x}", &mut env)
+        evaluate(r"\diff{x^3 + 2*x}{x}", &mut env)
             .unwrap()
             .to_string(),
-        r"3 \\cdot x^{2} + 2"
+        r"3 \cdot x^{2} + 2"
     );
 
     evaluate("x := 12", &mut env).unwrap();
@@ -339,6 +339,30 @@ fn bare_command_aliases_work_without_backslashes() {
     assert_eq!(
         evaluate(r"x cdot y", &mut env).unwrap().to_string(),
         r"x \cdot y"
+    );
+}
+
+#[test]
+fn bare_indexed_commands_tokenize_without_whitespace() {
+    let tokens = lexer::lex(r"sum_{i=1}^{3} i").unwrap();
+    assert!(tokens
+        .iter()
+        .any(|t| matches!(&t.kind, puremath::lexer::TokenKind::Ident(c) if c == "sum")));
+    assert!(tokens
+        .iter()
+        .any(|t| matches!(t.kind, puremath::lexer::TokenKind::Underscore)));
+}
+
+#[test]
+fn bare_calculus_bounds_work_without_backslashes() {
+    let mut env = Environment::new();
+    assert_eq!(
+        evaluate(r"int_{0}^{3} x^2", &mut env).unwrap().to_string(),
+        "9"
+    );
+    assert_eq!(
+        evaluate(r"lim_{x to 2} x^2", &mut env).unwrap().to_string(),
+        "4"
     );
 }
 
