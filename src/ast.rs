@@ -56,6 +56,30 @@ pub enum Expr {
         elements: Vec<Expr>,
         span: Span,
     },
+    Vector {
+        elements: Vec<Expr>,
+        span: Span,
+    },
+    Matrix {
+        rows: Vec<Vec<Expr>>,
+        span: Span,
+    },
+        elements: Vec<Expr>,
+        span: Span,
+    },
+    Integral {
+        var: String,
+        lower: Option<Box<Expr>>,
+        upper: Option<Box<Expr>>,
+        body: Box<Expr>,
+        span: Span,
+    },
+    Limit {
+        var: String,
+        target: Box<Expr>,
+        body: Box<Expr>,
+        span: Span,
+    },
     Product {
         var: String,
         lower: Box<Expr>,
@@ -112,6 +136,12 @@ pub enum BinOp {
     Le,
     Gt,
     Ge,
+    Union,
+    Intersect,
+    Difference,
+    In,
+    Subset,
+    SubsetEq,
 }
 
 impl Expr {
@@ -124,6 +154,10 @@ impl Expr {
             | Expr::Binary { span, .. }
             | Expr::Call { span, .. }
             | Expr::Set { span, .. }
+            | Expr::Vector { span, .. }
+            | Expr::Matrix { span, .. }
+            | Expr::Integral { span, .. }
+            | Expr::Limit { span, .. }
             | Expr::Product { span, .. }
             | Expr::Sum { span, .. }
             | Expr::Abs { span, .. }
