@@ -46,6 +46,26 @@ A \cup \{4\}
 
 The implementation deliberately does **not** claim to parse all of KaTeX. KaTeX-compatible notation is a surface goal; PureMath maintains its own semantic AST.
 
+### Optional command backslashes
+
+LaTeX-style command backslashes are optional for PureMath command names. Both forms are accepted and map to the same semantic operations:
+
+\`\`\`latex
+\\diff{x}{x^2 + 1}
+diff{x}{x^2 + 1}
+
+\\sin{0}
+sin{0}
+
+\\sum_{i=1}^{10} i
+sum_{i=1}^{10} i
+
+2 \\in \{1,2,3\}
+2 in \{1,2,3\}
+\`\`\`
+
+The backslash form remains valid for LaTeX compatibility. Bare command words are recognized in command/operator positions so ordinary identifiers remain usable.
+
 The broad prototype currently includes exact indexed sums/products, finite sets and set relations, vectors and matrices, elementary exact functions, number theory/combinatorics helpers, statistics, substitution, symbolic differentiation, exact polynomial integration, direct-substitution limits, and degree-2 polynomial solving.
 
 For a single executable tour of the implemented mathematical surface, run:
