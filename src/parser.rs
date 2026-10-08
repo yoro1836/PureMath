@@ -275,6 +275,29 @@ impl Parser {
     }
 
     fn parse_set_body(&mut self, start: usize) -> Result<Expr, Diagnostic> {
+        if let Some(TokenKind::Ident(var)) | Some(TokenKind::Command(var)) = self.peek_kind().cloned() {
+            if self.tokens.get(self.pos + 1).is_some_and(|token| {
+                matches!(&token.kind, TokenKind::Ident(name) | TokenKind::Command(name) if name == "in")
+            }) {
+                let var = var;
+                self.take();
+                self.take();
+                let domain = self.parse_expr(6)?;
+                if self.at(&TokenKind::Pipe) {
+                    self.take();
+                    let condition = self.parse_expr(0)?;
+                    let end = self.expect(TokenKind::RBrace)?.end;
+                    return Ok(Expr::SetComprehension {
+                        var,
+                        domain: Box::new(domain),
+                        condition: Box::new(condition),
+                        span: Span::new(start, end),
+                    });
+                }
+                return Err(self.error_here("set comprehension requires a condition"));
+            }
+        }
+
         let mut elements = Vec::new();
         if !self.at(&TokenKind::RBrace) {
             loop {
