@@ -2,7 +2,7 @@ use crate::ast::{BinOp, Expr, UnaryOp};
 use crate::diagnostics::Span;
 
 /// Small, semantics-preserving normalization rules used by the prototype.
-/// This is intentionally not a CAS; it is a separate layer that can grow later.
+/// This is intentionally not a full CAS; it is a separate layer that can grow later.
 pub fn simplify(expr: Expr) -> Expr {
     match expr {
         Expr::Unary {
@@ -62,6 +62,41 @@ pub fn simplify(expr: Expr) -> Expr {
         },
         Expr::Set { elements, span } => Expr::Set {
             elements: elements.into_iter().map(simplify).collect(),
+            span,
+        },
+        Expr::Vector { elements, span } => Expr::Vector {
+            elements: elements.into_iter().map(simplify).collect(),
+            span,
+        },
+        Expr::Matrix { rows, span } => Expr::Matrix {
+            rows: rows
+                .into_iter()
+                .map(|row| row.into_iter().map(simplify).collect())
+                .collect(),
+            span,
+        },
+        Expr::Integral {
+            var,
+            lower,
+            upper,
+            body,
+            span,
+        } => Expr::Integral {
+            var,
+            lower: lower.map(|e| Box::new(simplify(*e))),
+            upper: upper.map(|e| Box::new(simplify(*e))),
+            body: Box::new(simplify(*body)),
+            span,
+        },
+        Expr::Limit {
+            var,
+            target,
+            body,
+            span,
+        } => Expr::Limit {
+            var,
+            target: Box::new(simplify(*target)),
+            body: Box::new(simplify(*body)),
             span,
         },
         Expr::Product {
@@ -124,6 +159,7 @@ fn is_integer(expr: &Expr, expected: i128) -> bool {
 fn is_zero(expr: &Expr) -> bool {
     is_integer(expr, 0)
 }
+
 fn is_one(expr: &Expr) -> bool {
     is_integer(expr, 1)
 }
