@@ -64,6 +64,19 @@ pub fn simplify(expr: Expr) -> Expr {
             elements: elements.into_iter().map(simplify).collect(),
             span,
         },
+        Expr::Product {
+            var,
+            lower,
+            upper,
+            body,
+            span,
+        } => Expr::Product {
+            var,
+            lower: Box::new(simplify(*lower)),
+            upper: Box::new(simplify(*upper)),
+            body: Box::new(simplify(*body)),
+            span,
+        },
         Expr::Sum {
             var,
             lower,
@@ -75,6 +88,10 @@ pub fn simplify(expr: Expr) -> Expr {
             lower: Box::new(simplify(*lower)),
             upper: Box::new(simplify(*upper)),
             body: Box::new(simplify(*body)),
+            span,
+        },
+        Expr::Abs { expr: inner, span } => Expr::Abs {
+            expr: Box::new(simplify(*inner)),
             span,
         },
         Expr::Sqrt { expr: inner, span } => Expr::Sqrt {
