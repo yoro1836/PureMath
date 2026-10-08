@@ -116,6 +116,13 @@ impl fmt::Display for Rational {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         if self.den == 1 {
             write!(f, "{}", self.num)
+        } else if self.num < 0 {
+            write!(
+                f,
+                "-\\frac{{{}}}{{{}}}",
+                self.num.checked_abs().ok_or(fmt::Error)?,
+                self.den
+            )
         } else {
             write!(f, "\\frac{{{}}}{{{}}}", self.num, self.den)
         }
@@ -146,7 +153,12 @@ impl fmt::Display for Value {
             Value::Matrix(rows) => {
                 let body = rows
                     .iter()
-                    .map(|row| row.iter().map(ToString::to_string).collect::<Vec<_>>().join(" & "))
+                    .map(|row| {
+                        row.iter()
+                            .map(ToString::to_string)
+                            .collect::<Vec<_>>()
+                            .join(" & ")
+                    })
                     .collect::<Vec<_>>()
                     .join(" \\\\ ");
                 write!(f, "\\begin{{pmatrix}} {} \\end{{pmatrix}}", body)
