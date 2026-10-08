@@ -82,3 +82,14 @@ Optimizer
     ├── WASM backend
     └── Native/LLVM backend
 ```
+
+## Phase 1.2 — Runtime boundary
+
+Implement the minimum host-side interface without adding non-mathematical constructs to Mathematical Core:
+
+- `\\print{E}` writes an evaluated value to stdout.
+- runtime execution is separated from `Evaluator`.
+- pure library evaluation rejects runtime statements.
+- declarative module loading rejects runtime side effects.
+
+Future input, filesystem, networking, clock, OS, entropy, and process interfaces follow the same boundary.
