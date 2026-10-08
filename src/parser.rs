@@ -682,15 +682,16 @@ impl Parser {
 
     fn bare_prefix_command(&self, name: &str) -> bool {
         match name {
-            "frac" | "sqrt" | "abs" | "vec" | "set" | "tuple" | "dot" | "norm"
-            | "det" | "transpose" | "trans" | "inverse" | "inv" | "rank"
-            | "card" | "cardinality" | "trace" | "mean" | "variance" | "stdev"
-            | "diff" | "derivative" | "subs" | "substitute" | "solve"
-            | "sin" | "cos" | "tan" | "ln" | "log" | "exp" | "range"
-            | "factorial" | "binom" | "choose" | "perm" | "permutation"
-            | "gcd" | "lcm" | "floor" | "ceil" | "min" | "max"
-            | "print" | "import" | "begin" | "end"
-                if self.at(&TokenKind::LBrace) => true,
+            "frac" | "sqrt" | "abs" | "vec" | "set" | "tuple" | "dot" | "norm" | "det"
+            | "transpose" | "trans" | "inverse" | "inv" | "rank" | "card" | "cardinality"
+            | "trace" | "mean" | "variance" | "stdev" | "diff" | "derivative" | "subs"
+            | "substitute" | "solve" | "sin" | "cos" | "tan" | "ln" | "log" | "exp" | "range"
+            | "factorial" | "binom" | "choose" | "perm" | "permutation" | "gcd" | "lcm"
+            | "floor" | "ceil" | "min" | "max" | "print" | "import" | "begin" | "end"
+                if self.at(&TokenKind::LBrace) =>
+            {
+                true
+            },
             "sum" | "prod" | "lim" if self.at(&TokenKind::Underscore) => true,
             "int" => true,
             _ => false,
