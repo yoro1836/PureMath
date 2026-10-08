@@ -112,4 +112,4 @@ x := 10
 \\print{x + 2}
 ```
 
-Definitions and imports do not produce implicit file output. Expression statements may still be displayed by the development CLI; explicit program output should use `\\print`.
+Definitions, imports, and expression statements do not produce implicit output when a `.pmath` file is executed. Use `\\print` for program output. The REPL separately displays evaluated expression results for interactive use.
