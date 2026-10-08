@@ -8,6 +8,50 @@ use super::number_theory::*;
 use super::statistics::*;
 use super::symbolic::*;
 
+pub(super) fn bare_builtin_name(name: &str) -> Option<&'static str> {
+    match name {
+        "factorial" => Some("\\factorial"),
+        "binom" => Some("\\binom"),
+        "choose" => Some("\\choose"),
+        "perm" => Some("\\perm"),
+        "permutation" => Some("\\permutation"),
+        "gcd" => Some("\\gcd"),
+        "lcm" => Some("\\lcm"),
+        "floor" => Some("\\floor"),
+        "ceil" => Some("\\ceil"),
+        "min" => Some("\\min"),
+        "max" => Some("\\max"),
+        "dot" => Some("\\dot"),
+        "norm" => Some("\\norm"),
+        "det" => Some("\\det"),
+        "transpose" => Some("\\transpose"),
+        "trans" => Some("\\trans"),
+        "inverse" => Some("\\inverse"),
+        "inv" => Some("\\inv"),
+        "rank" => Some("\\rank"),
+        "card" => Some("\\card"),
+        "cardinality" => Some("\\cardinality"),
+        "trace" => Some("\\trace"),
+        "mean" => Some("\\mean"),
+        "variance" => Some("\\variance"),
+        "stdev" => Some("\\stdev"),
+        "diff" => Some("\\diff"),
+        "derivative" => Some("\\derivative"),
+        "subs" => Some("\\subs"),
+        "substitute" => Some("\\substitute"),
+        "solve" => Some("\\solve"),
+        "sin" => Some("\\sin"),
+        "cos" => Some("\\cos"),
+        "tan" => Some("\\tan"),
+        "ln" => Some("\\ln"),
+        "log" => Some("\\log"),
+        "exp" => Some("\\exp"),
+        "range" => Some("\\range"),
+        "tuple" => Some("\\tuple"),
+        _ => None,
+    }
+}
+
 pub(super) fn eval_builtin(
     evaluator: &mut Evaluator<'_>,
     name: &str,
