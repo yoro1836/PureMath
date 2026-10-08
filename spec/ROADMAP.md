@@ -36,14 +36,32 @@
 - solving
 - linear algebra
 
-## Then: ecosystem
+## Then: mathematical ecosystem
 
-- PureMath standard library
+- PureMath mathematical standard library
+- probability and statistics
+- random variables and pseudo-random sequences
+- sampling and combinatorics
 - namespaces
 - dependency graph
 - versioned packages
 - documentation generation
 - LaTeX rendering
+
+Mathematical functionality should be implemented as Core semantics or library definitions whenever it can be stated independently of the execution environment.
+
+## Runtime boundary
+
+Introduce explicit interfaces only for capabilities that depend on external state:
+
+- stdout / \\print
+- stdin / \\read
+- files
+- networking
+- current time
+- OS/environment access
+- OS entropy
+- external processes
 
 ## Finally: compilation and proof
 
