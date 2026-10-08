@@ -513,7 +513,7 @@ impl Parser {
     fn first_non_constant_symbol(expr: &Expr) -> Option<String> {
         match expr {
             Expr::Symbol { name, .. }
-                if !matches!(name.as_str(), "\pi" | "\e" | "\infty") =>
+                if !matches!(name.as_str(), "\\pi" | "\\e" | "\\infty") =>
             {
                 Some(name.clone())
             }
