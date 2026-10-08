@@ -195,6 +195,25 @@ A := \{1,2,3\}
 
 Set comprehension is planned but not yet required by the prototype parser.
 
+
+## 10.1 Indexed products and absolute value
+
+Finite products are mathematical indexed aggregations:
+
+```latex
+\prod_{i=1}^{5} i
+```
+
+They evaluate exactly when the bounds are finite integers and the body produces exact rational values. An empty product evaluates to `1`.
+
+Absolute value is a mathematical operation:
+
+```latex
+\abs{-\frac{3}{2}}
+```
+
+For exact rational values, it evaluates exactly rather than through floating-point approximation.
+
 ## 11. Exact and symbolic values
 
 The evaluator distinguishes at minimum:
