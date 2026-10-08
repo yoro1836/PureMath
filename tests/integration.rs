@@ -185,3 +185,21 @@ fn file_definitions_are_not_implicitly_printed() {
 
     assert_eq!(String::from_utf8(output).unwrap(), "11\n");
 }
+
+#[test]
+fn finite_product() {
+    let mut env = Environment::new();
+    assert_eq!(evaluate(r"\prod_{i=1}^{5} i", &mut env).unwrap().to_string(), "120");
+}
+
+#[test]
+fn absolute_value_is_exact() {
+    let mut env = Environment::new();
+    assert_eq!(evaluate(r"\abs{-\frac{3}{2}}", &mut env).unwrap().to_string(), r"\frac{3}{2}");
+}
+
+#[test]
+fn empty_product_is_one() {
+    let mut env = Environment::new();
+    assert_eq!(evaluate(r"\prod_{i=5}^{1} i", &mut env).unwrap().to_string(), "1");
+}
