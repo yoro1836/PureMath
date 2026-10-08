@@ -32,7 +32,7 @@ pub fn run() {
 
         match eval_line(line, &mut env) {
             Ok(value) if !matches!(value, crate::value::Value::Unit) => println!("{}", value),
-            Ok(crate::value::Value::Unit) => {},
+            Ok(crate::value::Value::Unit) => {}
             Err(err) => eprintln!("error: {}", err),
         }
     }
