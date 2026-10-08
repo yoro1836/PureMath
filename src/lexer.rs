@@ -30,6 +30,7 @@ pub enum TokenKind {
     Le,
     Gt,
     Ge,
+    Bang,
     Newline,
     Eof,
 }
@@ -123,6 +124,13 @@ pub fn lex(input: &str) -> Result<Vec<Token>, Diagnostic> {
             '>' => {
                 out.push(Token {
                     kind: TokenKind::Gt,
+                    span: Span::new(i, i + 1),
+                });
+                i += 1;
+            }
+            '!' => {
+                out.push(Token {
+                    kind: TokenKind::Bang,
                     span: Span::new(i, i + 1),
                 });
                 i += 1;
