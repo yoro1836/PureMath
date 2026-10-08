@@ -281,6 +281,32 @@ fn matrix_operations() {
 }
 
 #[test]
+fn derivative_accepts_both_argument_orders_and_stays_symbolic() {
+    let mut env = Environment::new();
+
+    assert_eq!(
+        evaluate(r"\\diff{x}{x^2 + 1}", &mut env)
+            .unwrap()
+            .to_string(),
+        r"2 \\cdot x"
+    );
+    assert_eq!(
+        evaluate(r"\\diff{x^3 + 2*x}{x}", &mut env)
+            .unwrap()
+            .to_string(),
+        r"3 \\cdot x^{2} + 2"
+    );
+
+    evaluate("x := 12", &mut env).unwrap();
+    assert_eq!(
+        evaluate(r"\\diff{x^3 + 2*x}{x}", &mut env)
+            .unwrap()
+            .to_string(),
+        r"3 \\cdot x^{2} + 2"
+    );
+}
+
+#[test]
 fn calculus_primitives() {
     let mut env = Environment::new();
     assert_eq!(
