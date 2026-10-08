@@ -33,6 +33,12 @@ fn expr_inner(node: &Expr) -> String {
             BinOp::Le => format!("{} \\le {}", parenthesize(lhs), parenthesize(rhs)),
             BinOp::Gt => format!("{} > {}", parenthesize(lhs), parenthesize(rhs)),
             BinOp::Ge => format!("{} \\ge {}", parenthesize(lhs), parenthesize(rhs)),
+            BinOp::Union => format!("{} \\cup {}", parenthesize(lhs), parenthesize(rhs)),
+            BinOp::Intersect => format!("{} \\cap {}", parenthesize(lhs), parenthesize(rhs)),
+            BinOp::Difference => format!("{} \\setminus {}", parenthesize(lhs), parenthesize(rhs)),
+            BinOp::In => format!("{} \\in {}", parenthesize(lhs), parenthesize(rhs)),
+            BinOp::Subset => format!("{} \\subset {}", parenthesize(lhs), parenthesize(rhs)),
+            BinOp::SubsetEq => format!("{} \\subseteq {}", parenthesize(lhs), parenthesize(rhs)),
         },
         Expr::Call { callee, args, .. } => format!(
             "{}({})",
@@ -47,6 +53,45 @@ fn expr_inner(node: &Expr) -> String {
                 .join(", ");
             format!("\\{{{}\\}}", body)
         }
+        Expr::Vector { elements, .. } => format!(
+            "\\left({}\\right)",
+            elements.iter().map(expr_inner).collect::<Vec<_>>().join(", ")
+        ),
+        Expr::Matrix { rows, .. } => {
+            let body = rows
+                .iter()
+                .map(|row| row.iter().map(expr_inner).collect::<Vec<_>>().join(" & "))
+                .collect::<Vec<_>>()
+                .join(" \\\\ ");
+            format!("\\begin{{pmatrix}} {} \\end{{pmatrix}}", body)
+        }
+        Expr::Integral {
+            var,
+            lower,
+            upper,
+            body,
+            ..
+        } => match (lower, upper) {
+            (Some(lower), Some(upper)) => format!(
+                "\\int_{{{}}}^{{{}}} {} \\,d{}",
+                expr_inner(lower),
+                expr_inner(upper),
+                expr_inner(body),
+                var
+            ),
+            _ => format!("\\int {} \\,d{}", expr_inner(body), var),
+        },
+        Expr::Limit {
+            var,
+            target,
+            body,
+            ..
+        } => format!(
+            "\\lim_{{{} \\to {}}} {}",
+            var,
+            expr_inner(target),
+            expr_inner(body)
+        ),
         Expr::Product {
             var,
             lower,
@@ -54,7 +99,7 @@ fn expr_inner(node: &Expr) -> String {
             body,
             ..
         } => format!(
-            "\\\\prod_{{{}={}}}^{{{}}} {}",
+            "\\prod_{{{}={}}}^{{{}}} {}",
             var,
             expr_inner(lower),
             expr_inner(upper),
@@ -73,7 +118,7 @@ fn expr_inner(node: &Expr) -> String {
             expr_inner(upper),
             expr_inner(body)
         ),
-        Expr::Abs { expr: inner, .. } => format!("\\\\left|{}\\\\right|", expr_inner(inner)),
+        Expr::Abs { expr: inner, .. } => format!("\\left|{}\\right|", expr_inner(inner)),
         Expr::Sqrt { expr: inner, .. } => format!("\\sqrt{{{}}}", expr_inner(inner)),
         Expr::Piecewise { branches, .. } => {
             let rows = branches
@@ -89,9 +134,10 @@ fn expr_inner(node: &Expr) -> String {
 
 fn parenthesize(node: &Expr) -> String {
     match node {
-        Expr::Integer(_, _) | Expr::Symbol { .. } | Expr::Call { .. } | Expr::Sqrt { .. } => {
-            expr_inner(node)
-        }
+        Expr::Integer(_, _)
+        | Expr::Symbol { .. }
+        | Expr::Call { .. }
+        | Expr::Sqrt { .. } => expr_inner(node),
         _ => format!("({})", expr_inner(node)),
     }
 }
