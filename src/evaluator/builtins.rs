@@ -347,15 +347,40 @@ pub(super) fn eval_builtin(
         }
         "\\diff" | "\\derivative" => {
             require(2)?;
-            let var = match &args[1] {
-                Expr::Symbol { name, .. } => name.clone(),
-                _ => return Err(Diagnostic::at("derivative variable must be a symbol", span)),
+
+            // Accept both \diff{expr}{var} (the original prototype form)
+            // and the natural mathematical \diff{var}{expr} form.
+            //
+            // When exactly one argument is a Symbol, use the Symbol as the
+            // differentiation variable. This keeps both forms compatible.
+            let (expr, var) = match (&args[0], &args[1]) {
+                (Expr::Symbol { name, .. }, Expr::Symbol { .. }) => (&args[0], match &args[1] {
+                    Expr::Symbol { name, .. } => name.clone(),
+                    _ => unreachable!(),
+                }),
+                (Expr::Symbol { name, .. }, _) => (&args[1], name.clone()),
+                (_, Expr::Symbol { name, .. }) => (&args[0], name.clone()),
+                _ => {
+                    return Err(Diagnostic::at(
+                        "derivative requires a symbolic variable",
+                        span,
+                    ))
+                }
             };
-            let derivative = differentiate(&args[0], &var).ok_or_else(|| {
+
+            let derivative = differentiate(expr, &var).ok_or_else(|| {
                 Diagnostic::at("derivative is outside the supported symbolic subset", span)
             })?;
             let derivative = simplifier::simplify(derivative);
-            evaluator.eval_expr(&derivative, locals)
+
+            // Differentiation is a symbolic transformation. Do not evaluate
+            // the resulting expression against the current environment:
+            // x := 12 must not turn d/dx (x^3 + 2x) into 434.
+            if contains_symbol(&derivative, &var) {
+                Ok(Value::Symbolic(derivative))
+            } else {
+                evaluator.eval_expr(&derivative, locals)
+            }
         }
         "\\subs" | "\\substitute" => {
             require(2)?;
