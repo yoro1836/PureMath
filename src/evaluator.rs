@@ -232,16 +232,21 @@ impl<'a> Evaluator<'a> {
                 })),
                 other => Err(Diagnostic::at(format!("cannot take absolute value of {}", other), *span)),
             },
-            Expr::Sqrt { expr: inner, .. } => match self.eval_expr(inner, locals)? {
-                Value::Rational(v) if v.is_integer() && v.num >= 0 => {
-                    let n = v.num as u128;
-                    let r = exact_integer_sqrt(n);
-                    if r * r == n {
-                        Ok(Value::Rational(Rational::integer(r as i128)))
+            Expr::Sqrt { expr: inner, span } => match self.eval_expr(inner, locals)? {
+                Value::Rational(v) if v.num >= 0 => {
+                    if let Some(root) = exact_sqrt_rational(&v) {
+                        Ok(Value::Rational(root))
                     } else {
-                        Ok(Value::Symbolic(expr.clone()))
+                        Ok(Value::Symbolic(Expr::Sqrt {
+                            expr: Box::new(value_to_rational_expr(&v, *span)),
+                            span: *span,
+                        }))
                     }
                 }
+                Value::Symbolic(v) => Ok(Value::Symbolic(Expr::Sqrt {
+                    expr: Box::new(v),
+                    span: *span,
+                })),
                 _ => Ok(Value::Symbolic(expr.clone())),
             },
             Expr::Piecewise { branches, .. } => {
@@ -1216,6 +1221,21 @@ fn variance(xs: &[Rational]) -> Result<Rational, String> {
         sum = sum.add(&d.mul(&d)?)?;
     }
     sum.div(&Rational::integer(xs.len() as i128))
+}
+
+fn exact_sqrt_rational(value: &Rational) -> Option<Rational> {
+    if value.num < 0 || value.den <= 0 {
+        return None;
+    }
+    let numerator = value.num as u128;
+    let denominator = value.den as u128;
+    let n = exact_integer_sqrt(numerator);
+    let d = exact_integer_sqrt(denominator);
+    if n.checked_mul(n)? == numerator && d.checked_mul(d)? == denominator {
+        Rational::new(n as i128, d as i128).ok()
+    } else {
+        None
+    }
 }
 
 fn value_to_rational_expr(value: &Rational, span: crate::diagnostics::Span) -> Expr {
