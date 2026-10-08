@@ -247,8 +247,24 @@ pub fn lex(input: &str) -> Result<Vec<Token>, Diagnostic> {
                         break;
                     }
                 }
+
+                let word = &input[ident_start..i];
+                if let Some(command) = word.strip_suffix('_') {
+                    if matches!(command, "sum" | "prod" | "lim" | "int") {
+                        out.push(Token {
+                            kind: TokenKind::Ident(command.to_owned()),
+                            span: Span::new(ident_start, i - 1),
+                        });
+                        out.push(Token {
+                            kind: TokenKind::Underscore,
+                            span: Span::new(i - 1, i),
+                        });
+                        continue;
+                    }
+                }
+
                 out.push(Token {
-                    kind: TokenKind::Ident(input[ident_start..i].to_owned()),
+                    kind: TokenKind::Ident(word.to_owned()),
                     span: Span::new(ident_start, i),
                 });
             }
