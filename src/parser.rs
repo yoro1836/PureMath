@@ -169,7 +169,11 @@ impl Parser {
 
     fn parse_prefix(&mut self) -> Result<Expr, Diagnostic> {
         let token = self.take();
-        let mut expr = match token.kind {
+        let token_kind = match token.kind {
+            TokenKind::Ident(name) if self.bare_prefix_command(&name) => TokenKind::Command(name),
+            kind => kind,
+        };
+        let mut expr = match token_kind {
             TokenKind::Int(n) => Expr::Integer(n, token.span),
             TokenKind::Ident(name) if self.bare_prefix_command(&name) => {
                 self.parse_command_application(name, token.span.start)?
