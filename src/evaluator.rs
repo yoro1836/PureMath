@@ -134,6 +134,11 @@ impl<'a> Evaluator<'a> {
             },
             Expr::Binary { op, lhs, rhs, span } => self.eval_binary(*op, lhs, rhs, *span, locals),
             Expr::Call { callee, args, span } => {
+                if let Expr::Symbol { name, .. } = callee.as_ref() {
+                    if name.starts_with('\\') {
+                        return self.eval_builtin(name, args, *span, locals);
+                    }
+                }
                 let callable = self.eval_expr(callee, locals)?;
                 match callable {
                     Value::Function(function) => {
@@ -176,6 +181,21 @@ impl<'a> Evaluator<'a> {
                     .map(|e| self.eval_expr(e, locals))
                     .collect::<Result<Vec<_>, _>>()?,
             )),
+            Expr::Vector { elements, .. } => Ok(Value::Vector(
+                elements
+                    .iter()
+                    .map(|e| self.eval_expr(e, locals))
+                    .collect::<Result<Vec<_>, _>>()?,
+            )),
+            Expr::Matrix { rows, .. } => Ok(Value::Matrix(
+                rows.iter()
+                    .map(|row| {
+                        row.iter()
+                            .map(|e| self.eval_expr(e, locals))
+                            .collect::<Result<Vec<_>, _>>()
+                    })
+                    .collect::<Result<Vec<_>, _>>()?,
+            )),
             Expr::Product {
                 var,
                 lower,
@@ -190,6 +210,19 @@ impl<'a> Evaluator<'a> {
                 body,
                 ..
             } => self.eval_sum(var, lower, upper, body, expr, locals),
+            Expr::Integral {
+                var,
+                lower,
+                upper,
+                body,
+                ..
+            } => self.eval_integral(var, lower.as_deref(), upper.as_deref(), body, expr, locals),
+            Expr::Limit {
+                var,
+                target,
+                body,
+                ..
+            } => self.eval_limit(var, target, body, expr, locals),
             Expr::Abs { expr: inner, span } => match self.eval_expr(inner, locals)? {
                 Value::Rational(v) => Ok(Value::Rational(Rational::new(v.num.checked_abs().ok_or_else(|| Diagnostic::new("integer overflow in absolute value"))?, v.den)
                     .map_err(Diagnostic::new)?)),
@@ -316,7 +349,14 @@ impl<'a> Evaluator<'a> {
         let a = self.eval_expr(lhs, locals)?;
         let b = self.eval_expr(rhs, locals)?;
         match op {
-            BinOp::Eq | BinOp::Lt | BinOp::Le | BinOp::Gt | BinOp::Ge => {
+            BinOp::Eq
+            | BinOp::Lt
+            | BinOp::Le
+            | BinOp::Gt
+            | BinOp::Ge
+            | BinOp::In
+            | BinOp::Subset
+            | BinOp::SubsetEq => {
                 match compare(op, &a, &b) {
                     Ok(value) => Ok(Value::Bool(value)),
                     Err(_) => Ok(Value::Symbolic(Expr::Binary {
@@ -327,7 +367,13 @@ impl<'a> Evaluator<'a> {
                     })),
                 }
             }
-            BinOp::Add => numeric_or_symbolic(BinOp::Add, a, b, lhs, rhs, |x, y| x.add(y)),
+            BinOp::Union | BinOp::Intersect | BinOp::Difference => {
+                set_binary(op, &a, &b, lhs, rhs, span)
+            }
+            BinOp::Add => structured_add_sub(op, &a, &b, lhs, rhs, span, false),
+            BinOp::Sub => structured_add_sub(op, &a, &b, lhs, rhs, span, false),
+            BinOp::Mul => structured_mul(&a, &b, lhs, rhs, span),
+            BinOp::Div => numeric_or_symbolic(BinOp::Add, a, b, lhs, rhs, |x, y| x.add(y)),
             BinOp::Sub => numeric_or_symbolic(BinOp::Sub, a, b, lhs, rhs, |x, y| x.sub(y)),
             BinOp::Mul => numeric_or_symbolic(BinOp::Mul, a, b, lhs, rhs, |x, y| x.mul(y)),
             BinOp::Div => numeric_or_symbolic(BinOp::Div, a, b, lhs, rhs, |x, y| x.div(y)),
