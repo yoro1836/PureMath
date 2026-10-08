@@ -11,6 +11,8 @@ f(t) := t^2 + 1
 \print{\sqrt{144}}
 \print{\abs{-\frac{15}{4}}}
 \print{double(21)}
+\print{square(8)}
+\print{\tuple{1,2,3}}
 
 % Piecewise and recursion.
 positive_magnitude(t) :=
@@ -73,6 +75,8 @@ A := \begin{pmatrix}
 \print{\perm{5}{2}}
 \print{\gcd{84}{30}}
 \print{\lcm{12}{18}}
+\print{\min{3}{7}{5}}
+\print{\max{3}{7}{5}}
 
 % Integer rounding and elementary functions.
 \print{\floor{\frac{-7}{3}}}
@@ -81,6 +85,7 @@ A := \begin{pmatrix}
 \print{\cos{0}}
 \print{\tan{0}}
 \print{\ln{1}}
+\print{\log{1}}
 \print{\exp{0}}
 \print{\pi}
 \print{\e}
