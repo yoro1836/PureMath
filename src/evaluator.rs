@@ -1164,7 +1164,11 @@ fn inverse_matrix(m: &[Vec<Value>]) -> Result<Vec<Vec<Value>>, String> {
         }
     }
     Ok((0..n)
-        .map(|i| (0..n).map(|j| aug[i][n + j].clone().into()).collect())
+        .map(|i| {
+            (0..n)
+                .map(|j| Value::Rational(aug[i][n + j].clone()))
+                .collect()
+        })
         .collect())
 }
 
@@ -1754,5 +1758,7 @@ fn solve_polynomial(
     let minus = Expr::Binary { op: BinOp::Div, lhs: Box::new(Expr::Binary { op: BinOp::Sub, lhs: Box::new(neg_b), rhs: Box::new(sqrt_expr), span }), rhs: Box::new(denom), span };
     let p = evaluator.eval_expr(&plus, &HashMap::new())?;
     let m = evaluator.eval_expr(&minus, &HashMap::new())?;
-    Ok(Value::Set(vec![p, m]))
+    let mut roots = vec![p, m];
+    roots.sort_by_key(|value| value.to_string());
+    Ok(Value::Set(roots))
 }
