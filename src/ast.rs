@@ -56,6 +56,13 @@ pub enum Expr {
         elements: Vec<Expr>,
         span: Span,
     },
+    Product {
+        var: String,
+        lower: Box<Expr>,
+        upper: Box<Expr>,
+        body: Box<Expr>,
+        span: Span,
+    },
     Sum {
         var: String,
         lower: Box<Expr>,
@@ -113,6 +120,7 @@ impl Expr {
             | Expr::Binary { span, .. }
             | Expr::Call { span, .. }
             | Expr::Set { span, .. }
+            | Expr::Product { span, .. }
             | Expr::Sum { span, .. }
             | Expr::Sqrt { span, .. }
             | Expr::Piecewise { span, .. }
