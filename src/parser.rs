@@ -45,19 +45,24 @@ impl Parser {
             let save = self.pos;
             let name_span = self.take().span;
             let mut params = Vec::new();
+            let mut is_definition_candidate = true;
+
             if self.at(&TokenKind::LParen) {
                 self.take();
                 if !self.at(&TokenKind::RParen) {
                     loop {
-                        match self.take().kind {
-                            TokenKind::Ident(p) => params.push(p),
-                            kind => {
-                                return Err(self.error_here(format!(
-                                    "expected parameter name, got {:?}",
-                                    kind
-                                )))
+                        match self.peek_kind().cloned() {
+                            Some(TokenKind::Ident(_)) => {
+                                if let TokenKind::Ident(param) = self.take().kind {
+                                    params.push(param);
+                                }
+                            }
+                            _ => {
+                                is_definition_candidate = false;
+                                break;
                             }
                         }
+
                         if self.at(&TokenKind::Comma) {
                             self.take();
                             continue;
@@ -65,10 +70,17 @@ impl Parser {
                         break;
                     }
                 }
-                self.expect(TokenKind::RParen)?;
+
+                if is_definition_candidate && !self.at(&TokenKind::RParen) {
+                    is_definition_candidate = false;
+                }
+
+                if is_definition_candidate {
+                    self.expect(TokenKind::RParen)?;
+                }
             }
 
-            if self.at(&TokenKind::Assign) {
+            if is_definition_candidate && self.at(&TokenKind::Assign) {
                 self.take();
                 let body = self.parse_expr(0)?;
                 self.expect_eof_or("definition")?;
@@ -79,6 +91,7 @@ impl Parser {
                     body,
                 });
             }
+
             self.pos = save;
         }
 
@@ -129,7 +142,7 @@ impl Parser {
                 span: token.span,
             },
             TokenKind::Minus => {
-                let inner = self.parse_expr(31)?;
+                let inner = self.parse_expr(30)?;
                 Expr::Unary {
                     op: UnaryOp::Neg,
                     span: Span::new(token.span.start, inner.span().end),
