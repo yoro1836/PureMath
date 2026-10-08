@@ -123,17 +123,31 @@ impl Parser {
                 Some(TokenKind::Le) => (BinOp::Le, 5, 6),
                 Some(TokenKind::Gt) => (BinOp::Gt, 5, 6),
                 Some(TokenKind::Ge) => (BinOp::Ge, 5, 6),
-                Some(TokenKind::Command(c)) if c == "in" => (BinOp::In, 5, 6),
-                Some(TokenKind::Command(c)) if c == "subset" => (BinOp::Subset, 5, 6),
-                Some(TokenKind::Command(c)) if c == "subseteq" => (BinOp::SubsetEq, 5, 6),
-                Some(TokenKind::Command(c)) if c == "cup" => (BinOp::Union, 7, 8),
-                Some(TokenKind::Command(c)) if c == "cap" => (BinOp::Intersect, 8, 9),
-                Some(TokenKind::Command(c)) if c == "setminus" => (BinOp::Difference, 8, 9),
+                Some(TokenKind::Command(c)) | Some(TokenKind::Ident(c)) if c == "in" => {
+                    (BinOp::In, 5, 6)
+                }
+                Some(TokenKind::Command(c)) | Some(TokenKind::Ident(c)) if c == "subset" => {
+                    (BinOp::Subset, 5, 6)
+                }
+                Some(TokenKind::Command(c)) | Some(TokenKind::Ident(c)) if c == "subseteq" => {
+                    (BinOp::SubsetEq, 5, 6)
+                }
+                Some(TokenKind::Command(c)) | Some(TokenKind::Ident(c)) if c == "cup" => {
+                    (BinOp::Union, 7, 8)
+                }
+                Some(TokenKind::Command(c)) | Some(TokenKind::Ident(c)) if c == "cap" => {
+                    (BinOp::Intersect, 8, 9)
+                }
+                Some(TokenKind::Command(c)) | Some(TokenKind::Ident(c)) if c == "setminus" => {
+                    (BinOp::Difference, 8, 9)
+                }
                 Some(TokenKind::Plus) => (BinOp::Add, 10, 11),
                 Some(TokenKind::Minus) => (BinOp::Sub, 10, 11),
                 Some(TokenKind::Star) => (BinOp::Mul, 20, 21),
                 Some(TokenKind::Slash) => (BinOp::Div, 20, 21),
-                Some(TokenKind::Command(c)) if c == "cdot" => (BinOp::Mul, 20, 21),
+                Some(TokenKind::Command(c)) | Some(TokenKind::Ident(c)) if c == "cdot" => {
+                    (BinOp::Mul, 20, 21)
+                }
                 Some(TokenKind::Caret) => (BinOp::Pow, 30, 30),
                 _ => break,
             };
@@ -157,6 +171,9 @@ impl Parser {
         let token = self.take();
         let mut expr = match token.kind {
             TokenKind::Int(n) => Expr::Integer(n, token.span),
+            TokenKind::Ident(name) if self.bare_prefix_command(&name) => {
+                self.parse_command_application(name, token.span.start)?
+            }
             TokenKind::Ident(name) => Expr::Symbol {
                 name,
                 span: token.span,
@@ -457,7 +474,7 @@ impl Parser {
             }
         };
         match self.take().kind {
-            TokenKind::Command(name) if name == "to" => {}
+            TokenKind::Command(name) | TokenKind::Ident(name) if name == "to" => {}
             other => {
                 return Err(self.error_here(format!("expected \\to in limit, got {:?}", other)))
             }
@@ -653,9 +670,30 @@ impl Parser {
         self.peek_kind() == Some(want)
     }
     fn command_is(&self, name: &str) -> bool {
-        matches!(self.peek_kind(), Some(TokenKind::Command(c)) if c == name)
+        matches!(
+            self.peek_kind(),
+            Some(TokenKind::Command(c)) | Some(TokenKind::Ident(c)) if c == name
+        )
     }
-    fn error_here(&self, message: impl Into<String>) -> Diagnostic {
+
+    fn bare_prefix_command(&self, name: &str) -> bool {
+        match name {
+            "frac" | "sqrt" | "abs" | "vec" | "set" | "tuple" | "dot" | "norm"
+            | "det" | "transpose" | "trans" | "inverse" | "inv" | "rank"
+            | "card" | "cardinality" | "trace" | "mean" | "variance" | "stdev"
+            | "diff" | "derivative" | "subs" | "substitute" | "solve"
+            | "sin" | "cos" | "tan" | "ln" | "log" | "exp" | "range"
+            | "factorial" | "binom" | "choose" | "perm" | "permutation"
+            | "gcd" | "lcm" | "floor" | "ceil" | "min" | "max"
+            | "print" | "import" | "begin" | "end"
+                if self.at(&TokenKind::LBrace) => true,
+            "sum" | "prod" | "lim" if self.at(&TokenKind::Underscore) => true,
+            "int" => true,
+            _ => false,
+        }
+    }
+
+    fn error_here(&self, message: impl Into<String>) {
         Diagnostic::at(
             message,
             self.tokens
