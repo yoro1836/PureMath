@@ -4,19 +4,98 @@ use std::path::Path;
 
 use puremath::{Environment, Evaluator};
 
-fn main() {
-    let mut args = env::args().skip(1);
-    let ast = matches!(args.next().as_deref(), Some("--ast"));
-    let path = args.next();
+enum CliCommand {
+    Help,
+    Version,
+    Repl,
+    Run { path: String, ast: bool },
+}
 
-    match path {
-        Some(path) => {
+fn usage() -> &'static str {
+    "Usage: puremath [OPTIONS] [FILE]
+
+Options:
+    -h, --help           Show this help message
+    -V, --version        Show the version
+        --ast FILE       Parse FILE and print its AST
+
+Without FILE, PureMath starts the REPL.
+"
+}
+
+fn parse_args<I>(mut args: I) -> Result<CliCommand, String>
+where
+    I: Iterator<Item = String>,
+{
+    let Some(first) = args.next() else {
+        return Ok(CliCommand::Repl);
+    };
+
+    match first.as_str() {
+        "-h" | "--help" => {
+            if args.next().is_some() {
+                return Err("--help does not take arguments".into());
+            }
+            Ok(CliCommand::Help)
+        }
+        "-V" | "--version" => {
+            if args.next().is_some() {
+                return Err("--version does not take arguments".into());
+            }
+            Ok(CliCommand::Version)
+        }
+        "--ast" => {
+            let path = args
+                .next()
+                .ok_or_else(|| "--ast requires a FILE argument".to_string())?;
+            if args.next().is_some() {
+                return Err("--ast accepts exactly one FILE argument".into());
+            }
+            Ok(CliCommand::Run { path, ast: true })
+        }
+        "--" => {
+            let path = args
+                .next()
+                .ok_or_else(|| "-- requires a FILE argument".to_string())?;
+            if args.next().is_some() {
+                return Err("expected exactly one FILE argument".into());
+            }
+            Ok(CliCommand::Run { path, ast: false })
+        }
+        _ if first.starts_with('-') => Err(format!("unknown option: {}", first)),
+        path => {
+            if args.next().is_some() {
+                return Err("expected exactly one FILE argument".into());
+            }
+            Ok(CliCommand::Run {
+                path: path.to_string(),
+                ast: false,
+            })
+        }
+    }
+}
+
+fn main() {
+    let command = match parse_args(env::args().skip(1)) {
+        Ok(command) => command,
+        Err(error) => {
+            eprintln!("error: {}", error);
+            eprintln!();
+            eprintln!("{}", usage());
+            std::process::exit(2);
+        }
+    };
+
+    match command {
+        CliCommand::Help => print!("{}", usage()),
+        CliCommand::Version => println!("PureMath {}", env!("CARGO_PKG_VERSION")),
+        CliCommand::Repl => puremath::repl::run(),
+        CliCommand::Run { path, ast } => {
             if let Err(error) = run_file(Path::new(&path), ast) {
                 eprintln!("error: {}", error);
                 std::process::exit(1);
             }
         }
-        None => puremath::repl::run(),
     }
 }
 
