@@ -488,7 +488,7 @@ impl<'a> Evaluator<'a> {
         };
 
         match name {
-            "\factorial" => {
+            "\\factorial" => {
                 require(1)?;
                 match self.eval_expr(&args[0], locals)? {
                     Value::Rational(n) if n.is_integer() && n.num >= 0 => {
@@ -497,7 +497,7 @@ impl<'a> Evaluator<'a> {
                     _ => Err(Diagnostic::at("factorial requires a non-negative integer", span)),
                 }
             }
-            "\binom" | "\choose" => {
+            "\\binom" | "\\choose" => {
                 require(2)?;
                 let a = self.eval_expr(&args[0], locals)?;
                 let b = self.eval_expr(&args[1], locals)?;
@@ -512,7 +512,7 @@ impl<'a> Evaluator<'a> {
                     _ => Err(Diagnostic::at("binomial coefficient requires non-negative integers", span)),
                 }
             }
-            "\perm" | "\permutation" => {
+            "\\perm" | "\\permutation" => {
                 require(2)?;
                 let a = self.eval_expr(&args[0], locals)?;
                 let b = self.eval_expr(&args[1], locals)?;
@@ -525,7 +525,7 @@ impl<'a> Evaluator<'a> {
                     _ => Err(Diagnostic::at("permutation requires non-negative integers", span)),
                 }
             }
-            "\gcd" => {
+            "\\gcd" => {
                 require(2)?;
                 let a = self.eval_expr(&args[0], locals)?;
                 let b = self.eval_expr(&args[1], locals)?;
@@ -536,7 +536,7 @@ impl<'a> Evaluator<'a> {
                     _ => Err(Diagnostic::at("gcd requires integers", span)),
                 }
             }
-            "\lcm" => {
+            "\\lcm" => {
                 require(2)?;
                 let a = self.eval_expr(&args[0], locals)?;
                 let b = self.eval_expr(&args[1], locals)?;
@@ -549,13 +549,13 @@ impl<'a> Evaluator<'a> {
                     _ => Err(Diagnostic::at("lcm requires integers", span)),
                 }
             }
-            "\floor" | "\ceil" => {
+            "\\floor" | "\\ceil" => {
                 require(1)?;
                 match self.eval_expr(&args[0], locals)? {
                     Value::Rational(r) => {
                         let q = r.num / r.den;
                         let rem = r.num % r.den;
-                        let n = if name == "\floor" {
+                        let n = if name == "\\floor" {
                             if r.num < 0 && rem != 0 { q - 1 } else { q }
                         } else if r.num > 0 && rem != 0 {
                             q + 1
@@ -567,7 +567,7 @@ impl<'a> Evaluator<'a> {
                     _ => Err(Diagnostic::at(format!("{} requires an exact rational", name), span)),
                 }
             }
-            "\min" | "\max" => {
+            "\\min" | "\\max" => {
                 if args.is_empty() {
                     return Err(Diagnostic::at(format!("{} requires at least one argument", name), span));
                 }
@@ -581,7 +581,7 @@ impl<'a> Evaluator<'a> {
                                 Some(current) => {
                                     let less = r.num.checked_mul(current.den).ok_or_else(|| Diagnostic::new("comparison overflow"))?
                                         .cmp(&current.num.checked_mul(r.den).ok_or_else(|| Diagnostic::new("comparison overflow"))?);
-                                    if (name == "\min" && less.is_lt()) || (name == "\max" && less.is_gt()) { r } else { current }
+                                    if (name == "\\min" && less.is_lt()) || (name == "\\max" && less.is_gt()) { r } else { current }
                                 }
                             });
                         }
@@ -590,7 +590,7 @@ impl<'a> Evaluator<'a> {
                 }
                 Ok(Value::Rational(best.expect("non-empty min/max")))
             }
-            "\dot" => {
+            "\\dot" => {
                 require(2)?;
                 let a = self.eval_expr(&args[0], locals)?;
                 let b = self.eval_expr(&args[1], locals)?;
@@ -609,7 +609,7 @@ impl<'a> Evaluator<'a> {
                     _ => Err(Diagnostic::at("dot product requires vectors of equal length", span)),
                 }
             }
-            "\norm" => {
+            "\\norm" => {
                 require(1)?;
                 let value = self.eval_expr(&args[0], locals)?;
                 match value {
@@ -632,7 +632,7 @@ impl<'a> Evaluator<'a> {
                     _ => Err(Diagnostic::at("norm requires a vector or number", span)),
                 }
             }
-            "\det" => {
+            "\\det" => {
                 require(1)?;
                 match self.eval_expr(&args[0], locals)? {
                     Value::Matrix(matrix) => {
@@ -641,21 +641,21 @@ impl<'a> Evaluator<'a> {
                     _ => Err(Diagnostic::at("determinant requires a matrix", span)),
                 }
             }
-            "\transpose" | "\trans" => {
+            "\\transpose" | "\\trans" => {
                 require(1)?;
                 match self.eval_expr(&args[0], locals)? {
                     Value::Matrix(matrix) => Ok(Value::Matrix(transpose(&matrix))),
                     _ => Err(Diagnostic::at("transpose requires a matrix", span)),
                 }
             }
-            "\trace" => {
+            "\\trace" => {
                 require(1)?;
                 match self.eval_expr(&args[0], locals)? {
                     Value::Matrix(matrix) => trace_matrix(&matrix).map(Value::Rational).map_err(Diagnostic::new),
                     _ => Err(Diagnostic::at("trace requires a matrix", span)),
                 }
             }
-            "\mean" | "\variance" | "\stdev" => {
+            "\\mean" | "\\variance" | "\\stdev" => {
                 require(1)?;
                 let value = self.eval_expr(&args[0], locals)?;
                 let xs = match value {
@@ -671,8 +671,8 @@ impl<'a> Evaluator<'a> {
                     })
                     .collect::<Result<Vec<_>, _>>()?;
                 match name {
-                    "\mean" => mean(&numbers).map(Value::Rational).map_err(Diagnostic::new),
-                    "\variance" => variance(&numbers).map(Value::Rational).map_err(Diagnostic::new),
+                    "\\mean" => mean(&numbers).map(Value::Rational).map_err(Diagnostic::new),
+                    "\\variance" => variance(&numbers).map(Value::Rational).map_err(Diagnostic::new),
                     _ => {
                         let v = variance(&numbers).map_err(Diagnostic::new)?;
                         self.eval_expr(&Expr::Sqrt {
@@ -682,7 +682,7 @@ impl<'a> Evaluator<'a> {
                     }
                 }
             }
-            "\diff" | "\derivative" => {
+            "\\diff" | "\\derivative" => {
                 require(2)?;
                 let var = match &args[1] {
                     Expr::Symbol { name, .. } => name.clone(),
@@ -693,7 +693,7 @@ impl<'a> Evaluator<'a> {
                 let derivative = simplifier::simplify(derivative);
                 self.eval_expr(&derivative, locals)
             }
-            "\subs" | "\substitute" => {
+            "\\subs" | "\\substitute" => {
                 require(2)?;
                 let (var, replacement) = match &args[0] {
                     Expr::Binary { op: BinOp::Eq, lhs, rhs, .. } => {
@@ -708,7 +708,7 @@ impl<'a> Evaluator<'a> {
                 let body = substitute(&args[1], &var, &replacement);
                 self.eval_expr(&body, locals)
             }
-            "\solve" => {
+            "\\solve" => {
                 require(2)?;
                 let var = match &args[1] {
                     Expr::Symbol { name, .. } => name.clone(),
@@ -726,7 +726,7 @@ impl<'a> Evaluator<'a> {
                 let coeffs = polynomial_coefficients(&equation, &var, self, locals)?;
                 solve_polynomial(&coeffs, &var, span, self)
             }
-            "\sin" | "\cos" | "\tan" | "\ln" | "\log" | "\exp" => {
+            "\\sin" | "\\cos" | "\\tan" | "\\ln" | "\\log" | "\\exp" => {
                 require(1)?;
                 let value = self.eval_expr(&args[0], locals)?;
                 if let Some(result) = elementary_exact(name, &value, span) {
@@ -735,7 +735,7 @@ impl<'a> Evaluator<'a> {
                     Ok(symbolic(name, &[value]))
                 }
             }
-            "\range" => {
+            "\\range" => {
                 require(2)?;
                 let a = self.eval_expr(&args[0], locals)?;
                 let b = self.eval_expr(&args[1], locals)?;
@@ -759,7 +759,7 @@ impl<'a> Evaluator<'a> {
                     _ => Err(Diagnostic::at("range requires integer bounds", span)),
                 }
             }
-            "\tuple" => {
+            "\\tuple" => {
                 Ok(Value::Vector(args.iter().map(|arg| self.eval_expr(arg, locals)).collect::<Result<Vec<_>, _>>()?))
             }
             _ => {
@@ -1260,32 +1260,32 @@ fn call_expr(name: &str, args: Vec<Expr>, span: crate::diagnostics::Span) -> Exp
 
 fn elementary_exact(name: &str, value: &Value, span: crate::diagnostics::Span) -> Option<Value> {
     match name {
-        "\sin" => {
+        "\\sin" => {
             if matches!(value, Value::Rational(r) if r.num == 0) {
                 return Some(Value::Rational(Rational::integer(0)));
             }
         }
-        "\cos" => {
+        "\\cos" => {
             if matches!(value, Value::Rational(r) if r.num == 0) {
                 return Some(Value::Rational(Rational::integer(1)));
             }
         }
-        "\tan" => {
+        "\\tan" => {
             if matches!(value, Value::Rational(r) if r.num == 0) {
                 return Some(Value::Rational(Rational::integer(0)));
             }
         }
-        "\ln" => {
+        "\\ln" => {
             if matches!(value, Value::Rational(r) if r.num == r.den) {
                 return Some(Value::Rational(Rational::integer(0)));
             }
         }
-        "\exp" => {
+        "\\exp" => {
             if matches!(value, Value::Rational(r) if r.num == 0) {
                 return Some(Value::Rational(Rational::integer(1)));
             }
         }
-        "\log" => {
+        "\\log" => {
             if matches!(value, Value::Rational(r) if r.num == r.den) {
                 return Some(Value::Rational(Rational::integer(0)));
             }
@@ -1420,12 +1420,12 @@ fn differentiate(expr: &Expr, var: &str) -> Option<Expr> {
             let dx = differentiate(&args[0], var)?;
             let x = args[0].clone();
             match name.as_str() {
-                "\sin" => Some(Expr::Binary { op: BinOp::Mul, lhs: Box::new(call_expr("\cos", vec![x], span)), rhs: Box::new(dx), span }),
-                "\cos" => Some(Expr::Unary { op: crate::ast::UnaryOp::Neg, expr: Box::new(Expr::Binary { op: BinOp::Mul, lhs: Box::new(call_expr("\sin", vec![x], span)), rhs: Box::new(dx), span }), span }),
-                "\tan" => Some(Expr::Binary { op: BinOp::Div, lhs: Box::new(dx), rhs: Box::new(Expr::Binary { op: BinOp::Pow, lhs: Box::new(call_expr("\cos", vec![x], span)), rhs: Box::new(Expr::Integer(2, span)), span }), span }),
-                "\exp" => Some(Expr::Binary { op: BinOp::Mul, lhs: Box::new(call_expr("\exp", vec![x], span)), rhs: Box::new(dx), span }),
-                "\ln" | "\log" => Some(Expr::Binary { op: BinOp::Div, lhs: Box::new(dx), rhs: Box::new(x), span }),
-                "\sqrt" => Some(Expr::Binary { op: BinOp::Div, lhs: Box::new(dx), rhs: Box::new(Expr::Binary { op: BinOp::Mul, lhs: Box::new(Expr::Integer(2, span)), rhs: Box::new(call_expr("\sqrt", vec![x], span)), span }), span }),
+                "\\sin" => Some(Expr::Binary { op: BinOp::Mul, lhs: Box::new(call_expr("\\cos", vec![x], span)), rhs: Box::new(dx), span }),
+                "\\cos" => Some(Expr::Unary { op: crate::ast::UnaryOp::Neg, expr: Box::new(Expr::Binary { op: BinOp::Mul, lhs: Box::new(call_expr("\\sin", vec![x], span)), rhs: Box::new(dx), span }), span }),
+                "\\tan" => Some(Expr::Binary { op: BinOp::Div, lhs: Box::new(dx), rhs: Box::new(Expr::Binary { op: BinOp::Pow, lhs: Box::new(call_expr("\\cos", vec![x], span)), rhs: Box::new(Expr::Integer(2, span)), span }), span }),
+                "\\exp" => Some(Expr::Binary { op: BinOp::Mul, lhs: Box::new(call_expr("\\exp", vec![x], span)), rhs: Box::new(dx), span }),
+                "\\ln" | "\\log" => Some(Expr::Binary { op: BinOp::Div, lhs: Box::new(dx), rhs: Box::new(x), span }),
+                "\\sqrt" => Some(Expr::Binary { op: BinOp::Div, lhs: Box::new(dx), rhs: Box::new(Expr::Binary { op: BinOp::Mul, lhs: Box::new(Expr::Integer(2, span)), rhs: Box::new(call_expr("\\sqrt", vec![x], span)), span }), span }),
                 _ => None,
             }
         }
@@ -1483,7 +1483,7 @@ fn integrate_expr(expr: &Expr, var: &str) -> Option<Expr> {
         Expr::Binary { op: BinOp::Pow, lhs, rhs, .. } if matches!(lhs.as_ref(), Expr::Symbol { name, .. } if name == var) => {
             let Expr::Integer(n, _) = rhs.as_ref() else { return None; };
             if *n == -1 {
-                Some(call_expr("\ln", vec![lhs.as_ref().clone()], span))
+                Some(call_expr("\\ln", vec![lhs.as_ref().clone()], span))
             } else {
                 let next = n.checked_add(1)?;
                 Some(Expr::Binary {
@@ -1608,7 +1608,7 @@ fn solve_polynomial(
     let a = coeffs.get(2).cloned().unwrap_or_else(|| Rational::integer(0));
     if zero(&a) {
         if zero(&b) {
-            return Ok(Value::Symbolic(call_expr("\solve", vec![
+            return Ok(Value::Symbolic(call_expr("\\solve", vec![
                 value_to_rational_expr(&c, span),
                 Expr::Symbol { name: var.to_owned(), span },
             ], span)));
@@ -1620,7 +1620,7 @@ fn solve_polynomial(
     let four_ac = a.mul(&c).and_then(|x| Rational::integer(4).mul(&x)).map_err(Diagnostic::new)?;
     let discriminant = b2.sub(&four_ac).map_err(Diagnostic::new)?;
     if discriminant.num < 0 {
-        return Ok(Value::Symbolic(call_expr("\solve", vec![], span)));
+        return Ok(Value::Symbolic(call_expr("\\solve", vec![], span)));
     }
     let sqrt_expr = Expr::Sqrt {
         expr: Box::new(value_to_rational_expr(&discriminant, span)),
