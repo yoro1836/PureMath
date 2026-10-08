@@ -307,6 +307,54 @@ fn derivative_accepts_both_argument_orders_and_stays_symbolic() {
 }
 
 #[test]
+fn bare_command_aliases_work_without_backslashes() {
+    let mut env = Environment::new();
+
+    assert_eq!(
+        evaluate(r"diff{x}{x^2 + 1}", &mut env).unwrap().to_string(),
+        r"2 \cdot x"
+    );
+    assert_eq!(
+        evaluate(r"diff{x^3 + 2*x}{x}", &mut env).unwrap().to_string(),
+        r"3 \cdot x^{2} + 2"
+    );
+    assert_eq!(evaluate(r"sin{0}", &mut env).unwrap().to_string(), "0");
+    assert_eq!(
+        evaluate(r"sum_{i=1}^{3} i", &mut env).unwrap().to_string(),
+        "6"
+    );
+    assert_eq!(
+        evaluate(r"2 in {1,2,3}", &mut env).unwrap().to_string(),
+        "true"
+    );
+    assert_eq!(
+        evaluate(r"x cdot y", &mut env).unwrap().to_string(),
+        r"x \cdot y"
+    );
+}
+
+#[test]
+fn bare_parenthesized_builtins_work_without_backslashes() {
+    let mut env = Environment::new();
+
+    assert_eq!(evaluate("sin(0)", &mut env).unwrap().to_string(), "0");
+    assert_eq!(evaluate("gcd(84,30)", &mut env).unwrap().to_string(), "6");
+}
+
+#[test]
+fn bare_runtime_command_works_without_backslash() {
+    let mut env = Environment::new();
+    let program = parse(r"print{2 + 3}").unwrap();
+    let mut output = Vec::new();
+    let mut runtime = puremath::Runtime::new(&mut env, &mut output);
+    runtime
+        .execute_program(&program, std::path::Path::new("."))
+        .unwrap();
+
+    assert_eq!(String::from_utf8(output).unwrap(), "5\n");
+}
+
+#[test]
 fn calculus_primitives() {
     let mut env = Environment::new();
     assert_eq!(
