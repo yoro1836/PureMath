@@ -1,8 +1,9 @@
 use std::env;
 use std::fs;
+use std::io::{self, Write};
 use std::path::Path;
 
-use puremath::{Environment, Evaluator};
+use puremath::{Environment, Runtime};
 
 enum CliCommand {
     Help,
@@ -112,14 +113,22 @@ fn run_file(path: &Path, ast: bool) -> Result<(), String> {
 
     let mut env = Environment::new();
     let base_dir = path.parent().unwrap_or(Path::new("."));
-    let mut evaluator = Evaluator::new(&mut env);
+    let mut runtime = Runtime::new(&mut env, io::stdout());
 
     for statement in &program.statements {
-        let value = evaluator
+        let value = runtime
             .execute(statement, base_dir)
             .map_err(|error| error.to_string())?;
-        println!("{}", value);
+
+        if matches!(statement, puremath::Stmt::Expression(_)) {
+            println!("{}", value);
+        }
     }
+
+    runtime
+        .output_mut()
+        .flush()
+        .map_err(|error| format!("stdout flush failed: {}", error))?;
 
     Ok(())
 }
