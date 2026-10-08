@@ -72,7 +72,15 @@ impl<'a> Evaluator<'a> {
                 crate::module::load_module(module, self.env, base_dir)?;
                 Ok(Value::Unit)
             }
+            Stmt::Print { span, .. } => Err(Diagnostic::at(
+                "print is a runtime operation; execute it through puremath::Runtime",
+                *span,
+            )),
         }
+    }
+
+    pub(crate) fn evaluate_expr(&mut self, expr: &Expr) -> Result<Value, Diagnostic> {
+        self.eval_expr(expr, &HashMap::new())
     }
 
     fn eval_expr(
