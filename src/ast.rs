@@ -56,6 +56,12 @@ pub enum Expr {
         elements: Vec<Expr>,
         span: Span,
     },
+    SetComprehension {
+        var: String,
+        domain: Box<Expr>,
+        condition: Box<Expr>,
+        span: Span,
+    },
     Vector {
         elements: Vec<Expr>,
         span: Span,
@@ -151,6 +157,7 @@ impl Expr {
             | Expr::Binary { span, .. }
             | Expr::Call { span, .. }
             | Expr::Set { span, .. }
+            | Expr::SetComprehension { span, .. }
             | Expr::Vector { span, .. }
             | Expr::Matrix { span, .. }
             | Expr::Integral { span, .. }
