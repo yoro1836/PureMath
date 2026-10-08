@@ -29,6 +29,9 @@ impl<'env, W: Write> Runtime<'env, W> {
                 let value = self.evaluator.evaluate_expr(expr)?;
                 writeln!(self.output, "{}", value)
                     .map_err(|error| Diagnostic::new(format!("print failed: {}", error)))?;
+                self.output
+                    .flush()
+                    .map_err(|error| Diagnostic::new(format!("print flush failed: {}", error)))?;
                 Ok(Value::Unit)
             }
             _ => self.evaluator.execute(stmt, base_dir),
