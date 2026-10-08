@@ -183,6 +183,14 @@ impl Parser {
                 }
             }
             TokenKind::Command(c) if c == "sum" => self.parse_sum(token.span.start)?,
+            TokenKind::Command(c) if c == "prod" => self.parse_product(token.span.start)?,
+            TokenKind::Command(c) if c == "abs" => {
+                let x = self.parse_group_expr()?;
+                Expr::Abs {
+                    span: Span::new(token.span.start, x.span().end),
+                    expr: Box::new(x),
+                }
+            }
             TokenKind::Command(c) if c == "begin" => self.parse_cases(token.span.start)?,
             TokenKind::Command(c) => Expr::Opaque {
                 text: format!("\\{}", c),
@@ -246,6 +254,33 @@ impl Parser {
         let expr = self.parse_expr(0)?;
         self.expect(TokenKind::RBrace)?;
         Ok(expr)
+    }
+
+    fn parse_product(&mut self, start: usize) -> Result<Expr, Diagnostic> {
+        self.expect(TokenKind::Underscore)?;
+        self.expect(TokenKind::LBrace)?;
+        let var = match self.take().kind {
+            TokenKind::Ident(name) => name,
+            other => {
+                return Err(
+                    self.error_here(format!("expected product variable, got {:?}", other))
+                )
+            }
+        };
+        self.expect(TokenKind::Eq)?;
+        let lower = self.parse_expr(0)?;
+        self.expect(TokenKind::RBrace)?;
+        self.expect(TokenKind::Caret)?;
+        let upper = self.parse_group_expr()?;
+        let body = self.parse_expr(29)?;
+        let end = body.span().end;
+        Ok(Expr::Product {
+            var,
+            lower: Box::new(lower),
+            upper: Box::new(upper),
+            body: Box::new(body),
+            span: Span::new(start, end),
+        })
     }
 
     fn parse_sum(&mut self, start: usize) -> Result<Expr, Diagnostic> {
