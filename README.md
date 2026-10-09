@@ -34,7 +34,7 @@ M := \begin{pmatrix} 1 & 2 \\ 3 & 4 \end{pmatrix}
 \sqrt{16}
 \abs{-3}
 \det{M}
-\diff{x^3}{x}
+\diff{x}{x^3}
 \int_{0}^{1} x^2
 \lim_{x\to 0} x^2
 \solve{x^2 - 4 = 0}{x}

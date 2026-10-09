@@ -300,7 +300,7 @@ fn derivative_accepts_both_argument_orders_and_stays_symbolic() {
         r"2 \cdot x"
     );
     assert_eq!(
-        evaluate(r"\diff{x^3 + 2*x}{x}", &mut env)
+        evaluate(r"\diff{x}{x^3 + 2x}", &mut env)
             .unwrap()
             .to_string(),
         r"3 \cdot x^{2} + 2"
@@ -308,7 +308,7 @@ fn derivative_accepts_both_argument_orders_and_stays_symbolic() {
 
     evaluate("x := 12", &mut env).unwrap();
     assert_eq!(
-        evaluate(r"\diff{x^3 + 2*x}{x}", &mut env)
+        evaluate(r"\diff{x}{x^3 + 2x}", &mut env)
             .unwrap()
             .to_string(),
         r"3 \cdot x^{2} + 2"
@@ -324,7 +324,7 @@ fn bare_command_aliases_work_without_backslashes() {
         r"2 \cdot x"
     );
     assert_eq!(
-        evaluate(r"diff{x^3 + 2*x}{x}", &mut env)
+        evaluate(r"diff{x}{x^3 + 2x}", &mut env)
             .unwrap()
             .to_string(),
         r"3 \cdot x^{2} + 2"
@@ -411,7 +411,7 @@ fn bare_runtime_command_works_without_backslash() {
 fn calculus_primitives() {
     let mut env = Environment::new();
     assert_eq!(
-        evaluate(r"\diff{x^3 + 2*x}{x}", &mut env)
+        evaluate(r"\diff{x}{x^3 + 2x}", &mut env)
             .unwrap()
             .to_string(),
         r"3 \cdot x^{2} + 2"
@@ -698,4 +698,24 @@ fn decimal_literals_are_exact_rationals() {
     assert_eq!(eval_str(r"\floor{3.7}", &mut env), "3");
     assert_eq!(eval_str("2.5x", &mut env), r"\frac{5}{2} \cdot x");
     assert!(evaluate("x2.5", &mut env).is_err());
+}
+
+#[test]
+fn derivative_variable_comes_first() {
+    let mut env = Environment::new();
+    assert_eq!(eval_str(r"\diff{x}{x}", &mut env), "1");
+    let error = evaluate(r"\diff{x^2}{x}", &mut env)
+        .unwrap_err()
+        .to_string();
+    assert!(error.contains(r"\diff{x}{expression}"), "{}", error);
+}
+
+#[test]
+fn value_builtins_preserve_unknown_arguments() {
+    let mut env = Environment::new();
+    assert_eq!(eval_str(r"\det{A}", &mut env), r"\det(A)");
+    assert_eq!(eval_str(r"\dot{u}{v}", &mut env), r"\dot(u, v)");
+    assert_eq!(eval_str(r"\gcd{a}{6}", &mut env), r"\gcd(a, 6)");
+    assert_eq!(eval_str(r"\dot{\vec{1,2}}{\vec{3,4}}", &mut env), "11");
+    assert!(evaluate(r"\det{\{1,2\}}", &mut env).is_err());
 }

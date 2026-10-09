@@ -151,7 +151,7 @@ For example, the canonical derivative form remains:
 \diff{x}{x^2 + 1}
 ```
 
-The current prototype also accepts the argument order expression, variable for derivative handling, but the braced command form is the documented surface syntax.
+The variable comes first, as `d/dx` is read; `\diff{x^2 + 1}{x}` is rejected with a hint.
 
 ## Optional command backslashes
 

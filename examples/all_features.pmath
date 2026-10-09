@@ -107,7 +107,7 @@ D := \vec{1,2,3,4}
 
 % Symbolic substitution and calculus.
 \print{\subs{x=3}{x^2 + 1}}
-\print{\diff{x^3 + 2*x}{x}}
+\print{\diff{x}{x^3 + 2x}}
 \print{\int_{0}^{3} x^2}
 \print{\lim_{x\to 2} x^2}
 

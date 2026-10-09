@@ -85,6 +85,31 @@ pub(super) fn eval_builtin(
         }
     };
 
+    // Builtins over values preserve an unknown argument symbolically rather
+    // than failing: \det{A} with A undefined stays \det(A). Arguments are
+    // evaluated once and passed on as exact expressions.
+    let evaluated: Vec<Expr>;
+    let args = if takes_values(name) {
+        let values = args
+            .iter()
+            .map(|arg| evaluator.eval_expr(arg, locals))
+            .collect::<Result<Vec<_>, _>>()?;
+        if values
+            .iter()
+            .any(|value| matches!(value, Value::Symbolic(_)))
+        {
+            return Ok(symbolic(name, &values));
+        }
+        evaluated = values
+            .iter()
+            .zip(args)
+            .map(|(value, arg)| value_to_expr(value, arg))
+            .collect();
+        &evaluated[..]
+    } else {
+        args
+    };
+
     match name {
         "\\factorial" => {
             require(1)?;
@@ -392,28 +417,23 @@ pub(super) fn eval_builtin(
         "\\diff" | "\\derivative" => {
             require(2)?;
 
-            // Accept both \diff{expr}{var} (the original prototype form)
-            // and the natural mathematical \diff{var}{expr} form.
-            //
-            // When exactly one argument is a Symbol, use the Symbol as the
-            // differentiation variable. This keeps both forms compatible.
-            let (expr, var) = match (&args[0], &args[1]) {
-                (Expr::Symbol { .. }, Expr::Symbol { .. }) => (
-                    &args[0],
-                    match &args[1] {
-                        Expr::Symbol { name, .. } => name.clone(),
-                        _ => unreachable!(),
-                    },
-                ),
-                (Expr::Symbol { name, .. }, _) => (&args[1], name.clone()),
-                (_, Expr::Symbol { name, .. }) => (&args[0], name.clone()),
+            // \diff{x}{E} is d/dx E: the variable comes first, as it is read.
+            let var = match &args[0] {
+                Expr::Symbol { name, .. } => name.clone(),
+                _ if matches!(args[1], Expr::Symbol { .. }) => {
+                    return Err(Diagnostic::at(
+                        "the differentiation variable comes first: write \\diff{x}{expression}",
+                        span,
+                    ))
+                }
                 _ => {
                     return Err(Diagnostic::at(
-                        "derivative requires a symbolic variable",
+                        "derivative requires a variable: \\diff{x}{expression}",
                         span,
                     ))
                 }
             };
+            let expr = &args[1];
 
             let derivative = differentiate(expr, &var).ok_or_else(|| {
                 Diagnostic::at("derivative is outside the supported symbolic subset", span)
@@ -525,4 +545,38 @@ pub(super) fn eval_builtin(
             Ok(symbolic(name, &values))
         }
     }
+}
+
+/// Builtins whose arguments are values; the others (`\diff`, `\subs`,
+/// `\solve`) transform their argument expressions.
+fn takes_values(name: &str) -> bool {
+    matches!(
+        name,
+        "\\factorial"
+            | "\\binom"
+            | "\\choose"
+            | "\\perm"
+            | "\\permutation"
+            | "\\gcd"
+            | "\\lcm"
+            | "\\floor"
+            | "\\ceil"
+            | "\\min"
+            | "\\max"
+            | "\\dot"
+            | "\\norm"
+            | "\\det"
+            | "\\transpose"
+            | "\\trans"
+            | "\\inverse"
+            | "\\inv"
+            | "\\rank"
+            | "\\card"
+            | "\\cardinality"
+            | "\\trace"
+            | "\\mean"
+            | "\\variance"
+            | "\\stdev"
+            | "\\range"
+    )
 }
