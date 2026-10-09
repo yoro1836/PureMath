@@ -4,66 +4,24 @@
 # The block id is a content hash printed by `cargo test --test docs`.
 #
 # This list records documentation drift and must only shrink. v0.1.1 exits
-# when it is empty (see spec/ROADMAP.md). Wiki entries are checked only when
-# PUREMATH_WIKI_DIR points at a Wiki checkout.
+# when it is empty (see spec/ROADMAP.md).
 
 # README.md
 README.md f42fa2c6 escaped set braces \{ \}
 README.md 30ddaf17 escaped set braces \{ \}
 
-# GitHub Wiki
-Design-Philosophy.md 4bfdca8e unexpected character '.'
-Design-Philosophy.md aaeae5db doubled backslash (\\) in source
-Examples.md 5456df57 unexpected tokens after expression
-Examples.md f77f34d4 doubled backslash (\\) in source
-Examples.md a48a1a19 doubled backslash (\\) in source
-Examples.md 3e6a0a71 doubled backslash (\\) in source
-Examples.md f4797b5f doubled backslash (\\) in source
-Examples.md 8999eceb doubled backslash (\\) in source
-Examples.md 97d8fd6e doubled backslash (\\) in source
-Examples.md 0e69e992 unexpected tokens after definition
-Examples.md 8b7c5115 doubled backslash (\\) in source
-Examples.md ef61ee8a doubled backslash (\\) in source
-Examples.md 1fb1bd04 unexpected tokens after definition
-Examples.md 636a4f1a doubled backslash (\\) in source
-Execution-and-Modules.md 5f754523 doubled backslash (\\) in source
-Execution-and-Modules.md c7dea2d7 doubled backslash (\\) in source
-Execution-and-Modules.md 881c3b06 doubled backslash (\\) in source
-Getting-Started.md 8c533033 doubled backslash (\\) in source
-Getting-Started.md 11d9f7e4 doubled backslash (\\) in source
-Getting-Started.md 618111c1 doubled backslash (\\) in source
-Getting-Started.md 44abd315 doubled backslash (\\) in source
-Language-Guide.md 7fc70acf unexpected tokens after definition
-Language-Guide.md 3e2dd488 doubled backslash (\\) in source
-Language-Guide.md 3c5f1892 doubled backslash (\\) in source
-Language-Guide.md 5f754523 doubled backslash (\\) in source
-Language-Guide.md 6d5b4203 doubled backslash (\\) in source
-Language-Guide.md 5c319c23 unexpected tokens after expression
-Language-Guide.md 29ec09ee unexpected tokens after expression
-Language-Guide.md 74f8e0b9 doubled backslash (\\) in source
-Language-Guide.md 10684b7a doubled backslash (\\) in source
-Language-Guide.md fdb14c3d doubled backslash (\\) in source
-Language-Guide.md 46c6be59 unexpected character '.'
-Language-Guide.md 1da5713e doubled backslash (\\) in source
-Language-Guide.md 24f95af9 doubled backslash (\\) in source
-Mathematical-Constructs.md 2a55cdd4 doubled backslash (\\) in source
-Mathematical-Constructs.md e971202c doubled backslash (\\) in source
-Mathematical-Constructs.md ec4fc927 doubled backslash (\\) in source
-Mathematical-Constructs.md f374f6d4 doubled backslash (\\) in source
-Mathematical-Constructs.md 3a258684 doubled backslash (\\) in source
-Mathematical-Constructs.md 9a1db930 doubled backslash (\\) in source
-Mathematical-Constructs.md f84d0eda doubled backslash (\\) in source
-Mathematical-Constructs.md 50bdf695 doubled backslash (\\) in source
-Mathematical-Constructs.md 2da3f45c doubled backslash (\\) in source
-Mathematical-Constructs.md 6d5b4203 doubled backslash (\\) in source
-Mathematical-Constructs.md d4b43c8c unexpected tokens after expression
-Syntax-Reference.md 43649f00 unexpected character '.'
-Syntax-Reference.md 41346b02 doubled backslash (\\) in source
-Syntax-Reference.md c535ccdf doubled backslash (\\) in source
-Syntax-Reference.md f84d0eda doubled backslash (\\) in source
-Syntax-Reference.md daded8b7 doubled backslash (\\) in source
-Syntax-Reference.md c6a571bc doubled backslash (\\) in source
-Syntax-Reference.md 5c3f671c doubled backslash (\\) in source
-Syntax-Reference.md d3d062f7 doubled backslash (\\) in source
-Syntax-Reference.md 881c3b06 doubled backslash (\\) in source
-Syntax-Reference.md c7dea2d7 doubled backslash (\\) in source
+# wiki/
+Design-Philosophy.md 04897182 escaped set braces \{ \}
+Examples.md 6fcbcc2d escaped set braces \{ \}
+Getting-Started.md cbdb2bbb escaped set braces \{ \}
+Language-Guide.md 97dc6089 \mapsto
+Language-Guide.md de17a5b8 \ge in cases
+Language-Guide.md ba43b465 escaped set braces \{ \}
+Language-Guide.md 386b33cb escaped set braces \{ \}
+Language-Guide.md bf98dbb1 decimal literal (3.7)
+Mathematical-Constructs.md ad5904e4 \ge in cases
+Mathematical-Constructs.md ba43b465 escaped set braces \{ \}
+Mathematical-Constructs.md 65b50f90 escaped set braces \{ \}
+Syntax-Reference.md 2bd8e30e decimal literal (3.7)
+Syntax-Reference.md 0abf6af0 \dot of undefined vectors is not kept symbolic
+Syntax-Reference.md a792be7f escaped set braces \{ \}

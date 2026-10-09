@@ -13,7 +13,7 @@ matrices, and a small symbolic layer.
 Known gaps found by running the documented examples:
 
 - Documented syntax that does not run: `\{1,2,3\}`, `\le \ge \leq \geq \neq`,
-  `\times`, `\left( \right)`, `\mapsto`, decimal literals (`3.7`). Wiki code blocks use a doubled `\\print`.
+  `\times`, `\left( \right)`, `\mapsto`, decimal literals (`3.7`).
 - Finite sets keep duplicates (`{1,1,2}`) and set equality is not decided
   (`{1,2} = {2,1}` stays symbolic).
 - Integers are fixed `i128` (`2^200`, `\factorial{40}` overflow).
@@ -28,6 +28,8 @@ Known gaps found by running the documented examples:
 
 - [x] Restore green CI (rustfmt, clippy); run CI on `dev` as well as `main`.
 - [ ] Require CI on `main` (repository settings).
+- [x] Wiki source lives in `wiki/` and is mirrored to the GitHub Wiki from
+  `main`.
 - [x] Executable documentation: `latex` code blocks from README and Wiki run
   as tests (`tests/docs.rs`); current drift is recorded in
   `tests/docs_known_failures.txt`, which may only shrink.
@@ -43,7 +45,8 @@ Known gaps found by running the documented examples:
   `\operatorname{...}` / `\mathrm{...}` for multi-letter names.
 - `\mapsto` function values.
 - One canonical `\diff` argument order.
-- Fix Wiki escaping; refresh STATUS, SPEC §12 and MODULE-ARCHITECTURE.
+- [x] Fix Wiki and README escaping.
+- Refresh STATUS, SPEC §12 and MODULE-ARCHITECTURE.
 
 Exit criterion: `tests/docs_known_failures.txt` is empty.
 

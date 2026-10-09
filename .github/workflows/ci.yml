@@ -45,29 +45,3 @@ jobs:
       - name: Release build
         run: cargo build --release
 
-  wiki-docs:
-    name: Wiki code blocks
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Checkout Wiki
-        uses: actions/checkout@v4
-        with:
-          repository: ${{ github.repository }}.wiki
-          path: wiki
-
-      - name: Install Rust
-        uses: dtolnay/rust-toolchain@stable
-        with:
-          toolchain: stable
-
-      - name: Cache Cargo
-        uses: Swatinem/rust-cache@v2
-
-      - name: Run Wiki code blocks
-        run: cargo test --test docs wiki_code_blocks_run
-        env:
-          PUREMATH_WIKI_DIR: ${{ github.workspace }}/wiki

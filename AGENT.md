@@ -41,13 +41,18 @@ cargo clippy --all-targets --all-features -- -D warnings
 cargo test --all-features
 ```
 
+## Wiki
+
+The GitHub Wiki is generated from `wiki/`. Edit pages there; the `Wiki`
+workflow mirrors `wiki/` to the Wiki when it reaches `main`, overwriting
+direct Wiki edits.
+
 ## Snapshot and documentation tests
 
 - `tests/snapshots.rs` compares `examples/*.pmath` output and `--ast` output
   with `tests/snapshots/`. After an intended change, regenerate with
   `UPDATE_SNAPSHOTS=1 cargo test --test snapshots` and review the diff.
-- `tests/docs.rs` runs every ```latex block in README.md, and in the Wiki
-  when `PUREMATH_WIKI_DIR` points at a Wiki checkout. Blocks that do not run
-  yet are listed in `tests/docs_known_failures.txt`. That list must only
-  shrink: remove entries when you fix them, and do not add entries to hide
-  a regression.
+- `tests/docs.rs` runs every ```latex block in README.md and `wiki/`. Blocks
+  that do not run yet are listed in `tests/docs_known_failures.txt`. That
+  list must only shrink: remove entries when you fix them, and do not add
+  entries to hide a regression.
