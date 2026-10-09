@@ -8,8 +8,8 @@
 # PUREMATH_WIKI_DIR points at a Wiki checkout.
 
 # README.md
-README.md f42fa2c6 expected LaTeX command after backslash
-README.md 8c533033 doubled backslash (\\) in source
+README.md f42fa2c6 escaped set braces \{ \}
+README.md 30ddaf17 escaped set braces \{ \}
 
 # GitHub Wiki
 Design-Philosophy.md 4bfdca8e unexpected character '.'

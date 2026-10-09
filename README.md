@@ -66,27 +66,29 @@ x_{max} := 10
 
 LaTeX-style command backslashes are optional for PureMath command names. Both forms are accepted and map to the same semantic operations:
 
-\`\`\`latex
-\\diff{x}{x^2 + 1}
+```latex
+\diff{x}{x^2 + 1}
 diff{x}{x^2 + 1}
 
-\\sin{0}
+\sin{0}
 sin{0}
 
-\\sum_{i=1}^{10} i
+\sum_{i=1}^{10} i
 sum_{i=1}^{10} i
 
-2 \\in \{1,2,3\}
+2 \in \{1,2,3\}
 2 in \{1,2,3\}
-\`\`\`
+```
 
-The backslash form remains valid for LaTeX compatibility. Bare command words are recognized in command/operator positions so ordinary identifiers remain usable.
+The backslash form remains valid for LaTeX compatibility. Only standard command and operator words are recognized without a backslash; any other run of letters is a product of single-letter names (see [Names](#names)).
 
 The broad prototype currently includes exact indexed sums/products, finite sets and set relations, vectors and matrices, elementary exact functions, number theory/combinatorics helpers, statistics, substitution, symbolic differentiation, exact polynomial integration, direct-substitution limits, and degree-2 polynomial solving.
 
 For a single executable tour of the implemented mathematical surface, run:
 
+```bash
 ./target/release/puremath examples/all_features.pmath
+```
 
 
 Definitions are immutable: a name cannot be defined twice in the same environment. This is intentional and prevents `:=` from becoming hidden reassignment.
@@ -138,7 +140,7 @@ The next architectural step is elaboration/domain checking and a dedicated Math 
 
 Mathematical features are not moved into the runtime merely because their implementations may use runtime services. Probability, random variables, pseudo-random sequences, statistics, and similar constructs remain mathematical semantics or standard-library functionality.
 
-The runtime boundary is reserved for environment-dependent capabilities such as `\\print`, input, files, networking, clocks, OS APIs, entropy sources, and external processes.
+The runtime boundary is reserved for environment-dependent capabilities such as `\print`, input, files, networking, clocks, OS APIs, entropy sources, and external processes.
 
 ## Source layout
 
@@ -161,11 +163,11 @@ src/
 
 ### Explicit output
 
-`\\print{E}` is the explicit stdout interface for programs:
+`\print{E}` is the explicit stdout interface for programs:
 
 ```latex
 x := 10
-\\print{x + 2}
+\print{x + 2}
 ```
 
-Definitions, imports, and expression statements do not produce implicit output when a `.pmath` file is executed. Use `\\print` for program output. The REPL separately displays evaluated expression results for interactive use.
+Definitions, imports, and expression statements do not produce implicit output when a `.pmath` file is executed. Use `\print` for program output. The REPL separately displays evaluated expression results for interactive use.
