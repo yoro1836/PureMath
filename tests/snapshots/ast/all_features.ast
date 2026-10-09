@@ -1,0 +1,2751 @@
+Program {
+    statements: [
+        Import {
+            module: "algebra",
+            span: Span {
+                start: 116,
+                end: 132,
+            },
+        },
+        Definition {
+            name: "x",
+            params: [],
+            body: Integer(
+                12,
+                Span {
+                    start: 210,
+                    end: 212,
+                },
+            ),
+            span: Span {
+                start: 205,
+                end: 212,
+            },
+        },
+        Definition {
+            name: "f",
+            params: [
+                "t",
+            ],
+            body: Binary {
+                op: Add,
+                lhs: Binary {
+                    op: Pow,
+                    lhs: Symbol {
+                        name: "t",
+                        span: Span {
+                            start: 221,
+                            end: 222,
+                        },
+                    },
+                    rhs: Integer(
+                        2,
+                        Span {
+                            start: 223,
+                            end: 224,
+                        },
+                    ),
+                    span: Span {
+                        start: 221,
+                        end: 224,
+                    },
+                },
+                rhs: Integer(
+                    1,
+                    Span {
+                        start: 227,
+                        end: 228,
+                    },
+                ),
+                span: Span {
+                    start: 221,
+                    end: 228,
+                },
+            },
+            span: Span {
+                start: 213,
+                end: 228,
+            },
+        },
+        Print {
+            expr: Call {
+                callee: Symbol {
+                    name: "f",
+                    span: Span {
+                        start: 236,
+                        end: 237,
+                    },
+                },
+                args: [
+                    Integer(
+                        3,
+                        Span {
+                            start: 238,
+                            end: 239,
+                        },
+                    ),
+                ],
+                span: Span {
+                    start: 236,
+                    end: 240,
+                },
+            },
+            span: Span {
+                start: 229,
+                end: 240,
+            },
+        },
+        Print {
+            expr: Binary {
+                op: Add,
+                lhs: Rational {
+                    numerator: Integer(
+                        7,
+                        Span {
+                            start: 255,
+                            end: 256,
+                        },
+                    ),
+                    denominator: Integer(
+                        12,
+                        Span {
+                            start: 258,
+                            end: 260,
+                        },
+                    ),
+                    span: Span {
+                        start: 249,
+                        end: 260,
+                    },
+                },
+                rhs: Rational {
+                    numerator: Integer(
+                        5,
+                        Span {
+                            start: 270,
+                            end: 271,
+                        },
+                    ),
+                    denominator: Integer(
+                        18,
+                        Span {
+                            start: 273,
+                            end: 275,
+                        },
+                    ),
+                    span: Span {
+                        start: 264,
+                        end: 275,
+                    },
+                },
+                span: Span {
+                    start: 249,
+                    end: 275,
+                },
+            },
+            span: Span {
+                start: 242,
+                end: 275,
+            },
+        },
+        Print {
+            expr: Sqrt {
+                expr: Integer(
+                    144,
+                    Span {
+                        start: 291,
+                        end: 294,
+                    },
+                ),
+                span: Span {
+                    start: 285,
+                    end: 294,
+                },
+            },
+            span: Span {
+                start: 278,
+                end: 294,
+            },
+        },
+        Print {
+            expr: Abs {
+                expr: Unary {
+                    op: Neg,
+                    expr: Rational {
+                        numerator: Integer(
+                            15,
+                            Span {
+                                start: 316,
+                                end: 318,
+                            },
+                        ),
+                        denominator: Integer(
+                            4,
+                            Span {
+                                start: 320,
+                                end: 321,
+                            },
+                        ),
+                        span: Span {
+                            start: 310,
+                            end: 321,
+                        },
+                    },
+                    span: Span {
+                        start: 309,
+                        end: 321,
+                    },
+                },
+                span: Span {
+                    start: 304,
+                    end: 321,
+                },
+            },
+            span: Span {
+                start: 297,
+                end: 321,
+            },
+        },
+        Print {
+            expr: Call {
+                callee: Symbol {
+                    name: "double",
+                    span: Span {
+                        start: 332,
+                        end: 338,
+                    },
+                },
+                args: [
+                    Integer(
+                        21,
+                        Span {
+                            start: 339,
+                            end: 341,
+                        },
+                    ),
+                ],
+                span: Span {
+                    start: 332,
+                    end: 342,
+                },
+            },
+            span: Span {
+                start: 325,
+                end: 342,
+            },
+        },
+        Print {
+            expr: Call {
+                callee: Symbol {
+                    name: "square",
+                    span: Span {
+                        start: 351,
+                        end: 357,
+                    },
+                },
+                args: [
+                    Integer(
+                        8,
+                        Span {
+                            start: 358,
+                            end: 359,
+                        },
+                    ),
+                ],
+                span: Span {
+                    start: 351,
+                    end: 360,
+                },
+            },
+            span: Span {
+                start: 344,
+                end: 360,
+            },
+        },
+        Print {
+            expr: Call {
+                callee: Symbol {
+                    name: "\\tuple",
+                    span: Span {
+                        start: 369,
+                        end: 375,
+                    },
+                },
+                args: [
+                    Integer(
+                        1,
+                        Span {
+                            start: 376,
+                            end: 377,
+                        },
+                    ),
+                    Integer(
+                        2,
+                        Span {
+                            start: 378,
+                            end: 379,
+                        },
+                    ),
+                    Integer(
+                        3,
+                        Span {
+                            start: 380,
+                            end: 381,
+                        },
+                    ),
+                ],
+                span: Span {
+                    start: 369,
+                    end: 382,
+                },
+            },
+            span: Span {
+                start: 362,
+                end: 382,
+            },
+        },
+        Definition {
+            name: "positive_magnitude",
+            params: [
+                "t",
+            ],
+            body: Piecewise {
+                branches: [
+                    PiecewiseBranch {
+                        value: Symbol {
+                            name: "t",
+                            span: Span {
+                                start: 451,
+                                end: 452,
+                            },
+                        },
+                        condition: Binary {
+                            op: Ge,
+                            lhs: Symbol {
+                                name: "t",
+                                span: Span {
+                                    start: 455,
+                                    end: 456,
+                                },
+                            },
+                            rhs: Integer(
+                                0,
+                                Span {
+                                    start: 460,
+                                    end: 461,
+                                },
+                            ),
+                            span: Span {
+                                start: 455,
+                                end: 461,
+                            },
+                        },
+                        span: Span {
+                            start: 437,
+                            end: 461,
+                        },
+                    },
+                    PiecewiseBranch {
+                        value: Unary {
+                            op: Neg,
+                            expr: Symbol {
+                                name: "t",
+                                span: Span {
+                                    start: 466,
+                                    end: 467,
+                                },
+                            },
+                            span: Span {
+                                start: 465,
+                                end: 467,
+                            },
+                        },
+                        condition: Binary {
+                            op: Lt,
+                            lhs: Symbol {
+                                name: "t",
+                                span: Span {
+                                    start: 470,
+                                    end: 471,
+                                },
+                            },
+                            rhs: Integer(
+                                0,
+                                Span {
+                                    start: 474,
+                                    end: 475,
+                                },
+                            ),
+                            span: Span {
+                                start: 470,
+                                end: 475,
+                            },
+                        },
+                        span: Span {
+                            start: 461,
+                            end: 475,
+                        },
+                    },
+                ],
+                span: Span {
+                    start: 437,
+                    end: 487,
+                },
+            },
+            span: Span {
+                start: 412,
+                end: 487,
+            },
+        },
+        Print {
+            expr: Call {
+                callee: Symbol {
+                    name: "positive_magnitude",
+                    span: Span {
+                        start: 495,
+                        end: 513,
+                    },
+                },
+                args: [
+                    Unary {
+                        op: Neg,
+                        expr: Integer(
+                            9,
+                            Span {
+                                start: 515,
+                                end: 516,
+                            },
+                        ),
+                        span: Span {
+                            start: 514,
+                            end: 516,
+                        },
+                    },
+                ],
+                span: Span {
+                    start: 495,
+                    end: 517,
+                },
+            },
+            span: Span {
+                start: 488,
+                end: 517,
+            },
+        },
+        Definition {
+            name: "fact",
+            params: [
+                "n",
+            ],
+            body: Piecewise {
+                branches: [
+                    PiecewiseBranch {
+                        value: Integer(
+                            1,
+                            Span {
+                                start: 545,
+                                end: 546,
+                            },
+                        ),
+                        condition: Binary {
+                            op: Eq,
+                            lhs: Symbol {
+                                name: "n",
+                                span: Span {
+                                    start: 549,
+                                    end: 550,
+                                },
+                            },
+                            rhs: Integer(
+                                0,
+                                Span {
+                                    start: 553,
+                                    end: 554,
+                                },
+                            ),
+                            span: Span {
+                                start: 549,
+                                end: 554,
+                            },
+                        },
+                        span: Span {
+                            start: 531,
+                            end: 554,
+                        },
+                    },
+                    PiecewiseBranch {
+                        value: Binary {
+                            op: Mul,
+                            lhs: Symbol {
+                                name: "n",
+                                span: Span {
+                                    start: 558,
+                                    end: 559,
+                                },
+                            },
+                            rhs: Call {
+                                callee: Symbol {
+                                    name: "fact",
+                                    span: Span {
+                                        start: 566,
+                                        end: 570,
+                                    },
+                                },
+                                args: [
+                                    Binary {
+                                        op: Sub,
+                                        lhs: Symbol {
+                                            name: "n",
+                                            span: Span {
+                                                start: 571,
+                                                end: 572,
+                                            },
+                                        },
+                                        rhs: Integer(
+                                            1,
+                                            Span {
+                                                start: 573,
+                                                end: 574,
+                                            },
+                                        ),
+                                        span: Span {
+                                            start: 571,
+                                            end: 574,
+                                        },
+                                    },
+                                ],
+                                span: Span {
+                                    start: 566,
+                                    end: 575,
+                                },
+                            },
+                            span: Span {
+                                start: 558,
+                                end: 575,
+                            },
+                        },
+                        condition: Binary {
+                            op: Gt,
+                            lhs: Symbol {
+                                name: "n",
+                                span: Span {
+                                    start: 578,
+                                    end: 579,
+                                },
+                            },
+                            rhs: Integer(
+                                0,
+                                Span {
+                                    start: 582,
+                                    end: 583,
+                                },
+                            ),
+                            span: Span {
+                                start: 578,
+                                end: 583,
+                            },
+                        },
+                        span: Span {
+                            start: 554,
+                            end: 583,
+                        },
+                    },
+                ],
+                span: Span {
+                    start: 531,
+                    end: 595,
+                },
+            },
+            span: Span {
+                start: 520,
+                end: 595,
+            },
+        },
+        Print {
+            expr: Call {
+                callee: Symbol {
+                    name: "fact",
+                    span: Span {
+                        start: 603,
+                        end: 607,
+                    },
+                },
+                args: [
+                    Integer(
+                        6,
+                        Span {
+                            start: 608,
+                            end: 609,
+                        },
+                    ),
+                ],
+                span: Span {
+                    start: 603,
+                    end: 610,
+                },
+            },
+            span: Span {
+                start: 596,
+                end: 610,
+            },
+        },
+        Definition {
+            name: "fib",
+            params: [
+                "n",
+            ],
+            body: Piecewise {
+                branches: [
+                    PiecewiseBranch {
+                        value: Integer(
+                            0,
+                            Span {
+                                start: 637,
+                                end: 638,
+                            },
+                        ),
+                        condition: Binary {
+                            op: Eq,
+                            lhs: Symbol {
+                                name: "n",
+                                span: Span {
+                                    start: 641,
+                                    end: 642,
+                                },
+                            },
+                            rhs: Integer(
+                                0,
+                                Span {
+                                    start: 645,
+                                    end: 646,
+                                },
+                            ),
+                            span: Span {
+                                start: 641,
+                                end: 646,
+                            },
+                        },
+                        span: Span {
+                            start: 623,
+                            end: 646,
+                        },
+                    },
+                    PiecewiseBranch {
+                        value: Integer(
+                            1,
+                            Span {
+                                start: 650,
+                                end: 651,
+                            },
+                        ),
+                        condition: Binary {
+                            op: Eq,
+                            lhs: Symbol {
+                                name: "n",
+                                span: Span {
+                                    start: 654,
+                                    end: 655,
+                                },
+                            },
+                            rhs: Integer(
+                                1,
+                                Span {
+                                    start: 658,
+                                    end: 659,
+                                },
+                            ),
+                            span: Span {
+                                start: 654,
+                                end: 659,
+                            },
+                        },
+                        span: Span {
+                            start: 646,
+                            end: 659,
+                        },
+                    },
+                    PiecewiseBranch {
+                        value: Binary {
+                            op: Add,
+                            lhs: Call {
+                                callee: Symbol {
+                                    name: "fib",
+                                    span: Span {
+                                        start: 663,
+                                        end: 666,
+                                    },
+                                },
+                                args: [
+                                    Binary {
+                                        op: Sub,
+                                        lhs: Symbol {
+                                            name: "n",
+                                            span: Span {
+                                                start: 667,
+                                                end: 668,
+                                            },
+                                        },
+                                        rhs: Integer(
+                                            1,
+                                            Span {
+                                                start: 669,
+                                                end: 670,
+                                            },
+                                        ),
+                                        span: Span {
+                                            start: 667,
+                                            end: 670,
+                                        },
+                                    },
+                                ],
+                                span: Span {
+                                    start: 663,
+                                    end: 671,
+                                },
+                            },
+                            rhs: Call {
+                                callee: Symbol {
+                                    name: "fib",
+                                    span: Span {
+                                        start: 674,
+                                        end: 677,
+                                    },
+                                },
+                                args: [
+                                    Binary {
+                                        op: Sub,
+                                        lhs: Symbol {
+                                            name: "n",
+                                            span: Span {
+                                                start: 678,
+                                                end: 679,
+                                            },
+                                        },
+                                        rhs: Integer(
+                                            2,
+                                            Span {
+                                                start: 680,
+                                                end: 681,
+                                            },
+                                        ),
+                                        span: Span {
+                                            start: 678,
+                                            end: 681,
+                                        },
+                                    },
+                                ],
+                                span: Span {
+                                    start: 674,
+                                    end: 682,
+                                },
+                            },
+                            span: Span {
+                                start: 663,
+                                end: 682,
+                            },
+                        },
+                        condition: Binary {
+                            op: Gt,
+                            lhs: Symbol {
+                                name: "n",
+                                span: Span {
+                                    start: 685,
+                                    end: 686,
+                                },
+                            },
+                            rhs: Integer(
+                                1,
+                                Span {
+                                    start: 689,
+                                    end: 690,
+                                },
+                            ),
+                            span: Span {
+                                start: 685,
+                                end: 690,
+                            },
+                        },
+                        span: Span {
+                            start: 659,
+                            end: 690,
+                        },
+                    },
+                ],
+                span: Span {
+                    start: 623,
+                    end: 702,
+                },
+            },
+            span: Span {
+                start: 613,
+                end: 702,
+            },
+        },
+        Print {
+            expr: Call {
+                callee: Symbol {
+                    name: "fib",
+                    span: Span {
+                        start: 710,
+                        end: 713,
+                    },
+                },
+                args: [
+                    Integer(
+                        10,
+                        Span {
+                            start: 714,
+                            end: 716,
+                        },
+                    ),
+                ],
+                span: Span {
+                    start: 710,
+                    end: 717,
+                },
+            },
+            span: Span {
+                start: 703,
+                end: 717,
+            },
+        },
+        Definition {
+            name: "S",
+            params: [],
+            body: Set {
+                elements: [
+                    Integer(
+                        1,
+                        Span {
+                            start: 778,
+                            end: 779,
+                        },
+                    ),
+                    Integer(
+                        2,
+                        Span {
+                            start: 780,
+                            end: 781,
+                        },
+                    ),
+                    Integer(
+                        3,
+                        Span {
+                            start: 782,
+                            end: 783,
+                        },
+                    ),
+                ],
+                span: Span {
+                    start: 777,
+                    end: 784,
+                },
+            },
+            span: Span {
+                start: 772,
+                end: 784,
+            },
+        },
+        Definition {
+            name: "T",
+            params: [],
+            body: Set {
+                elements: [
+                    Integer(
+                        2,
+                        Span {
+                            start: 791,
+                            end: 792,
+                        },
+                    ),
+                    Integer(
+                        3,
+                        Span {
+                            start: 793,
+                            end: 794,
+                        },
+                    ),
+                    Integer(
+                        4,
+                        Span {
+                            start: 795,
+                            end: 796,
+                        },
+                    ),
+                ],
+                span: Span {
+                    start: 790,
+                    end: 797,
+                },
+            },
+            span: Span {
+                start: 785,
+                end: 797,
+            },
+        },
+        Print {
+            expr: Binary {
+                op: Union,
+                lhs: Symbol {
+                    name: "S",
+                    span: Span {
+                        start: 805,
+                        end: 806,
+                    },
+                },
+                rhs: Symbol {
+                    name: "T",
+                    span: Span {
+                        start: 812,
+                        end: 813,
+                    },
+                },
+                span: Span {
+                    start: 805,
+                    end: 813,
+                },
+            },
+            span: Span {
+                start: 798,
+                end: 813,
+            },
+        },
+        Print {
+            expr: Binary {
+                op: Intersect,
+                lhs: Symbol {
+                    name: "S",
+                    span: Span {
+                        start: 822,
+                        end: 823,
+                    },
+                },
+                rhs: Symbol {
+                    name: "T",
+                    span: Span {
+                        start: 829,
+                        end: 830,
+                    },
+                },
+                span: Span {
+                    start: 822,
+                    end: 830,
+                },
+            },
+            span: Span {
+                start: 815,
+                end: 830,
+            },
+        },
+        Print {
+            expr: Binary {
+                op: Difference,
+                lhs: Symbol {
+                    name: "T",
+                    span: Span {
+                        start: 839,
+                        end: 840,
+                    },
+                },
+                rhs: Symbol {
+                    name: "S",
+                    span: Span {
+                        start: 851,
+                        end: 852,
+                    },
+                },
+                span: Span {
+                    start: 839,
+                    end: 852,
+                },
+            },
+            span: Span {
+                start: 832,
+                end: 852,
+            },
+        },
+        Print {
+            expr: Binary {
+                op: In,
+                lhs: Integer(
+                    2,
+                    Span {
+                        start: 861,
+                        end: 862,
+                    },
+                ),
+                rhs: Symbol {
+                    name: "S",
+                    span: Span {
+                        start: 867,
+                        end: 868,
+                    },
+                },
+                span: Span {
+                    start: 861,
+                    end: 868,
+                },
+            },
+            span: Span {
+                start: 854,
+                end: 868,
+            },
+        },
+        Print {
+            expr: Binary {
+                op: SubsetEq,
+                lhs: Symbol {
+                    name: "S",
+                    span: Span {
+                        start: 877,
+                        end: 878,
+                    },
+                },
+                rhs: Set {
+                    elements: [
+                        Integer(
+                            1,
+                            Span {
+                                start: 890,
+                                end: 891,
+                            },
+                        ),
+                        Integer(
+                            2,
+                            Span {
+                                start: 892,
+                                end: 893,
+                            },
+                        ),
+                        Integer(
+                            3,
+                            Span {
+                                start: 894,
+                                end: 895,
+                            },
+                        ),
+                        Integer(
+                            4,
+                            Span {
+                                start: 896,
+                                end: 897,
+                            },
+                        ),
+                    ],
+                    span: Span {
+                        start: 889,
+                        end: 898,
+                    },
+                },
+                span: Span {
+                    start: 877,
+                    end: 898,
+                },
+            },
+            span: Span {
+                start: 870,
+                end: 898,
+            },
+        },
+        Print {
+            expr: Call {
+                callee: Symbol {
+                    name: "\\range",
+                    span: Span {
+                        start: 907,
+                        end: 913,
+                    },
+                },
+                args: [
+                    Integer(
+                        3,
+                        Span {
+                            start: 914,
+                            end: 915,
+                        },
+                    ),
+                    Integer(
+                        7,
+                        Span {
+                            start: 917,
+                            end: 918,
+                        },
+                    ),
+                ],
+                span: Span {
+                    start: 907,
+                    end: 919,
+                },
+            },
+            span: Span {
+                start: 900,
+                end: 919,
+            },
+        },
+        Print {
+            expr: Sum {
+                var: "i",
+                lower: Integer(
+                    1,
+                    Span {
+                        start: 936,
+                        end: 937,
+                    },
+                ),
+                upper: Integer(
+                    10,
+                    Span {
+                        start: 940,
+                        end: 942,
+                    },
+                ),
+                body: Symbol {
+                    name: "i",
+                    span: Span {
+                        start: 944,
+                        end: 945,
+                    },
+                },
+                span: Span {
+                    start: 928,
+                    end: 945,
+                },
+            },
+            span: Span {
+                start: 921,
+                end: 945,
+            },
+        },
+        Print {
+            expr: Product {
+                var: "i",
+                lower: Integer(
+                    1,
+                    Span {
+                        start: 963,
+                        end: 964,
+                    },
+                ),
+                upper: Integer(
+                    5,
+                    Span {
+                        start: 967,
+                        end: 968,
+                    },
+                ),
+                body: Symbol {
+                    name: "i",
+                    span: Span {
+                        start: 970,
+                        end: 971,
+                    },
+                },
+                span: Span {
+                    start: 954,
+                    end: 971,
+                },
+            },
+            span: Span {
+                start: 947,
+                end: 971,
+            },
+        },
+        Print {
+            expr: Call {
+                callee: Symbol {
+                    name: "\\card",
+                    span: Span {
+                        start: 980,
+                        end: 985,
+                    },
+                },
+                args: [
+                    Symbol {
+                        name: "S",
+                        span: Span {
+                            start: 986,
+                            end: 987,
+                        },
+                    },
+                ],
+                span: Span {
+                    start: 980,
+                    end: 988,
+                },
+            },
+            span: Span {
+                start: 973,
+                end: 988,
+            },
+        },
+        Definition {
+            name: "v",
+            params: [],
+            body: Vector {
+                elements: [
+                    Integer(
+                        1,
+                        Span {
+                            start: 1025,
+                            end: 1026,
+                        },
+                    ),
+                    Integer(
+                        2,
+                        Span {
+                            start: 1027,
+                            end: 1028,
+                        },
+                    ),
+                    Integer(
+                        3,
+                        Span {
+                            start: 1029,
+                            end: 1030,
+                        },
+                    ),
+                ],
+                span: Span {
+                    start: 1020,
+                    end: 1031,
+                },
+            },
+            span: Span {
+                start: 1015,
+                end: 1031,
+            },
+        },
+        Definition {
+            name: "w",
+            params: [],
+            body: Vector {
+                elements: [
+                    Integer(
+                        4,
+                        Span {
+                            start: 1042,
+                            end: 1043,
+                        },
+                    ),
+                    Integer(
+                        5,
+                        Span {
+                            start: 1044,
+                            end: 1045,
+                        },
+                    ),
+                    Integer(
+                        6,
+                        Span {
+                            start: 1046,
+                            end: 1047,
+                        },
+                    ),
+                ],
+                span: Span {
+                    start: 1037,
+                    end: 1048,
+                },
+            },
+            span: Span {
+                start: 1032,
+                end: 1048,
+            },
+        },
+        Print {
+            expr: Binary {
+                op: Add,
+                lhs: Symbol {
+                    name: "v",
+                    span: Span {
+                        start: 1056,
+                        end: 1057,
+                    },
+                },
+                rhs: Symbol {
+                    name: "w",
+                    span: Span {
+                        start: 1060,
+                        end: 1061,
+                    },
+                },
+                span: Span {
+                    start: 1056,
+                    end: 1061,
+                },
+            },
+            span: Span {
+                start: 1049,
+                end: 1061,
+            },
+        },
+        Print {
+            expr: Call {
+                callee: Symbol {
+                    name: "\\dot",
+                    span: Span {
+                        start: 1070,
+                        end: 1074,
+                    },
+                },
+                args: [
+                    Symbol {
+                        name: "v",
+                        span: Span {
+                            start: 1075,
+                            end: 1076,
+                        },
+                    },
+                    Symbol {
+                        name: "w",
+                        span: Span {
+                            start: 1078,
+                            end: 1079,
+                        },
+                    },
+                ],
+                span: Span {
+                    start: 1070,
+                    end: 1080,
+                },
+            },
+            span: Span {
+                start: 1063,
+                end: 1080,
+            },
+        },
+        Print {
+            expr: Call {
+                callee: Symbol {
+                    name: "\\norm",
+                    span: Span {
+                        start: 1089,
+                        end: 1094,
+                    },
+                },
+                args: [
+                    Symbol {
+                        name: "v",
+                        span: Span {
+                            start: 1095,
+                            end: 1096,
+                        },
+                    },
+                ],
+                span: Span {
+                    start: 1089,
+                    end: 1097,
+                },
+            },
+            span: Span {
+                start: 1082,
+                end: 1097,
+            },
+        },
+        Definition {
+            name: "A",
+            params: [],
+            body: Matrix {
+                rows: [
+                    [
+                        Integer(
+                            1,
+                            Span {
+                                start: 1121,
+                                end: 1122,
+                            },
+                        ),
+                        Integer(
+                            2,
+                            Span {
+                                start: 1125,
+                                end: 1126,
+                            },
+                        ),
+                    ],
+                    [
+                        Integer(
+                            3,
+                            Span {
+                                start: 1130,
+                                end: 1131,
+                            },
+                        ),
+                        Integer(
+                            4,
+                            Span {
+                                start: 1134,
+                                end: 1135,
+                            },
+                        ),
+                    ],
+                ],
+                span: Span {
+                    start: 1105,
+                    end: 1149,
+                },
+            },
+            span: Span {
+                start: 1100,
+                end: 1149,
+            },
+        },
+        Print {
+            expr: Binary {
+                op: Add,
+                lhs: Symbol {
+                    name: "A",
+                    span: Span {
+                        start: 1157,
+                        end: 1158,
+                    },
+                },
+                rhs: Symbol {
+                    name: "A",
+                    span: Span {
+                        start: 1161,
+                        end: 1162,
+                    },
+                },
+                span: Span {
+                    start: 1157,
+                    end: 1162,
+                },
+            },
+            span: Span {
+                start: 1150,
+                end: 1162,
+            },
+        },
+        Print {
+            expr: Binary {
+                op: Pow,
+                lhs: Symbol {
+                    name: "A",
+                    span: Span {
+                        start: 1171,
+                        end: 1172,
+                    },
+                },
+                rhs: Integer(
+                    2,
+                    Span {
+                        start: 1173,
+                        end: 1174,
+                    },
+                ),
+                span: Span {
+                    start: 1171,
+                    end: 1174,
+                },
+            },
+            span: Span {
+                start: 1164,
+                end: 1174,
+            },
+        },
+        Print {
+            expr: Call {
+                callee: Symbol {
+                    name: "\\transpose",
+                    span: Span {
+                        start: 1183,
+                        end: 1193,
+                    },
+                },
+                args: [
+                    Symbol {
+                        name: "A",
+                        span: Span {
+                            start: 1194,
+                            end: 1195,
+                        },
+                    },
+                ],
+                span: Span {
+                    start: 1183,
+                    end: 1196,
+                },
+            },
+            span: Span {
+                start: 1176,
+                end: 1196,
+            },
+        },
+        Print {
+            expr: Call {
+                callee: Symbol {
+                    name: "\\det",
+                    span: Span {
+                        start: 1205,
+                        end: 1209,
+                    },
+                },
+                args: [
+                    Symbol {
+                        name: "A",
+                        span: Span {
+                            start: 1210,
+                            end: 1211,
+                        },
+                    },
+                ],
+                span: Span {
+                    start: 1205,
+                    end: 1212,
+                },
+            },
+            span: Span {
+                start: 1198,
+                end: 1212,
+            },
+        },
+        Print {
+            expr: Call {
+                callee: Symbol {
+                    name: "\\inverse",
+                    span: Span {
+                        start: 1221,
+                        end: 1229,
+                    },
+                },
+                args: [
+                    Symbol {
+                        name: "A",
+                        span: Span {
+                            start: 1230,
+                            end: 1231,
+                        },
+                    },
+                ],
+                span: Span {
+                    start: 1221,
+                    end: 1232,
+                },
+            },
+            span: Span {
+                start: 1214,
+                end: 1232,
+            },
+        },
+        Print {
+            expr: Call {
+                callee: Symbol {
+                    name: "\\rank",
+                    span: Span {
+                        start: 1241,
+                        end: 1246,
+                    },
+                },
+                args: [
+                    Symbol {
+                        name: "A",
+                        span: Span {
+                            start: 1247,
+                            end: 1248,
+                        },
+                    },
+                ],
+                span: Span {
+                    start: 1241,
+                    end: 1249,
+                },
+            },
+            span: Span {
+                start: 1234,
+                end: 1249,
+            },
+        },
+        Print {
+            expr: Call {
+                callee: Symbol {
+                    name: "\\trace",
+                    span: Span {
+                        start: 1258,
+                        end: 1264,
+                    },
+                },
+                args: [
+                    Symbol {
+                        name: "A",
+                        span: Span {
+                            start: 1265,
+                            end: 1266,
+                        },
+                    },
+                ],
+                span: Span {
+                    start: 1258,
+                    end: 1267,
+                },
+            },
+            span: Span {
+                start: 1251,
+                end: 1267,
+            },
+        },
+        Print {
+            expr: Call {
+                callee: Symbol {
+                    name: "\\factorial",
+                    span: Span {
+                        start: 1313,
+                        end: 1314,
+                    },
+                },
+                args: [
+                    Integer(
+                        5,
+                        Span {
+                            start: 1312,
+                            end: 1313,
+                        },
+                    ),
+                ],
+                span: Span {
+                    start: 1312,
+                    end: 1314,
+                },
+            },
+            span: Span {
+                start: 1305,
+                end: 1314,
+            },
+        },
+        Print {
+            expr: Call {
+                callee: Symbol {
+                    name: "\\binom",
+                    span: Span {
+                        start: 1323,
+                        end: 1329,
+                    },
+                },
+                args: [
+                    Integer(
+                        5,
+                        Span {
+                            start: 1330,
+                            end: 1331,
+                        },
+                    ),
+                    Integer(
+                        2,
+                        Span {
+                            start: 1333,
+                            end: 1334,
+                        },
+                    ),
+                ],
+                span: Span {
+                    start: 1323,
+                    end: 1335,
+                },
+            },
+            span: Span {
+                start: 1316,
+                end: 1335,
+            },
+        },
+        Print {
+            expr: Call {
+                callee: Symbol {
+                    name: "\\perm",
+                    span: Span {
+                        start: 1344,
+                        end: 1349,
+                    },
+                },
+                args: [
+                    Integer(
+                        5,
+                        Span {
+                            start: 1350,
+                            end: 1351,
+                        },
+                    ),
+                    Integer(
+                        2,
+                        Span {
+                            start: 1353,
+                            end: 1354,
+                        },
+                    ),
+                ],
+                span: Span {
+                    start: 1344,
+                    end: 1355,
+                },
+            },
+            span: Span {
+                start: 1337,
+                end: 1355,
+            },
+        },
+        Print {
+            expr: Call {
+                callee: Symbol {
+                    name: "\\gcd",
+                    span: Span {
+                        start: 1364,
+                        end: 1368,
+                    },
+                },
+                args: [
+                    Integer(
+                        84,
+                        Span {
+                            start: 1369,
+                            end: 1371,
+                        },
+                    ),
+                    Integer(
+                        30,
+                        Span {
+                            start: 1373,
+                            end: 1375,
+                        },
+                    ),
+                ],
+                span: Span {
+                    start: 1364,
+                    end: 1376,
+                },
+            },
+            span: Span {
+                start: 1357,
+                end: 1376,
+            },
+        },
+        Print {
+            expr: Call {
+                callee: Symbol {
+                    name: "\\lcm",
+                    span: Span {
+                        start: 1385,
+                        end: 1389,
+                    },
+                },
+                args: [
+                    Integer(
+                        12,
+                        Span {
+                            start: 1390,
+                            end: 1392,
+                        },
+                    ),
+                    Integer(
+                        18,
+                        Span {
+                            start: 1394,
+                            end: 1396,
+                        },
+                    ),
+                ],
+                span: Span {
+                    start: 1385,
+                    end: 1397,
+                },
+            },
+            span: Span {
+                start: 1378,
+                end: 1397,
+            },
+        },
+        Print {
+            expr: Call {
+                callee: Symbol {
+                    name: "\\min",
+                    span: Span {
+                        start: 1406,
+                        end: 1410,
+                    },
+                },
+                args: [
+                    Integer(
+                        3,
+                        Span {
+                            start: 1411,
+                            end: 1412,
+                        },
+                    ),
+                    Integer(
+                        7,
+                        Span {
+                            start: 1414,
+                            end: 1415,
+                        },
+                    ),
+                    Integer(
+                        5,
+                        Span {
+                            start: 1417,
+                            end: 1418,
+                        },
+                    ),
+                ],
+                span: Span {
+                    start: 1406,
+                    end: 1419,
+                },
+            },
+            span: Span {
+                start: 1399,
+                end: 1419,
+            },
+        },
+        Print {
+            expr: Call {
+                callee: Symbol {
+                    name: "\\max",
+                    span: Span {
+                        start: 1428,
+                        end: 1432,
+                    },
+                },
+                args: [
+                    Integer(
+                        3,
+                        Span {
+                            start: 1433,
+                            end: 1434,
+                        },
+                    ),
+                    Integer(
+                        7,
+                        Span {
+                            start: 1436,
+                            end: 1437,
+                        },
+                    ),
+                    Integer(
+                        5,
+                        Span {
+                            start: 1439,
+                            end: 1440,
+                        },
+                    ),
+                ],
+                span: Span {
+                    start: 1428,
+                    end: 1441,
+                },
+            },
+            span: Span {
+                start: 1421,
+                end: 1441,
+            },
+        },
+        Print {
+            expr: Call {
+                callee: Symbol {
+                    name: "\\floor",
+                    span: Span {
+                        start: 1496,
+                        end: 1502,
+                    },
+                },
+                args: [
+                    Rational {
+                        numerator: Unary {
+                            op: Neg,
+                            expr: Integer(
+                                7,
+                                Span {
+                                    start: 1510,
+                                    end: 1511,
+                                },
+                            ),
+                            span: Span {
+                                start: 1509,
+                                end: 1511,
+                            },
+                        },
+                        denominator: Integer(
+                            3,
+                            Span {
+                                start: 1513,
+                                end: 1514,
+                            },
+                        ),
+                        span: Span {
+                            start: 1503,
+                            end: 1514,
+                        },
+                    },
+                ],
+                span: Span {
+                    start: 1496,
+                    end: 1516,
+                },
+            },
+            span: Span {
+                start: 1489,
+                end: 1516,
+            },
+        },
+        Print {
+            expr: Call {
+                callee: Symbol {
+                    name: "\\ceil",
+                    span: Span {
+                        start: 1525,
+                        end: 1530,
+                    },
+                },
+                args: [
+                    Rational {
+                        numerator: Unary {
+                            op: Neg,
+                            expr: Integer(
+                                7,
+                                Span {
+                                    start: 1538,
+                                    end: 1539,
+                                },
+                            ),
+                            span: Span {
+                                start: 1537,
+                                end: 1539,
+                            },
+                        },
+                        denominator: Integer(
+                            3,
+                            Span {
+                                start: 1541,
+                                end: 1542,
+                            },
+                        ),
+                        span: Span {
+                            start: 1531,
+                            end: 1542,
+                        },
+                    },
+                ],
+                span: Span {
+                    start: 1525,
+                    end: 1544,
+                },
+            },
+            span: Span {
+                start: 1518,
+                end: 1544,
+            },
+        },
+        Print {
+            expr: Call {
+                callee: Symbol {
+                    name: "\\sin",
+                    span: Span {
+                        start: 1553,
+                        end: 1557,
+                    },
+                },
+                args: [
+                    Integer(
+                        0,
+                        Span {
+                            start: 1558,
+                            end: 1559,
+                        },
+                    ),
+                ],
+                span: Span {
+                    start: 1553,
+                    end: 1560,
+                },
+            },
+            span: Span {
+                start: 1546,
+                end: 1560,
+            },
+        },
+        Print {
+            expr: Call {
+                callee: Symbol {
+                    name: "\\cos",
+                    span: Span {
+                        start: 1569,
+                        end: 1573,
+                    },
+                },
+                args: [
+                    Integer(
+                        0,
+                        Span {
+                            start: 1574,
+                            end: 1575,
+                        },
+                    ),
+                ],
+                span: Span {
+                    start: 1569,
+                    end: 1576,
+                },
+            },
+            span: Span {
+                start: 1562,
+                end: 1576,
+            },
+        },
+        Print {
+            expr: Call {
+                callee: Symbol {
+                    name: "\\tan",
+                    span: Span {
+                        start: 1585,
+                        end: 1589,
+                    },
+                },
+                args: [
+                    Integer(
+                        0,
+                        Span {
+                            start: 1590,
+                            end: 1591,
+                        },
+                    ),
+                ],
+                span: Span {
+                    start: 1585,
+                    end: 1592,
+                },
+            },
+            span: Span {
+                start: 1578,
+                end: 1592,
+            },
+        },
+        Print {
+            expr: Call {
+                callee: Symbol {
+                    name: "\\ln",
+                    span: Span {
+                        start: 1601,
+                        end: 1604,
+                    },
+                },
+                args: [
+                    Integer(
+                        1,
+                        Span {
+                            start: 1605,
+                            end: 1606,
+                        },
+                    ),
+                ],
+                span: Span {
+                    start: 1601,
+                    end: 1607,
+                },
+            },
+            span: Span {
+                start: 1594,
+                end: 1607,
+            },
+        },
+        Print {
+            expr: Call {
+                callee: Symbol {
+                    name: "\\log",
+                    span: Span {
+                        start: 1616,
+                        end: 1620,
+                    },
+                },
+                args: [
+                    Integer(
+                        1,
+                        Span {
+                            start: 1621,
+                            end: 1622,
+                        },
+                    ),
+                ],
+                span: Span {
+                    start: 1616,
+                    end: 1623,
+                },
+            },
+            span: Span {
+                start: 1609,
+                end: 1623,
+            },
+        },
+        Print {
+            expr: Call {
+                callee: Symbol {
+                    name: "\\exp",
+                    span: Span {
+                        start: 1632,
+                        end: 1636,
+                    },
+                },
+                args: [
+                    Integer(
+                        0,
+                        Span {
+                            start: 1637,
+                            end: 1638,
+                        },
+                    ),
+                ],
+                span: Span {
+                    start: 1632,
+                    end: 1639,
+                },
+            },
+            span: Span {
+                start: 1625,
+                end: 1639,
+            },
+        },
+        Print {
+            expr: Symbol {
+                name: "\\pi",
+                span: Span {
+                    start: 1648,
+                    end: 1651,
+                },
+            },
+            span: Span {
+                start: 1641,
+                end: 1651,
+            },
+        },
+        Print {
+            expr: Symbol {
+                name: "\\e",
+                span: Span {
+                    start: 1660,
+                    end: 1662,
+                },
+            },
+            span: Span {
+                start: 1653,
+                end: 1662,
+            },
+        },
+        Definition {
+            name: "data",
+            params: [],
+            body: Vector {
+                elements: [
+                    Integer(
+                        1,
+                        Span {
+                            start: 1692,
+                            end: 1693,
+                        },
+                    ),
+                    Integer(
+                        2,
+                        Span {
+                            start: 1694,
+                            end: 1695,
+                        },
+                    ),
+                    Integer(
+                        3,
+                        Span {
+                            start: 1696,
+                            end: 1697,
+                        },
+                    ),
+                    Integer(
+                        4,
+                        Span {
+                            start: 1698,
+                            end: 1699,
+                        },
+                    ),
+                ],
+                span: Span {
+                    start: 1687,
+                    end: 1700,
+                },
+            },
+            span: Span {
+                start: 1679,
+                end: 1700,
+            },
+        },
+        Print {
+            expr: Call {
+                callee: Symbol {
+                    name: "\\mean",
+                    span: Span {
+                        start: 1708,
+                        end: 1713,
+                    },
+                },
+                args: [
+                    Symbol {
+                        name: "data",
+                        span: Span {
+                            start: 1714,
+                            end: 1718,
+                        },
+                    },
+                ],
+                span: Span {
+                    start: 1708,
+                    end: 1719,
+                },
+            },
+            span: Span {
+                start: 1701,
+                end: 1719,
+            },
+        },
+        Print {
+            expr: Call {
+                callee: Symbol {
+                    name: "\\variance",
+                    span: Span {
+                        start: 1728,
+                        end: 1737,
+                    },
+                },
+                args: [
+                    Symbol {
+                        name: "data",
+                        span: Span {
+                            start: 1738,
+                            end: 1742,
+                        },
+                    },
+                ],
+                span: Span {
+                    start: 1728,
+                    end: 1743,
+                },
+            },
+            span: Span {
+                start: 1721,
+                end: 1743,
+            },
+        },
+        Print {
+            expr: Call {
+                callee: Symbol {
+                    name: "\\stdev",
+                    span: Span {
+                        start: 1752,
+                        end: 1758,
+                    },
+                },
+                args: [
+                    Symbol {
+                        name: "data",
+                        span: Span {
+                            start: 1759,
+                            end: 1763,
+                        },
+                    },
+                ],
+                span: Span {
+                    start: 1752,
+                    end: 1764,
+                },
+            },
+            span: Span {
+                start: 1745,
+                end: 1764,
+            },
+        },
+        Print {
+            expr: Call {
+                callee: Symbol {
+                    name: "\\subs",
+                    span: Span {
+                        start: 1812,
+                        end: 1817,
+                    },
+                },
+                args: [
+                    Binary {
+                        op: Eq,
+                        lhs: Symbol {
+                            name: "x",
+                            span: Span {
+                                start: 1818,
+                                end: 1819,
+                            },
+                        },
+                        rhs: Integer(
+                            3,
+                            Span {
+                                start: 1820,
+                                end: 1821,
+                            },
+                        ),
+                        span: Span {
+                            start: 1818,
+                            end: 1821,
+                        },
+                    },
+                    Binary {
+                        op: Add,
+                        lhs: Binary {
+                            op: Pow,
+                            lhs: Symbol {
+                                name: "x",
+                                span: Span {
+                                    start: 1823,
+                                    end: 1824,
+                                },
+                            },
+                            rhs: Integer(
+                                2,
+                                Span {
+                                    start: 1825,
+                                    end: 1826,
+                                },
+                            ),
+                            span: Span {
+                                start: 1823,
+                                end: 1826,
+                            },
+                        },
+                        rhs: Integer(
+                            1,
+                            Span {
+                                start: 1829,
+                                end: 1830,
+                            },
+                        ),
+                        span: Span {
+                            start: 1823,
+                            end: 1830,
+                        },
+                    },
+                ],
+                span: Span {
+                    start: 1812,
+                    end: 1831,
+                },
+            },
+            span: Span {
+                start: 1805,
+                end: 1831,
+            },
+        },
+        Print {
+            expr: Call {
+                callee: Symbol {
+                    name: "\\diff",
+                    span: Span {
+                        start: 1840,
+                        end: 1845,
+                    },
+                },
+                args: [
+                    Binary {
+                        op: Add,
+                        lhs: Binary {
+                            op: Pow,
+                            lhs: Symbol {
+                                name: "x",
+                                span: Span {
+                                    start: 1846,
+                                    end: 1847,
+                                },
+                            },
+                            rhs: Integer(
+                                3,
+                                Span {
+                                    start: 1848,
+                                    end: 1849,
+                                },
+                            ),
+                            span: Span {
+                                start: 1846,
+                                end: 1849,
+                            },
+                        },
+                        rhs: Binary {
+                            op: Mul,
+                            lhs: Integer(
+                                2,
+                                Span {
+                                    start: 1852,
+                                    end: 1853,
+                                },
+                            ),
+                            rhs: Symbol {
+                                name: "x",
+                                span: Span {
+                                    start: 1854,
+                                    end: 1855,
+                                },
+                            },
+                            span: Span {
+                                start: 1852,
+                                end: 1855,
+                            },
+                        },
+                        span: Span {
+                            start: 1846,
+                            end: 1855,
+                        },
+                    },
+                    Symbol {
+                        name: "x",
+                        span: Span {
+                            start: 1857,
+                            end: 1858,
+                        },
+                    },
+                ],
+                span: Span {
+                    start: 1840,
+                    end: 1859,
+                },
+            },
+            span: Span {
+                start: 1833,
+                end: 1859,
+            },
+        },
+        Print {
+            expr: Integral {
+                var: "x",
+                lower: Some(
+                    Integer(
+                        0,
+                        Span {
+                            start: 1874,
+                            end: 1875,
+                        },
+                    ),
+                ),
+                upper: Some(
+                    Integer(
+                        3,
+                        Span {
+                            start: 1878,
+                            end: 1879,
+                        },
+                    ),
+                ),
+                body: Binary {
+                    op: Pow,
+                    lhs: Symbol {
+                        name: "x",
+                        span: Span {
+                            start: 1881,
+                            end: 1882,
+                        },
+                    },
+                    rhs: Integer(
+                        2,
+                        Span {
+                            start: 1883,
+                            end: 1884,
+                        },
+                    ),
+                    span: Span {
+                        start: 1881,
+                        end: 1884,
+                    },
+                },
+                span: Span {
+                    start: 1868,
+                    end: 1884,
+                },
+            },
+            span: Span {
+                start: 1861,
+                end: 1884,
+            },
+        },
+        Print {
+            expr: Limit {
+                var: "x",
+                target: Integer(
+                    2,
+                    Span {
+                        start: 1904,
+                        end: 1905,
+                    },
+                ),
+                body: Binary {
+                    op: Pow,
+                    lhs: Symbol {
+                        name: "x",
+                        span: Span {
+                            start: 1907,
+                            end: 1908,
+                        },
+                    },
+                    rhs: Integer(
+                        2,
+                        Span {
+                            start: 1909,
+                            end: 1910,
+                        },
+                    ),
+                    span: Span {
+                        start: 1907,
+                        end: 1910,
+                    },
+                },
+                span: Span {
+                    start: 1893,
+                    end: 1910,
+                },
+            },
+            span: Span {
+                start: 1886,
+                end: 1910,
+            },
+        },
+        Print {
+            expr: Call {
+                callee: Symbol {
+                    name: "\\solve",
+                    span: Span {
+                        start: 1963,
+                        end: 1969,
+                    },
+                },
+                args: [
+                    Binary {
+                        op: Eq,
+                        lhs: Binary {
+                            op: Add,
+                            lhs: Binary {
+                                op: Mul,
+                                lhs: Integer(
+                                    3,
+                                    Span {
+                                        start: 1970,
+                                        end: 1971,
+                                    },
+                                ),
+                                rhs: Symbol {
+                                    name: "x",
+                                    span: Span {
+                                        start: 1972,
+                                        end: 1973,
+                                    },
+                                },
+                                span: Span {
+                                    start: 1970,
+                                    end: 1973,
+                                },
+                            },
+                            rhs: Integer(
+                                6,
+                                Span {
+                                    start: 1976,
+                                    end: 1977,
+                                },
+                            ),
+                            span: Span {
+                                start: 1970,
+                                end: 1977,
+                            },
+                        },
+                        rhs: Integer(
+                            0,
+                            Span {
+                                start: 1980,
+                                end: 1981,
+                            },
+                        ),
+                        span: Span {
+                            start: 1970,
+                            end: 1981,
+                        },
+                    },
+                    Symbol {
+                        name: "x",
+                        span: Span {
+                            start: 1983,
+                            end: 1984,
+                        },
+                    },
+                ],
+                span: Span {
+                    start: 1963,
+                    end: 1985,
+                },
+            },
+            span: Span {
+                start: 1956,
+                end: 1985,
+            },
+        },
+        Print {
+            expr: Call {
+                callee: Symbol {
+                    name: "\\solve",
+                    span: Span {
+                        start: 1994,
+                        end: 2000,
+                    },
+                },
+                args: [
+                    Binary {
+                        op: Eq,
+                        lhs: Binary {
+                            op: Add,
+                            lhs: Binary {
+                                op: Sub,
+                                lhs: Binary {
+                                    op: Pow,
+                                    lhs: Symbol {
+                                        name: "x",
+                                        span: Span {
+                                            start: 2001,
+                                            end: 2002,
+                                        },
+                                    },
+                                    rhs: Integer(
+                                        2,
+                                        Span {
+                                            start: 2003,
+                                            end: 2004,
+                                        },
+                                    ),
+                                    span: Span {
+                                        start: 2001,
+                                        end: 2004,
+                                    },
+                                },
+                                rhs: Binary {
+                                    op: Mul,
+                                    lhs: Integer(
+                                        5,
+                                        Span {
+                                            start: 2007,
+                                            end: 2008,
+                                        },
+                                    ),
+                                    rhs: Symbol {
+                                        name: "x",
+                                        span: Span {
+                                            start: 2009,
+                                            end: 2010,
+                                        },
+                                    },
+                                    span: Span {
+                                        start: 2007,
+                                        end: 2010,
+                                    },
+                                },
+                                span: Span {
+                                    start: 2001,
+                                    end: 2010,
+                                },
+                            },
+                            rhs: Integer(
+                                6,
+                                Span {
+                                    start: 2013,
+                                    end: 2014,
+                                },
+                            ),
+                            span: Span {
+                                start: 2001,
+                                end: 2014,
+                            },
+                        },
+                        rhs: Integer(
+                            0,
+                            Span {
+                                start: 2017,
+                                end: 2018,
+                            },
+                        ),
+                        span: Span {
+                            start: 2001,
+                            end: 2018,
+                        },
+                    },
+                    Symbol {
+                        name: "x",
+                        span: Span {
+                            start: 2020,
+                            end: 2021,
+                        },
+                    },
+                ],
+                span: Span {
+                    start: 1994,
+                    end: 2022,
+                },
+            },
+            span: Span {
+                start: 1987,
+                end: 2022,
+            },
+        },
+        Print {
+            expr: Call {
+                callee: Symbol {
+                    name: "\\sin",
+                    span: Span {
+                        start: 2081,
+                        end: 2085,
+                    },
+                },
+                args: [
+                    Symbol {
+                        name: "x",
+                        span: Span {
+                            start: 2086,
+                            end: 2087,
+                        },
+                    },
+                ],
+                span: Span {
+                    start: 2081,
+                    end: 2088,
+                },
+            },
+            span: Span {
+                start: 2074,
+                end: 2088,
+            },
+        },
+        Print {
+            expr: Integral {
+                var: "x",
+                lower: None,
+                upper: None,
+                body: Binary {
+                    op: Pow,
+                    lhs: Symbol {
+                        name: "x",
+                        span: Span {
+                            start: 2102,
+                            end: 2103,
+                        },
+                    },
+                    rhs: Integer(
+                        2,
+                        Span {
+                            start: 2104,
+                            end: 2105,
+                        },
+                    ),
+                    span: Span {
+                        start: 2102,
+                        end: 2105,
+                    },
+                },
+                span: Span {
+                    start: 2097,
+                    end: 2105,
+                },
+            },
+            span: Span {
+                start: 2090,
+                end: 2105,
+            },
+        },
+    ],
+}

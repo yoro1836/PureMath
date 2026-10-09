@@ -1,0 +1,381 @@
+Program {
+    statements: [
+        Definition {
+            name: "fact",
+            params: [
+                "n",
+            ],
+            body: Piecewise {
+                branches: [
+                    PiecewiseBranch {
+                        value: Integer(
+                            1,
+                            Span {
+                                start: 62,
+                                end: 63,
+                            },
+                        ),
+                        condition: Binary {
+                            op: Eq,
+                            lhs: Symbol {
+                                name: "n",
+                                span: Span {
+                                    start: 66,
+                                    end: 67,
+                                },
+                            },
+                            rhs: Integer(
+                                0,
+                                Span {
+                                    start: 70,
+                                    end: 71,
+                                },
+                            ),
+                            span: Span {
+                                start: 66,
+                                end: 71,
+                            },
+                        },
+                        span: Span {
+                            start: 48,
+                            end: 71,
+                        },
+                    },
+                    PiecewiseBranch {
+                        value: Binary {
+                            op: Mul,
+                            lhs: Symbol {
+                                name: "n",
+                                span: Span {
+                                    start: 75,
+                                    end: 76,
+                                },
+                            },
+                            rhs: Call {
+                                callee: Symbol {
+                                    name: "fact",
+                                    span: Span {
+                                        start: 83,
+                                        end: 87,
+                                    },
+                                },
+                                args: [
+                                    Binary {
+                                        op: Sub,
+                                        lhs: Symbol {
+                                            name: "n",
+                                            span: Span {
+                                                start: 88,
+                                                end: 89,
+                                            },
+                                        },
+                                        rhs: Integer(
+                                            1,
+                                            Span {
+                                                start: 90,
+                                                end: 91,
+                                            },
+                                        ),
+                                        span: Span {
+                                            start: 88,
+                                            end: 91,
+                                        },
+                                    },
+                                ],
+                                span: Span {
+                                    start: 83,
+                                    end: 92,
+                                },
+                            },
+                            span: Span {
+                                start: 75,
+                                end: 92,
+                            },
+                        },
+                        condition: Binary {
+                            op: Gt,
+                            lhs: Symbol {
+                                name: "n",
+                                span: Span {
+                                    start: 95,
+                                    end: 96,
+                                },
+                            },
+                            rhs: Integer(
+                                0,
+                                Span {
+                                    start: 99,
+                                    end: 100,
+                                },
+                            ),
+                            span: Span {
+                                start: 95,
+                                end: 100,
+                            },
+                        },
+                        span: Span {
+                            start: 71,
+                            end: 100,
+                        },
+                    },
+                ],
+                span: Span {
+                    start: 48,
+                    end: 112,
+                },
+            },
+            span: Span {
+                start: 37,
+                end: 112,
+            },
+        },
+        Definition {
+            name: "fib",
+            params: [
+                "n",
+            ],
+            body: Piecewise {
+                branches: [
+                    PiecewiseBranch {
+                        value: Integer(
+                            0,
+                            Span {
+                                start: 138,
+                                end: 139,
+                            },
+                        ),
+                        condition: Binary {
+                            op: Eq,
+                            lhs: Symbol {
+                                name: "n",
+                                span: Span {
+                                    start: 142,
+                                    end: 143,
+                                },
+                            },
+                            rhs: Integer(
+                                0,
+                                Span {
+                                    start: 146,
+                                    end: 147,
+                                },
+                            ),
+                            span: Span {
+                                start: 142,
+                                end: 147,
+                            },
+                        },
+                        span: Span {
+                            start: 124,
+                            end: 147,
+                        },
+                    },
+                    PiecewiseBranch {
+                        value: Integer(
+                            1,
+                            Span {
+                                start: 151,
+                                end: 152,
+                            },
+                        ),
+                        condition: Binary {
+                            op: Eq,
+                            lhs: Symbol {
+                                name: "n",
+                                span: Span {
+                                    start: 155,
+                                    end: 156,
+                                },
+                            },
+                            rhs: Integer(
+                                1,
+                                Span {
+                                    start: 159,
+                                    end: 160,
+                                },
+                            ),
+                            span: Span {
+                                start: 155,
+                                end: 160,
+                            },
+                        },
+                        span: Span {
+                            start: 147,
+                            end: 160,
+                        },
+                    },
+                    PiecewiseBranch {
+                        value: Binary {
+                            op: Add,
+                            lhs: Call {
+                                callee: Symbol {
+                                    name: "fib",
+                                    span: Span {
+                                        start: 164,
+                                        end: 167,
+                                    },
+                                },
+                                args: [
+                                    Binary {
+                                        op: Sub,
+                                        lhs: Symbol {
+                                            name: "n",
+                                            span: Span {
+                                                start: 168,
+                                                end: 169,
+                                            },
+                                        },
+                                        rhs: Integer(
+                                            1,
+                                            Span {
+                                                start: 170,
+                                                end: 171,
+                                            },
+                                        ),
+                                        span: Span {
+                                            start: 168,
+                                            end: 171,
+                                        },
+                                    },
+                                ],
+                                span: Span {
+                                    start: 164,
+                                    end: 172,
+                                },
+                            },
+                            rhs: Call {
+                                callee: Symbol {
+                                    name: "fib",
+                                    span: Span {
+                                        start: 175,
+                                        end: 178,
+                                    },
+                                },
+                                args: [
+                                    Binary {
+                                        op: Sub,
+                                        lhs: Symbol {
+                                            name: "n",
+                                            span: Span {
+                                                start: 179,
+                                                end: 180,
+                                            },
+                                        },
+                                        rhs: Integer(
+                                            2,
+                                            Span {
+                                                start: 181,
+                                                end: 182,
+                                            },
+                                        ),
+                                        span: Span {
+                                            start: 179,
+                                            end: 182,
+                                        },
+                                    },
+                                ],
+                                span: Span {
+                                    start: 175,
+                                    end: 183,
+                                },
+                            },
+                            span: Span {
+                                start: 164,
+                                end: 183,
+                            },
+                        },
+                        condition: Binary {
+                            op: Gt,
+                            lhs: Symbol {
+                                name: "n",
+                                span: Span {
+                                    start: 186,
+                                    end: 187,
+                                },
+                            },
+                            rhs: Integer(
+                                1,
+                                Span {
+                                    start: 190,
+                                    end: 191,
+                                },
+                            ),
+                            span: Span {
+                                start: 186,
+                                end: 191,
+                            },
+                        },
+                        span: Span {
+                            start: 160,
+                            end: 191,
+                        },
+                    },
+                ],
+                span: Span {
+                    start: 124,
+                    end: 203,
+                },
+            },
+            span: Span {
+                start: 114,
+                end: 203,
+            },
+        },
+        Print {
+            expr: Call {
+                callee: Symbol {
+                    name: "fact",
+                    span: Span {
+                        start: 212,
+                        end: 216,
+                    },
+                },
+                args: [
+                    Integer(
+                        6,
+                        Span {
+                            start: 217,
+                            end: 218,
+                        },
+                    ),
+                ],
+                span: Span {
+                    start: 212,
+                    end: 219,
+                },
+            },
+            span: Span {
+                start: 205,
+                end: 219,
+            },
+        },
+        Print {
+            expr: Call {
+                callee: Symbol {
+                    name: "fib",
+                    span: Span {
+                        start: 228,
+                        end: 231,
+                    },
+                },
+                args: [
+                    Integer(
+                        10,
+                        Span {
+                            start: 232,
+                            end: 234,
+                        },
+                    ),
+                ],
+                span: Span {
+                    start: 228,
+                    end: 235,
+                },
+            },
+            span: Span {
+                start: 221,
+                end: 235,
+            },
+        },
+    ],
+}

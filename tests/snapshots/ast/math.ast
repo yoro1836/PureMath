@@ -1,0 +1,183 @@
+Program {
+    statements: [
+        Print {
+            expr: Binary {
+                op: Add,
+                lhs: Rational {
+                    numerator: Integer(
+                        7,
+                        Span {
+                            start: 55,
+                            end: 56,
+                        },
+                    ),
+                    denominator: Integer(
+                        12,
+                        Span {
+                            start: 58,
+                            end: 60,
+                        },
+                    ),
+                    span: Span {
+                        start: 49,
+                        end: 60,
+                    },
+                },
+                rhs: Rational {
+                    numerator: Integer(
+                        5,
+                        Span {
+                            start: 70,
+                            end: 71,
+                        },
+                    ),
+                    denominator: Integer(
+                        18,
+                        Span {
+                            start: 73,
+                            end: 75,
+                        },
+                    ),
+                    span: Span {
+                        start: 64,
+                        end: 75,
+                    },
+                },
+                span: Span {
+                    start: 49,
+                    end: 75,
+                },
+            },
+            span: Span {
+                start: 42,
+                end: 75,
+            },
+        },
+        Print {
+            expr: Sum {
+                var: "i",
+                lower: Integer(
+                    1,
+                    Span {
+                        start: 93,
+                        end: 94,
+                    },
+                ),
+                upper: Integer(
+                    10,
+                    Span {
+                        start: 97,
+                        end: 99,
+                    },
+                ),
+                body: Symbol {
+                    name: "i",
+                    span: Span {
+                        start: 101,
+                        end: 102,
+                    },
+                },
+                span: Span {
+                    start: 85,
+                    end: 102,
+                },
+            },
+            span: Span {
+                start: 78,
+                end: 102,
+            },
+        },
+        Print {
+            expr: Product {
+                var: "i",
+                lower: Integer(
+                    1,
+                    Span {
+                        start: 120,
+                        end: 121,
+                    },
+                ),
+                upper: Integer(
+                    5,
+                    Span {
+                        start: 124,
+                        end: 125,
+                    },
+                ),
+                body: Symbol {
+                    name: "i",
+                    span: Span {
+                        start: 127,
+                        end: 128,
+                    },
+                },
+                span: Span {
+                    start: 111,
+                    end: 128,
+                },
+            },
+            span: Span {
+                start: 104,
+                end: 128,
+            },
+        },
+        Print {
+            expr: Abs {
+                expr: Unary {
+                    op: Neg,
+                    expr: Rational {
+                        numerator: Integer(
+                            15,
+                            Span {
+                                start: 149,
+                                end: 151,
+                            },
+                        ),
+                        denominator: Integer(
+                            4,
+                            Span {
+                                start: 153,
+                                end: 154,
+                            },
+                        ),
+                        span: Span {
+                            start: 143,
+                            end: 154,
+                        },
+                    },
+                    span: Span {
+                        start: 142,
+                        end: 154,
+                    },
+                },
+                span: Span {
+                    start: 137,
+                    end: 154,
+                },
+            },
+            span: Span {
+                start: 130,
+                end: 154,
+            },
+        },
+        Print {
+            expr: Sqrt {
+                expr: Integer(
+                    144,
+                    Span {
+                        start: 171,
+                        end: 174,
+                    },
+                ),
+                span: Span {
+                    start: 165,
+                    end: 174,
+                },
+            },
+            span: Span {
+                start: 158,
+                end: 174,
+            },
+        },
+    ],
+}
