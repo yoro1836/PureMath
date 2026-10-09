@@ -337,6 +337,7 @@ impl<'a> Evaluator<'a> {
         let b = self.eval_expr(rhs, locals)?;
         match op {
             BinOp::Eq
+            | BinOp::Ne
             | BinOp::Lt
             | BinOp::Le
             | BinOp::Gt

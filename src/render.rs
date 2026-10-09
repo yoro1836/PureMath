@@ -45,6 +45,11 @@ fn expr_inner(node: &Expr) -> String {
                 format_child(lhs, 5, false),
                 format_child(rhs, 5, true)
             ),
+            BinOp::Ne => format!(
+                "{} \\neq {}",
+                format_child(lhs, 5, false),
+                format_child(rhs, 5, true)
+            ),
             BinOp::Lt => format!(
                 "{} < {}",
                 format_child(lhs, 5, false),
@@ -173,6 +178,7 @@ fn format_child(node: &Expr, parent_precedence: u8, right_side: bool) -> String 
     let precedence = match node {
         Expr::Binary { op, .. } => match op {
             BinOp::Eq
+            | BinOp::Ne
             | BinOp::Lt
             | BinOp::Le
             | BinOp::Gt

@@ -46,6 +46,7 @@ pub(super) fn compare(op: BinOp, a: &Value, b: &Value) -> Result<bool, String> {
                 Ok(contained)
             }
         }
+        BinOp::Ne => compare(BinOp::Eq, a, b).map(|equal| !equal),
         BinOp::Eq | BinOp::Lt | BinOp::Le | BinOp::Gt | BinOp::Ge => match (a, b) {
             (Value::Rational(x), Value::Rational(y)) => {
                 let left = x.num.checked_mul(y.den).ok_or("comparison overflow")?;

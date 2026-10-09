@@ -650,3 +650,25 @@ fn latex_set_braces_and_delimiters() {
     assert_eq!(eval_str(r"\emptyset \subseteq A", &mut env), "true");
     assert_eq!(eval_str(r"2\,(1 + 2) + \left.1\right.", &mut env), "7");
 }
+
+#[test]
+fn latex_relations_and_operators() {
+    let mut env = Environment::new();
+    assert_eq!(eval_str(r"1 \le 2", &mut env), "true");
+    assert_eq!(eval_str(r"2 \leq 1", &mut env), "false");
+    assert_eq!(eval_str(r"3 \ge 3", &mut env), "true");
+    assert_eq!(eval_str(r"1 \geq 2", &mut env), "false");
+    assert_eq!(eval_str(r"1 \lt 2", &mut env), "true");
+    assert_eq!(eval_str(r"1 \gt 2", &mut env), "false");
+    assert_eq!(eval_str(r"1 \neq 2", &mut env), "true");
+    assert_eq!(eval_str(r"1 \ne 1", &mut env), "false");
+    assert_eq!(eval_str(r"x \neq 1", &mut env), r"x \neq 1");
+    assert_eq!(eval_str(r"2 \times 3", &mut env), "6");
+    assert_eq!(eval_str(r"6 \div 4", &mut env), r"\frac{3}{2}");
+    evaluate(
+        r"f(x) := \begin{cases} x^2 & x \ge 0 \\ -x & x < 0 \end{cases}",
+        &mut env,
+    )
+    .unwrap();
+    assert_eq!(eval_str("f(-3)", &mut env), "3");
+}

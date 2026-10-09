@@ -119,6 +119,13 @@ impl Parser {
             let (op, lbp, rbp) = match self.peek_kind() {
                 Some(TokenKind::Eq) => (BinOp::Eq, 5, 6),
                 Some(TokenKind::Lt) => (BinOp::Lt, 5, 6),
+                Some(TokenKind::Command(c)) if c == "lt" => (BinOp::Lt, 5, 6),
+                Some(TokenKind::Command(c)) if c == "le" || c == "leq" => (BinOp::Le, 5, 6),
+                Some(TokenKind::Command(c)) if c == "gt" => (BinOp::Gt, 5, 6),
+                Some(TokenKind::Command(c)) if c == "ge" || c == "geq" => (BinOp::Ge, 5, 6),
+                Some(TokenKind::Command(c)) if c == "ne" || c == "neq" => (BinOp::Ne, 5, 6),
+                Some(TokenKind::Command(c)) if c == "times" => (BinOp::Mul, 20, 21),
+                Some(TokenKind::Command(c)) if c == "div" => (BinOp::Div, 20, 21),
                 Some(TokenKind::Le) => (BinOp::Le, 5, 6),
                 Some(TokenKind::Gt) => (BinOp::Gt, 5, 6),
                 Some(TokenKind::Ge) => (BinOp::Ge, 5, 6),

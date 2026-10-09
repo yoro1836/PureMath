@@ -135,6 +135,7 @@ pub enum BinOp {
     Div,
     Pow,
     Eq,
+    Ne,
     Lt,
     Le,
     Gt,

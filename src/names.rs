@@ -95,6 +95,7 @@ pub fn is_infix_word(word: &str) -> bool {
             | "right"
             | "mid"
             | "times"
+            | "div"
             | "le"
             | "leq"
             | "ge"
