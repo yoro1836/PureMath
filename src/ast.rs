@@ -113,6 +113,12 @@ pub enum Expr {
         text: String,
         span: Span,
     },
+    /// `x \mapsto E`, a function value.
+    Lambda {
+        params: Vec<String>,
+        body: Box<Expr>,
+        span: Span,
+    },
 }
 
 #[derive(Clone, Debug, PartialEq)]
@@ -171,7 +177,8 @@ impl Expr {
             | Expr::Abs { span, .. }
             | Expr::Sqrt { span, .. }
             | Expr::Piecewise { span, .. }
-            | Expr::Rational { span, .. } => *span,
+            | Expr::Rational { span, .. }
+            | Expr::Lambda { span, .. } => *span,
         }
     }
 }

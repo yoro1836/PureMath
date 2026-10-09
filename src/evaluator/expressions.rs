@@ -258,6 +258,25 @@ impl<'a> Evaluator<'a> {
                 ))
             }
             Expr::Opaque { .. } => Ok(Value::Symbolic(expr.clone())),
+            Expr::Lambda { params, body, .. } => {
+                // Capture the exact values of enclosing local names so the
+                // function keeps its meaning outside the scope it was made in.
+                let mut captured = body.as_ref().clone();
+                for (name, value) in locals {
+                    if params.contains(name) {
+                        continue;
+                    }
+                    let symbol = Expr::Symbol {
+                        name: name.clone(),
+                        span: body.span(),
+                    };
+                    captured = substitute(&captured, name, &value_to_expr(value, &symbol));
+                }
+                Ok(Value::Function(std::rc::Rc::new(FunctionValue {
+                    params: params.clone(),
+                    body: captured,
+                })))
+            }
         }
     }
 

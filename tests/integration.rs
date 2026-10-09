@@ -719,3 +719,18 @@ fn value_builtins_preserve_unknown_arguments() {
     assert_eq!(eval_str(r"\dot{\vec{1,2}}{\vec{3,4}}", &mut env), "11");
     assert!(evaluate(r"\det{\{1,2\}}", &mut env).is_err());
 }
+
+#[test]
+fn mapsto_function_values() {
+    let mut env = Environment::new();
+    evaluate(r"s := x \mapsto x^2", &mut env).unwrap();
+    assert_eq!(eval_str("s(3)", &mut env), "9");
+    assert_eq!(eval_str("s", &mut env), r"x \mapsto x^{2}");
+    assert_eq!(eval_str(r"(x \mapsto x + 1)(4)", &mut env), "5");
+    evaluate(r"g(a) := x \mapsto x + a", &mut env).unwrap();
+    evaluate("h := g(5)", &mut env).unwrap();
+    assert_eq!(eval_str("h(1)", &mut env), "6");
+    evaluate("c(f) := f(f(2))", &mut env).unwrap();
+    assert_eq!(eval_str(r"c(t \mapsto 3t)", &mut env), "18");
+    assert!(evaluate(r"2 \mapsto 3", &mut env).is_err());
+}

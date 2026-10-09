@@ -116,6 +116,23 @@ impl Parser {
     fn parse_expr(&mut self, min_bp: u8) -> Result<Expr, Diagnostic> {
         let mut lhs = self.parse_prefix()?;
         loop {
+            // `x \mapsto E` binds loosest; its body extends as far as possible.
+            if min_bp <= 1 && self.command_is("mapsto") {
+                let Expr::Symbol { name, span } = &lhs else {
+                    return Err(
+                        self.error_at(lhs.span(), "\\mapsto requires a variable on its left")
+                    );
+                };
+                let (param, start) = (name.clone(), span.start);
+                self.take();
+                let body = self.parse_expr(0)?;
+                lhs = Expr::Lambda {
+                    params: vec![param],
+                    span: Span::new(start, body.span().end),
+                    body: Box::new(body),
+                };
+                continue;
+            }
             let (op, lbp, rbp) = match self.peek_kind() {
                 Some(TokenKind::Eq) => (BinOp::Eq, 5, 6),
                 Some(TokenKind::Lt) => (BinOp::Lt, 5, 6),
@@ -284,11 +301,14 @@ impl Parser {
         self.parse_postfix(expr)
     }
 
-    /// Function application `f(x)` applies only to names; after any other
-    /// expression a parenthesis starts an implicit product, as in `2(x+1)`.
+    /// Function application `f(x)` applies only to names and function values
+    /// (`(x \mapsto x^2)(3)`); after any other expression a parenthesis starts
+    /// an implicit product, as in `2(x+1)`.
     fn parse_postfix(&mut self, mut expr: Expr) -> Result<Expr, Diagnostic> {
         loop {
-            if self.at(&TokenKind::LParen) && matches!(expr, Expr::Symbol { .. }) {
+            if self.at(&TokenKind::LParen)
+                && matches!(expr, Expr::Symbol { .. } | Expr::Lambda { .. })
+            {
                 let start = self.take().span.start;
                 let mut args = Vec::new();
                 if !self.at(&TokenKind::RParen) {
@@ -646,6 +666,9 @@ impl Parser {
                 Self::first_non_constant_symbol(&b.value)
                     .or_else(|| Self::first_non_constant_symbol(&b.condition))
             }),
+            Expr::Lambda { body, params, .. } => {
+                Self::first_non_constant_symbol(body).filter(|name| !params.contains(name))
+            }
             Expr::Integer(..) | Expr::Opaque { .. } => None,
         }
     }

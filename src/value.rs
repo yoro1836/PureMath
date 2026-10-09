@@ -163,7 +163,9 @@ impl fmt::Display for Value {
                     .join(" \\\\ ");
                 write!(f, "\\begin{{pmatrix}} {} \\end{{pmatrix}}", body)
             }
-            Value::Function(fun) => write!(f, "function({})", fun.params.join(", ")),
+            Value::Function(fun) => {
+                write!(f, "{}", crate::render::function(&fun.params, &fun.body))
+            }
             Value::Symbolic(e) => write!(f, "{}", crate::render::expr(e)),
             Value::Unit => Ok(()),
         }

@@ -86,7 +86,10 @@ fn expr_inner(node: &Expr) -> String {
         },
         Expr::Call { callee, args, .. } => format!(
             "{}({})",
-            expr_inner(callee),
+            match callee.as_ref() {
+                Expr::Lambda { .. } => format!("({})", expr_inner(callee)),
+                _ => expr_inner(callee),
+            },
             args.iter().map(expr_inner).collect::<Vec<_>>().join(", ")
         ),
         Expr::Set { elements, .. } => {
@@ -185,7 +188,22 @@ fn expr_inner(node: &Expr) -> String {
             format!("\\begin{{cases}} {} \\end{{cases}}", rows)
         }
         Expr::Opaque { text, .. } => text.clone(),
+        Expr::Lambda { params, body, .. } => {
+            format!("{} \\mapsto {}", lambda_params(params), expr_inner(body))
+        }
     }
+}
+
+fn lambda_params(params: &[String]) -> String {
+    if params.len() == 1 {
+        params[0].clone()
+    } else {
+        format!("({})", params.join(", "))
+    }
+}
+
+pub(crate) fn function(params: &[String], body: &Expr) -> String {
+    format!("{} \\mapsto {}", lambda_params(params), expr_inner(body))
 }
 
 fn format_child(node: &Expr, parent_precedence: u8, right_side: bool) -> String {
@@ -210,6 +228,7 @@ fn format_child(node: &Expr, parent_precedence: u8, right_side: bool) -> String 
             BinOp::Pow => 30,
         },
         Expr::Unary { .. } => 25,
+        Expr::Lambda { .. } => 1,
         _ => 40,
     };
     if precedence < parent_precedence

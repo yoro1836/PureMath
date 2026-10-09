@@ -46,6 +46,9 @@ pub(super) fn contains_symbol(expr: &Expr, var: &str) -> bool {
         Expr::Piecewise { branches, .. } => branches
             .iter()
             .any(|b| contains_symbol(&b.value, var) || contains_symbol(&b.condition, var)),
+        Expr::Lambda { params, body, .. } => {
+            !params.iter().any(|p| p == var) && contains_symbol(body, var)
+        }
         Expr::Integer(..) | Expr::Opaque { .. } => false,
     }
 }
@@ -215,6 +218,12 @@ pub(super) fn differentiate(expr: &Expr, var: &str) -> Option<Expr> {
 pub(super) fn substitute(expr: &Expr, var: &str, replacement: &Expr) -> Expr {
     match expr {
         Expr::Symbol { name, .. } if name == var => replacement.clone(),
+        Expr::Lambda { params, .. } if params.iter().any(|p| p == var) => expr.clone(),
+        Expr::Lambda { params, body, span } => Expr::Lambda {
+            params: params.clone(),
+            body: Box::new(substitute(body, var, replacement)),
+            span: *span,
+        },
         Expr::Unary { op, expr, span } => Expr::Unary {
             op: *op,
             expr: Box::new(substitute(expr, var, replacement)),
