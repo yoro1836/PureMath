@@ -1,0 +1,97 @@
+Program {
+    statements: [
+        Definition {
+            name: "square",
+            params: [
+                "x",
+            ],
+            body: Binary {
+                op: Pow,
+                lhs: Symbol {
+                    name: "x",
+                    span: Span {
+                        start: 45,
+                        end: 46,
+                    },
+                },
+                rhs: Integer(
+                    2,
+                    Span {
+                        start: 47,
+                        end: 48,
+                    },
+                ),
+                span: Span {
+                    start: 45,
+                    end: 48,
+                },
+            },
+            span: Span {
+                start: 32,
+                end: 48,
+            },
+        },
+        Definition {
+            name: "cube",
+            params: [
+                "x",
+            ],
+            body: Binary {
+                op: Pow,
+                lhs: Symbol {
+                    name: "x",
+                    span: Span {
+                        start: 60,
+                        end: 61,
+                    },
+                },
+                rhs: Integer(
+                    3,
+                    Span {
+                        start: 62,
+                        end: 63,
+                    },
+                ),
+                span: Span {
+                    start: 60,
+                    end: 63,
+                },
+            },
+            span: Span {
+                start: 49,
+                end: 63,
+            },
+        },
+        Definition {
+            name: "double",
+            params: [
+                "x",
+            ],
+            body: Binary {
+                op: Mul,
+                lhs: Integer(
+                    2,
+                    Span {
+                        start: 77,
+                        end: 78,
+                    },
+                ),
+                rhs: Symbol {
+                    name: "x",
+                    span: Span {
+                        start: 81,
+                        end: 82,
+                    },
+                },
+                span: Span {
+                    start: 77,
+                    end: 82,
+                },
+            },
+            span: Span {
+                start: 64,
+                end: 82,
+            },
+        },
+    ],
+}
