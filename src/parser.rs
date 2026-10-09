@@ -275,11 +275,12 @@ impl Parser {
     }
 
     fn parse_set_body(&mut self, start: usize) -> Result<Expr, Diagnostic> {
-        if let Some(TokenKind::Ident(var)) | Some(TokenKind::Command(var)) = self.peek_kind().cloned() {
+        if let Some(TokenKind::Ident(var)) | Some(TokenKind::Command(var)) =
+            self.peek_kind().cloned()
+        {
             if self.tokens.get(self.pos + 1).is_some_and(|token| {
                 matches!(&token.kind, TokenKind::Ident(name) | TokenKind::Command(name) if name == "in")
             }) {
-                let var = var;
                 self.take();
                 self.take();
                 let domain = self.parse_expr(6)?;
@@ -576,7 +577,9 @@ impl Parser {
             Expr::Set { elements, .. } | Expr::Vector { elements, .. } => {
                 elements.iter().find_map(Self::first_non_constant_symbol)
             }
-            Expr::SetComprehension { domain, condition, .. } => Self::first_non_constant_symbol(domain)
+            Expr::SetComprehension {
+                domain, condition, ..
+            } => Self::first_non_constant_symbol(domain)
                 .or_else(|| Self::first_non_constant_symbol(condition)),
             Expr::Matrix { rows, .. } => rows
                 .iter()

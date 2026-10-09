@@ -17,10 +17,12 @@ pub(super) fn contains_symbol(expr: &Expr, var: &str) -> bool {
         Expr::Set { elements, .. } | Expr::Vector { elements, .. } => {
             elements.iter().any(|e| contains_symbol(e, var))
         }
-        Expr::SetComprehension { var: bound, domain, condition, .. } => {
-            contains_symbol(domain, var)
-                || (bound != var && contains_symbol(condition, var))
-        }
+        Expr::SetComprehension {
+            var: bound,
+            domain,
+            condition,
+            ..
+        } => contains_symbol(domain, var) || (bound != var && contains_symbol(condition, var)),
         Expr::Matrix { rows, .. } => rows.iter().flatten().any(|e| contains_symbol(e, var)),
         Expr::Integral {
             body, lower, upper, ..
@@ -244,17 +246,20 @@ pub(super) fn substitute(expr: &Expr, var: &str, replacement: &Expr) -> Expr {
                 .collect(),
             span: *span,
         },
-        Expr::SetComprehension { var: bound, domain, condition, span } => {
-            Expr::SetComprehension {
-                var: bound.clone(),
-                domain: Box::new(substitute(domain, var, replacement)),
-                condition: Box::new(if bound == var {
-                    condition.as_ref().clone()
-                } else {
-                    substitute(condition, var, replacement)
-                }),
-                span: *span,
-            }
+        Expr::SetComprehension {
+            var: bound,
+            domain,
+            condition,
+            span,
+        } => Expr::SetComprehension {
+            var: bound.clone(),
+            domain: Box::new(substitute(domain, var, replacement)),
+            condition: Box::new(if bound == var {
+                condition.as_ref().clone()
+            } else {
+                substitute(condition, var, replacement)
+            }),
+            span: *span,
         },
         Expr::Vector { elements, span } => Expr::Vector {
             elements: elements

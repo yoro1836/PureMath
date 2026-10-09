@@ -148,7 +148,7 @@ impl<'a> Evaluator<'a> {
                     }
                 }
                 Ok(Value::Set(out))
-            },
+            }
             Expr::Vector { elements, .. } => Ok(Value::Vector(
                 elements
                     .iter()

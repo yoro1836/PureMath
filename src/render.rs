@@ -77,7 +77,12 @@ fn expr_inner(node: &Expr) -> String {
                 .join(", ");
             format!("\\{{{}\\}}", body)
         }
-        Expr::SetComprehension { var, domain, condition, .. } => format!(
+        Expr::SetComprehension {
+            var,
+            domain,
+            condition,
+            ..
+        } => format!(
             "\\{{{} \\in {} \\mid {}\\}}",
             var,
             expr_inner(domain),
