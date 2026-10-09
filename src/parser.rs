@@ -6,11 +6,17 @@ use crate::names;
 pub struct Parser {
     tokens: Vec<Token>,
     pos: usize,
+    /// Nesting depth of integrands, where `d x` ends the body as a differential.
+    integral_depth: usize,
 }
 
 impl Parser {
     pub fn new(tokens: Vec<Token>) -> Self {
-        Self { tokens, pos: 0 }
+        Self {
+            tokens,
+            pos: 0,
+            integral_depth: 0,
+        }
     }
 
     pub fn parse_program(&mut self) -> Result<Program, Diagnostic> {
@@ -529,6 +535,7 @@ impl Parser {
         let mut lower = None;
         let mut upper = None;
         let mut var = "x".to_owned();
+        let mut declared = None;
 
         if self.at(&TokenKind::Underscore) {
             self.take();
@@ -541,7 +548,8 @@ impl Parser {
             } = group
             {
                 if let Expr::Symbol { name, .. } = *lhs {
-                    var = name;
+                    var = name.clone();
+                    declared = Some(name);
                 }
                 lower = Some(rhs);
             } else {
@@ -552,8 +560,25 @@ impl Parser {
             self.take();
             upper = Some(Box::new(self.parse_group_expr()?));
         }
-        let body = self.parse_expr(0)?;
-        if var == "x" {
+        self.integral_depth += 1;
+        let body = self.parse_expr(0);
+        let differential = body.is_ok() && self.at_differential();
+        self.integral_depth -= 1;
+        let body = body?;
+        if differential {
+            self.take();
+            let (differential, span) = self.parse_name()?.expect("differential variable");
+            if declared.as_ref().is_some_and(|name| *name != differential) {
+                return Err(self.error_at(
+                    span,
+                    format!(
+                        "integration variable {} does not match d{}",
+                        var, differential
+                    ),
+                ));
+            }
+            var = differential;
+        } else if var == "x" {
             if let Some(candidate) = Self::first_non_constant_symbol(&body) {
                 var = candidate;
             }
@@ -873,8 +898,21 @@ impl Parser {
         )
     }
 
+    /// `d` followed by a name inside an integrand: the differential `dx`.
+    fn at_differential(&self) -> bool {
+        self.integral_depth > 0
+            && matches!(self.peek_kind(), Some(TokenKind::Ident(d)) if d == "d")
+            && matches!(
+                self.tokens.get(self.pos + 1).map(|token| &token.kind),
+                Some(TokenKind::Ident(name)) if name.len() == 1
+            )
+    }
+
     /// Juxtaposed operands multiply (`2x`, `xy`, `2\pi`, `(a+b)(a-b)`).
     fn starts_implicit_operand(&self) -> bool {
+        if self.at_differential() {
+            return false;
+        }
         match self.peek_kind() {
             Some(TokenKind::Ident(word)) | Some(TokenKind::Command(word)) => {
                 !names::is_infix_word(word)

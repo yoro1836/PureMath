@@ -734,3 +734,14 @@ fn mapsto_function_values() {
     assert_eq!(eval_str(r"c(t \mapsto 3t)", &mut env), "18");
     assert!(evaluate(r"2 \mapsto 3", &mut env).is_err());
 }
+
+#[test]
+fn integral_differential_ends_the_integrand() {
+    let mut env = Environment::new();
+    assert_eq!(eval_str(r"\int_{0}^{1} x^2 dx", &mut env), r"\frac{1}{3}");
+    assert_eq!(eval_str(r"\int_{0}^{1} x^2 \,dx", &mut env), r"\frac{1}{3}");
+    assert_eq!(eval_str(r"\int_{0}^{3} 3t^2 dt", &mut env), "27");
+    assert_eq!(eval_str(r"\int_{0}^{1} 2x dx + 1", &mut env), "2");
+    assert_eq!(eval_str(r"\int x^2 dx", &mut env), r"\frac{x^{3}}{3}");
+    assert!(evaluate(r"\int_{x=0}^{1} x dt", &mut env).is_err());
+}
