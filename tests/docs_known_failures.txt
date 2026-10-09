@@ -8,7 +8,7 @@
 # PUREMATH_WIKI_DIR points at a Wiki checkout.
 
 # README.md
-README.md add752c8 expected LaTeX command after backslash
+README.md f42fa2c6 expected LaTeX command after backslash
 README.md 8c533033 doubled backslash (\\) in source
 
 # GitHub Wiki

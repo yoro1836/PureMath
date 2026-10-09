@@ -17,10 +17,10 @@ x := 10
 f(x) := x^2 + 1
 f(3)
 
-fact(n) :=
+\operatorname{fact}(n) :=
 \begin{cases}
 1 & n = 0 \\
-n \cdot fact(n-1) & n > 0
+n \cdot \operatorname{fact}(n-1) & n > 0
 \end{cases}
 
 \frac{1}{3} + \frac{1}{3}
@@ -45,6 +45,22 @@ A \cup \{4\}
 ```
 
 The implementation deliberately does **not** claim to parse all of KaTeX. KaTeX-compatible notation is a surface goal; PureMath maintains its own semantic AST.
+
+### Names
+
+Names follow mathematical convention. A variable is a single letter or Greek letter, optionally subscripted, and adjacent factors multiply:
+
+```latex
+a := 3
+b_1 := 4
+\alpha := 2
+x_{max} := 10
+\print{2ab_1}
+\print{\alpha(a + 1)}
+\print{(a + 1)(b_1 - 1)}
+```
+
+`xy` is `x \cdot y`, never a name `xy`, exactly as LaTeX renders it. Multi-letter names are written as upright operator names, `\operatorname{fact}` or `\mathrm{fact}` (the same name). Standard function and operator words such as `sin`, `gcd`, `det`, `in` and `pi` are recognised as whole words. A number may not follow a name (`x2`); write `x_2` or `2x`.
 
 ### Optional command backslashes
 
