@@ -10,6 +10,5 @@
 
 # wiki/
 Language-Guide.md 97dc6089 \mapsto
-Language-Guide.md bf98dbb1 decimal literal (3.7)
 Syntax-Reference.md 2bd8e30e decimal literal (3.7)
 Syntax-Reference.md 0abf6af0 \dot of undefined vectors is not kept symbolic

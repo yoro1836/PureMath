@@ -157,7 +157,9 @@ impl Parser {
                     (BinOp::Mul, 20, 21)
                 }
                 Some(TokenKind::Caret) => (BinOp::Pow, 30, 30),
-                Some(TokenKind::Int(_)) if matches!(lhs, Expr::Symbol { .. }) => {
+                Some(TokenKind::Int(_) | TokenKind::Decimal { .. })
+                    if matches!(lhs, Expr::Symbol { .. }) =>
+                {
                     return Err(self.error_here(
                         "a number cannot follow a name; write x_{2} for a subscripted name \
                          or 2x for a product",
@@ -204,6 +206,12 @@ impl Parser {
         };
         let expr = match token_kind {
             TokenKind::Int(n) => Expr::Integer(n, token.span),
+            // A decimal is an exact rational: 3.7 is 37/10.
+            TokenKind::Decimal { digits, scale } => Expr::Rational {
+                numerator: Box::new(Expr::Integer(digits, token.span)),
+                denominator: Box::new(Expr::Integer(10i128.pow(scale), token.span)),
+                span: token.span,
+            },
             TokenKind::Ident(name) if self.bare_prefix_command(&name) => {
                 self.parse_command_application(name, token.span.start)?
             }

@@ -9,6 +9,11 @@ pub struct Token {
 #[derive(Clone, Debug, PartialEq)]
 pub enum TokenKind {
     Int(i128),
+    /// A decimal literal `digits / 10^scale`, kept exact.
+    Decimal {
+        digits: i128,
+        scale: u32,
+    },
     Ident(String),
     Command(String),
     Plus,
@@ -271,12 +276,33 @@ pub fn lex(input: &str) -> Result<Vec<Token>, Diagnostic> {
                 while i < bytes.len() && (bytes[i] as char).is_ascii_digit() {
                     i += 1;
                 }
-                let raw = &input[number_start..i];
-                let n = raw.parse::<i128>().map_err(|_| {
-                    Diagnostic::at("integer literal overflow", Span::new(number_start, i))
+                let mut scale = 0u32;
+                if i + 1 < bytes.len() && bytes[i] == b'.' && bytes[i + 1].is_ascii_digit() {
+                    i += 1;
+                    while i < bytes.len() && bytes[i].is_ascii_digit() {
+                        i += 1;
+                        scale += 1;
+                    }
+                }
+                let digits: String = input[number_start..i]
+                    .chars()
+                    .filter(char::is_ascii_digit)
+                    .collect();
+                let n = digits.parse::<i128>().map_err(|_| {
+                    Diagnostic::at("numeric literal overflow", Span::new(number_start, i))
                 })?;
+                if scale > 0 && 10i128.checked_pow(scale).is_none() {
+                    return Err(Diagnostic::at(
+                        "numeric literal overflow",
+                        Span::new(number_start, i),
+                    ));
+                }
                 out.push(Token {
-                    kind: TokenKind::Int(n),
+                    kind: if scale == 0 {
+                        TokenKind::Int(n)
+                    } else {
+                        TokenKind::Decimal { digits: n, scale }
+                    },
                     span: Span::new(number_start, i),
                 });
             }

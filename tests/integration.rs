@@ -689,3 +689,13 @@ fn logical_connectives() {
     );
     assert!(evaluate(r"1 \land 2", &mut env).is_err());
 }
+
+#[test]
+fn decimal_literals_are_exact_rationals() {
+    let mut env = Environment::new();
+    assert_eq!(eval_str("3.7", &mut env), r"\frac{37}{10}");
+    assert_eq!(eval_str("0.1 + 0.2 = 0.3", &mut env), "true");
+    assert_eq!(eval_str(r"\floor{3.7}", &mut env), "3");
+    assert_eq!(eval_str("2.5x", &mut env), r"\frac{5}{2} \cdot x");
+    assert!(evaluate("x2.5", &mut env).is_err());
+}
