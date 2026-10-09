@@ -215,7 +215,12 @@ impl Parser {
                 self.expect(TokenKind::RParen)?;
                 inner
             }
-            TokenKind::LBrace => self.parse_set_body(token.span.start)?,
+            TokenKind::LBrace => self.parse_set_body(token.span.start, TokenKind::RBrace)?,
+            TokenKind::SetOpen => self.parse_set_body(token.span.start, TokenKind::SetClose)?,
+            TokenKind::Command(c) if c == "emptyset" || c == "varnothing" => Expr::Set {
+                elements: Vec::new(),
+                span: token.span,
+            },
             TokenKind::Command(c) if c == "frac" => {
                 let a = self.parse_group_expr()?;
                 let b = self.parse_group_expr()?;
@@ -299,7 +304,7 @@ impl Parser {
         Ok(expr)
     }
 
-    fn parse_set_body(&mut self, start: usize) -> Result<Expr, Diagnostic> {
+    fn parse_set_body(&mut self, start: usize, close: TokenKind) -> Result<Expr, Diagnostic> {
         if let Some(TokenKind::Ident(var)) | Some(TokenKind::Command(var)) =
             self.peek_kind().cloned()
         {
@@ -309,10 +314,10 @@ impl Parser {
                 self.take();
                 self.take();
                 let domain = self.parse_expr(6)?;
-                if self.at(&TokenKind::Pipe) {
+                if self.at(&TokenKind::Pipe) || self.command_is("mid") {
                     self.take();
                     let condition = self.parse_expr(0)?;
-                    let end = self.expect(TokenKind::RBrace)?.end;
+                    let end = self.expect(close)?.end;
                     return Ok(Expr::SetComprehension {
                         var,
                         domain: Box::new(domain),
@@ -335,7 +340,7 @@ impl Parser {
                 break;
             }
         }
-        let end = self.expect(TokenKind::RBrace)?.end;
+        let end = self.expect(close)?.end;
         Ok(Expr::Set {
             elements,
             span: Span::new(start, end),

@@ -24,6 +24,10 @@ pub enum TokenKind {
     Underscore,
     Ampersand,
     RowSep,
+    /// `\{`, the LaTeX spelling of a set's opening brace.
+    SetOpen,
+    /// `\}`.
+    SetClose,
     Assign,
     Eq,
     Lt,
@@ -68,6 +72,27 @@ pub fn lex(input: &str) -> Result<Vec<Token>, Diagnostic> {
                         span: Span::new(i, i + 2),
                     });
                     i += 2;
+                } else if i + 1 < bytes.len() && matches!(bytes[i + 1], b'{' | b'}') {
+                    let opening = bytes[i + 1] == b'{';
+                    if opening {
+                        brace_depth += 1;
+                    } else {
+                        brace_depth = brace_depth.saturating_sub(1);
+                    }
+                    out.push(Token {
+                        kind: if opening {
+                            TokenKind::SetOpen
+                        } else {
+                            TokenKind::SetClose
+                        },
+                        span: Span::new(i, i + 2),
+                    });
+                    i += 2;
+                } else if i + 1 < bytes.len()
+                    && matches!(bytes[i + 1], b',' | b';' | b':' | b'!' | b' ')
+                {
+                    // Spacing commands carry no mathematical meaning.
+                    i += 2;
                 } else {
                     i += 1;
                     let command_start = i;
@@ -81,6 +106,16 @@ pub fn lex(input: &str) -> Result<Vec<Token>, Diagnostic> {
                         ));
                     }
                     let command = input[command_start..i].to_owned();
+                    if is_presentation_command(&command) {
+                        // `\left.` / `\right.` use `.` as an empty delimiter.
+                        if matches!(command.as_str(), "left" | "right")
+                            && i < bytes.len()
+                            && bytes[i] == b'.'
+                        {
+                            i += 1;
+                        }
+                        continue;
+                    }
                     out.push(Token {
                         kind: TokenKind::Command(command),
                         span: Span::new(start, i),
@@ -280,4 +315,23 @@ pub fn lex(input: &str) -> Result<Vec<Token>, Diagnostic> {
         span: Span::new(input.len(), input.len()),
     });
     Ok(out)
+}
+
+/// Delimiter sizing and spacing commands affect only typesetting.
+fn is_presentation_command(command: &str) -> bool {
+    matches!(
+        command,
+        "left"
+            | "right"
+            | "big"
+            | "Big"
+            | "bigg"
+            | "Bigg"
+            | "bigl"
+            | "bigr"
+            | "Bigl"
+            | "Bigr"
+            | "quad"
+            | "qquad"
+    )
 }

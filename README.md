@@ -30,10 +30,10 @@ A := \{1,2,3\}
 A \cup \{4\}
 2 \in A
 \vec{1,2,3}
-\begin{pmatrix} 1 & 2 \\ 3 & 4 \end{pmatrix}
+M := \begin{pmatrix} 1 & 2 \\ 3 & 4 \end{pmatrix}
 \sqrt{16}
 \abs{-3}
-\det{A}
+\det{M}
 \diff{x^3}{x}
 \int_{0}^{1} x^2
 \lim_{x\to 0} x^2

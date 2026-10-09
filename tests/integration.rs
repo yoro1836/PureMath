@@ -632,3 +632,21 @@ fn function_name_juxtaposition_is_rejected() {
     assert_eq!(eval_str(r"\sin(0)", &mut env), "0");
     assert_eq!(eval_str(r"2\pi", &mut env), r"2 \cdot \pi");
 }
+
+#[test]
+fn latex_set_braces_and_delimiters() {
+    let mut env = Environment::new();
+    evaluate(r"A := \{1,2,3\}", &mut env).unwrap();
+    assert_eq!(eval_str(r"2 \in A", &mut env), "true");
+    assert_eq!(
+        eval_str(r"\{x \in \{1,2,3,4\} \mid x > 2\}", &mut env),
+        r"\{3,4\}"
+    );
+    assert_eq!(
+        eval_str(r"\left\{x \in A | x > 1\right\}", &mut env),
+        r"\{2,3\}"
+    );
+    assert_eq!(eval_str(r"\left(1 + 2\right) \cdot 3", &mut env), "9");
+    assert_eq!(eval_str(r"\emptyset \subseteq A", &mut env), "true");
+    assert_eq!(eval_str(r"2\,(1 + 2) + \left.1\right.", &mut env), "7");
+}
