@@ -146,19 +146,32 @@ The runtime boundary is reserved for environment-dependent capabilities such as 
 
 ```text
 src/
-├── ast.rs          semantic nodes
-├── diagnostics.rs  spans/errors
-├── env.rs          immutable name environment
-├── evaluator.rs    exact + symbolic evaluation
-├── lexer.rs        LaTeX-like tokenization
-├── lib.rs          public crate API
-├── main.rs         CLI
-├── module.rs       declarative imports
-├── parser.rs       surface -> AST
-├── render.rs       AST -> LaTeX-like output
-├── repl.rs         REPL
-├── simplifier.rs   small symbolic normalization layer
-└── value.rs        exact/symbolic values
+├── ast.rs            semantic nodes
+├── diagnostics.rs    spans and diagnostics with source context
+├── env.rs            immutable name environment
+├── evaluator/        exact + symbolic evaluation
+│   ├── mod.rs            Evaluator, statements, resource limits
+│   ├── expressions.rs    expression reduction, integrals, limits
+│   ├── arithmetic.rs     exact arithmetic and comparison
+│   ├── builtins.rs       builtin dispatch
+│   ├── algebra.rs        polynomial solving
+│   ├── symbolic.rs       differentiation, integration, substitution
+│   ├── elementary.rs     elementary functions and constants
+│   ├── linear_algebra.rs vectors and matrices
+│   ├── number_theory.rs  combinatorics and integer functions
+│   ├── sets.rs           set operations
+│   └── statistics.rs     mean, variance, standard deviation
+├── lexer.rs          LaTeX-like tokenization
+├── lib.rs            public crate API
+├── main.rs           CLI
+├── module.rs         declarative imports
+├── names.rs          mathematical identifier model
+├── parser.rs         surface -> AST
+├── render.rs         AST -> LaTeX output
+├── repl.rs           REPL
+├── runtime.rs        runtime capabilities (\print)
+├── simplifier.rs     small symbolic normalization layer
+└── value.rs          exact/symbolic values
 ```
 
 ### Explicit output

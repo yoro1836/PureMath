@@ -4,25 +4,22 @@ This roadmap is ordered by dependency: each milestone makes the next one
 sound. Semantics come before surface convenience, and the compiler comes only
 after evaluator semantics and domain information are stable.
 
-## Current state (0.1-development)
+## Current state (v0.1.1)
 
-The prototype is broad but shallow. It parses a LaTeX-like subset into a
-semantic AST and evaluates it with exact rationals, finite sets, vectors and
-matrices, and a small symbolic layer.
+The prototype parses a LaTeX-like subset into a semantic AST and evaluates it
+with exact rationals, finite sets, vectors and matrices, propositions, function
+values, and a small symbolic layer. Every documented code block runs.
 
-Known gaps found by running the documented examples:
+Known gaps:
 
-- Documented syntax that does not run: `\{1,2,3\}`, `\le \ge \leq \geq \neq`,
-  `\times`, `\left( \right)`, `\mapsto`, decimal literals (`3.7`).
 - Finite sets keep duplicates (`{1,1,2}`) and set equality is not decided
   (`{1,2} = {2,1}` stays symbolic).
 - Integers are fixed `i128` (`2^200`, `\factorial{40}` overflow).
 - `\solve{x^2+1=0}{x}` renders as `\solve()`; radicals are not simplified
   (`\sqrt{8}`); like terms are not collected (`x - x`).
 - `x \in \mathbb{N}` is accepted silently without meaning.
-- `\diff` accepts both argument orders by heuristic.
 - Free names in function bodies resolve at call time; this is unspecified.
-- `STATUS.md`, `MODULE-ARCHITECTURE.md` and SPEC §12 describe an older layout.
+- Documentation blocks are checked for running, not for their results.
 
 ## M0 — Foundation
 
@@ -37,26 +34,30 @@ Known gaps found by running the documented examples:
 
 ## v0.1.1 — Everything documented runs
 
-- Surface syntax: `\{ \}`, `\le \ge \leq \geq \neq \lt \gt`, `\times`,
-  `\left \right`, `\mid`, `\land \lor \neg`.
-- Decimal literals as exact rationals (`3.7` = 37/10).
+- [x] Surface syntax: `\{ \}`, `\emptyset`, `\le \ge \leq \geq \neq \lt \gt`,
+  `\times`, `\div`, `\left \right` and spacing commands, `\mid`,
+  `\land \lor \neg`.
+- [x] Decimal literals as exact rationals (`3.7` = 37/10).
 - [x] Mathematical identifier model: single-letter and Greek names with
   subscripts, implicit multiplication (`xy`, `2x`, `(a+b)(a-b)`), and
   `\operatorname{...}` / `\mathrm{...}` for multi-letter names.
-- `\mapsto` function values.
-- One canonical `\diff` argument order.
+- [x] `\mapsto` function values.
+- [x] One canonical `\diff` argument order: `\diff{x}{E}`.
+- [x] Builtins keep unknown arguments symbolic (`\det{A}` → `\det(A)`).
+- [x] `dx` ends an integrand instead of multiplying it.
 - [x] Fix Wiki and README escaping.
-- Refresh STATUS, SPEC §12 and MODULE-ARCHITECTURE.
+- [x] Refresh STATUS, SPEC §12 and MODULE-ARCHITECTURE.
 
-Exit criterion: `tests/docs_known_failures.txt` is empty.
+Exit criterion: `tests/docs_known_failures.txt` is empty. **Met.**
 
 ## v0.2 — Sound values
 
 - Dependency-free arbitrary-precision integers and rationals.
 - Canonical finite sets: deduplication, order-independent equality, decided
   set equality.
-- Tuples `(a, b)` and Cartesian products `A \times B`.
-- Propositions with `\land \lor \neg`; `\forall` / `\exists` over finite sets.
+- Tuples `(a, b)`.
+- `\forall` / `\exists` over finite sets.
+- `\times` as the Cartesian product of sets.
 - Constant and radical normalization (`\ln{e} = 1`, `\sqrt{8} = 2\sqrt{2}`).
 - Specify name-binding rules for function bodies.
 
@@ -158,6 +159,8 @@ environment.
    `x \cdot y`; multi-letter names via `\operatorname`). See
    `SYNTAX-DECISIONS.md`.
 2. Free-name binding in function bodies: at definition or at call time.
-3. Canonical `\diff` argument order.
+3. ~~Canonical `\diff` argument order~~ — decided: `\diff{x}{E}`.
 4. Arbitrary-precision arithmetic: self-implemented (dependency-free) or an
    external crate.
+5. Function application by juxtaposition: whether `\sin 2x` means
+   `\sin(2x)`. Currently rejected with a hint to write `\sin{x}`.

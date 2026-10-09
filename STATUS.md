@@ -1,41 +1,41 @@
 # PureMath Prototype Status
 
-## Implemented in v0.1 development prototype
+Current milestone: **v0.1.1** — every documented code block runs. See
+`spec/ROADMAP.md` for what comes next.
 
-- Modular Rust crate
-- Public library API
-- CLI + REPL
-- Structured source spans
-- Multi-statement files
-- `%` comments
-- Exact rational arithmetic
-- Function definitions/application
-- Recursive piecewise functions
-- Finite sums
-- Finite sets
-- Symbolic preservation
-- Minimal symbolic simplification
-- Declarative module imports
-- Module cycle detection/cache
+## Implemented
+
+- Modular, dependency-free Rust crate with a public library API
+- CLI (`--ast`, `--help`, `--version`) and REPL
+- Source spans and diagnostics with source context
+- Multi-statement files, `%` comments
+- Mathematical identifier model: single-letter and Greek names, subscripts,
+  implicit multiplication, `\operatorname{...}` for multi-letter names
+- Exact rational arithmetic, decimal literals as exact rationals
+- Immutable definitions; functions, recursion, piecewise definitions
+- Function values with `\mapsto`
+- Relations (`=`, `\neq`, `<`, `\le`, `>`, `\ge`) and connectives
+  (`\land`, `\lor`, `\neg`) with symbolic fallback
+- Finite sums and products
+- Finite sets with `\{ \}`, set operations, relations and comprehensions
+- Vectors and matrices with exact linear algebra
+- Number theory, combinatorics, statistics, elementary functions
+- Symbolic preservation, including builtins over unknown arguments
+- Substitution, differentiation, exact polynomial integration (with `dx`),
+  direct-substitution limits, degree-2 polynomial solving
+- Declarative module imports with cycle detection and caching
+- Runtime boundary: explicit `\print`
 - Evaluation resource limits
-- Integration tests
-- AST dump mode
+- Integration, CLI, snapshot and executable-documentation tests
 
-## Intentionally not implemented yet
+## Not implemented yet
 
+- Arbitrary-precision integers (values are `i128`)
+- Canonical finite sets (deduplication, decided set equality), tuples
+- Domains, type/domain inference, `\forall` / `\exists`
 - Full KaTeX grammar
-- Unicode/math-font identifier model
-- Type/domain inference
-- Set comprehension
-- quantified logic
-- complex numbers as exact values
-- matrix/vector semantics
-- general symbolic differentiation/integration
-- namespace/export syntax
-- explicit runtime effect system
-- Math IR
-- WASM/native compiler backend
-
-## Verification note
-
-The execution environment used for this package does not contain `cargo` or `rustc`, so `cargo test` could not be executed locally. The project is kept dependency-free and includes a Rust integration suite intended to run directly under a normal Rust 2021 toolchain.
+- Complex numbers
+- General symbolic algebra (like terms, factoring, radical simplification)
+- General integration, limits and equation solving
+- Namespaces and explicit exports
+- Math IR and the LLVM backend
