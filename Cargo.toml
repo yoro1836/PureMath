@@ -1,6 +1,6 @@
 [package]
 name = "puremath"
-version = "0.1.0-dev"
+version = "0.1.1"
 edition = "2021"
 description = "Modular prototype interpreter for the PureMath mathematical programming language"
 license = "MIT"

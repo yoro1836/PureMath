@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.1.1-development
+## 0.1.1
 
 - Mathematical identifier model: adjacent letters multiply, names are single
   letters or Greek letters with subscripts, multi-letter names use
