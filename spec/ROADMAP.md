@@ -12,7 +12,6 @@ matrices, and a small symbolic layer.
 
 Known gaps found by running the documented examples:
 
-- CI on `main` is red (`cargo fmt --check`, clippy `redundant_locals`).
 - Documented syntax that does not run: `\{1,2,3\}`, `\le \ge \leq \geq \neq`,
   `\times`, `\left( \right)`, implicit multiplication (`2x`), `\mapsto`,
   decimal literals (`3.7`). Wiki code blocks use a doubled `\\print`.
@@ -28,11 +27,12 @@ Known gaps found by running the documented examples:
 
 ## M0 — Foundation
 
-- Restore green CI (rustfmt, clippy).
-- Require CI on `main`.
-- Executable documentation: extract `latex` code blocks from README, Wiki and
-  spec and run them as tests, so documentation drift fails CI.
-- Snapshot tests for `examples/*.pmath` output and `--ast` output.
+- [x] Restore green CI (rustfmt, clippy); run CI on `dev` as well as `main`.
+- [ ] Require CI on `main` (repository settings).
+- [x] Executable documentation: `latex` code blocks from README and Wiki run
+  as tests (`tests/docs.rs`); current drift is recorded in
+  `tests/docs_known_failures.txt`, which may only shrink.
+- [x] Snapshot tests for `examples/*.pmath` output and `--ast` output.
 
 ## v0.1.1 — Everything documented runs
 
@@ -44,7 +44,7 @@ Known gaps found by running the documented examples:
 - One canonical `\diff` argument order.
 - Fix Wiki escaping; refresh STATUS, SPEC §12 and MODULE-ARCHITECTURE.
 
-Exit criterion: every documented code block passes the documentation tests.
+Exit criterion: `tests/docs_known_failures.txt` is empty.
 
 ## v0.2 — Sound values
 

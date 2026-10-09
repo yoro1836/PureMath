@@ -40,3 +40,14 @@ cargo fmt --all -- --check
 cargo clippy --all-targets --all-features -- -D warnings
 cargo test --all-features
 ```
+
+## Snapshot and documentation tests
+
+- `tests/snapshots.rs` compares `examples/*.pmath` output and `--ast` output
+  with `tests/snapshots/`. After an intended change, regenerate with
+  `UPDATE_SNAPSHOTS=1 cargo test --test snapshots` and review the diff.
+- `tests/docs.rs` runs every ```latex block in README.md, and in the Wiki
+  when `PUREMATH_WIKI_DIR` points at a Wiki checkout. Blocks that do not run
+  yet are listed in `tests/docs_known_failures.txt`. That list must only
+  shrink: remove entries when you fix them, and do not add entries to hide
+  a regression.
