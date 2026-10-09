@@ -300,7 +300,7 @@ fn derivative_accepts_both_argument_orders_and_stays_symbolic() {
         r"2 \cdot x"
     );
     assert_eq!(
-        evaluate(r"\diff{x^3 + 2*x}{x}", &mut env)
+        evaluate(r"\diff{x}{x^3 + 2x}", &mut env)
             .unwrap()
             .to_string(),
         r"3 \cdot x^{2} + 2"
@@ -308,7 +308,7 @@ fn derivative_accepts_both_argument_orders_and_stays_symbolic() {
 
     evaluate("x := 12", &mut env).unwrap();
     assert_eq!(
-        evaluate(r"\diff{x^3 + 2*x}{x}", &mut env)
+        evaluate(r"\diff{x}{x^3 + 2x}", &mut env)
             .unwrap()
             .to_string(),
         r"3 \cdot x^{2} + 2"
@@ -324,7 +324,7 @@ fn bare_command_aliases_work_without_backslashes() {
         r"2 \cdot x"
     );
     assert_eq!(
-        evaluate(r"diff{x^3 + 2*x}{x}", &mut env)
+        evaluate(r"diff{x}{x^3 + 2x}", &mut env)
             .unwrap()
             .to_string(),
         r"3 \cdot x^{2} + 2"
@@ -411,7 +411,7 @@ fn bare_runtime_command_works_without_backslash() {
 fn calculus_primitives() {
     let mut env = Environment::new();
     assert_eq!(
-        evaluate(r"\diff{x^3 + 2*x}{x}", &mut env)
+        evaluate(r"\diff{x}{x^3 + 2x}", &mut env)
             .unwrap()
             .to_string(),
         r"3 \cdot x^{2} + 2"
@@ -631,4 +631,117 @@ fn function_name_juxtaposition_is_rejected() {
     assert!(error.contains(r"\sin{x}"), "{}", error);
     assert_eq!(eval_str(r"\sin(0)", &mut env), "0");
     assert_eq!(eval_str(r"2\pi", &mut env), r"2 \cdot \pi");
+}
+
+#[test]
+fn latex_set_braces_and_delimiters() {
+    let mut env = Environment::new();
+    evaluate(r"A := \{1,2,3\}", &mut env).unwrap();
+    assert_eq!(eval_str(r"2 \in A", &mut env), "true");
+    assert_eq!(
+        eval_str(r"\{x \in \{1,2,3,4\} \mid x > 2\}", &mut env),
+        r"\{3,4\}"
+    );
+    assert_eq!(
+        eval_str(r"\left\{x \in A | x > 1\right\}", &mut env),
+        r"\{2,3\}"
+    );
+    assert_eq!(eval_str(r"\left(1 + 2\right) \cdot 3", &mut env), "9");
+    assert_eq!(eval_str(r"\emptyset \subseteq A", &mut env), "true");
+    assert_eq!(eval_str(r"2\,(1 + 2) + \left.1\right.", &mut env), "7");
+}
+
+#[test]
+fn latex_relations_and_operators() {
+    let mut env = Environment::new();
+    assert_eq!(eval_str(r"1 \le 2", &mut env), "true");
+    assert_eq!(eval_str(r"2 \leq 1", &mut env), "false");
+    assert_eq!(eval_str(r"3 \ge 3", &mut env), "true");
+    assert_eq!(eval_str(r"1 \geq 2", &mut env), "false");
+    assert_eq!(eval_str(r"1 \lt 2", &mut env), "true");
+    assert_eq!(eval_str(r"1 \gt 2", &mut env), "false");
+    assert_eq!(eval_str(r"1 \neq 2", &mut env), "true");
+    assert_eq!(eval_str(r"1 \ne 1", &mut env), "false");
+    assert_eq!(eval_str(r"x \neq 1", &mut env), r"x \neq 1");
+    assert_eq!(eval_str(r"2 \times 3", &mut env), "6");
+    assert_eq!(eval_str(r"6 \div 4", &mut env), r"\frac{3}{2}");
+    evaluate(
+        r"f(x) := \begin{cases} x^2 & x \ge 0 \\ -x & x < 0 \end{cases}",
+        &mut env,
+    )
+    .unwrap();
+    assert_eq!(eval_str("f(-3)", &mut env), "3");
+}
+
+#[test]
+fn logical_connectives() {
+    let mut env = Environment::new();
+    assert_eq!(eval_str(r"1 < 2 \land 2 < 3", &mut env), "true");
+    assert_eq!(eval_str(r"1 > 2 \lor 2 < 3", &mut env), "true");
+    assert_eq!(eval_str(r"\neg 1 = 2", &mut env), "true");
+    assert_eq!(eval_str(r"x > 0 \land 2 < 1", &mut env), "false");
+    assert_eq!(eval_str(r"x > 0 \land 1 < 2", &mut env), "x > 0");
+    assert_eq!(eval_str(r"x > 0 \lor y > 0", &mut env), r"x > 0 \lor y > 0");
+    assert_eq!(eval_str(r"\neg x > 0", &mut env), r"\neg (x > 0)");
+    assert_eq!(
+        eval_str(r"(a \lor b) \land c", &mut env),
+        r"(a \lor b) \land c"
+    );
+    assert!(evaluate(r"1 \land 2", &mut env).is_err());
+}
+
+#[test]
+fn decimal_literals_are_exact_rationals() {
+    let mut env = Environment::new();
+    assert_eq!(eval_str("3.7", &mut env), r"\frac{37}{10}");
+    assert_eq!(eval_str("0.1 + 0.2 = 0.3", &mut env), "true");
+    assert_eq!(eval_str(r"\floor{3.7}", &mut env), "3");
+    assert_eq!(eval_str("2.5x", &mut env), r"\frac{5}{2} \cdot x");
+    assert!(evaluate("x2.5", &mut env).is_err());
+}
+
+#[test]
+fn derivative_variable_comes_first() {
+    let mut env = Environment::new();
+    assert_eq!(eval_str(r"\diff{x}{x}", &mut env), "1");
+    let error = evaluate(r"\diff{x^2}{x}", &mut env)
+        .unwrap_err()
+        .to_string();
+    assert!(error.contains(r"\diff{x}{expression}"), "{}", error);
+}
+
+#[test]
+fn value_builtins_preserve_unknown_arguments() {
+    let mut env = Environment::new();
+    assert_eq!(eval_str(r"\det{A}", &mut env), r"\det(A)");
+    assert_eq!(eval_str(r"\dot{u}{v}", &mut env), r"\dot(u, v)");
+    assert_eq!(eval_str(r"\gcd{a}{6}", &mut env), r"\gcd(a, 6)");
+    assert_eq!(eval_str(r"\dot{\vec{1,2}}{\vec{3,4}}", &mut env), "11");
+    assert!(evaluate(r"\det{\{1,2\}}", &mut env).is_err());
+}
+
+#[test]
+fn mapsto_function_values() {
+    let mut env = Environment::new();
+    evaluate(r"s := x \mapsto x^2", &mut env).unwrap();
+    assert_eq!(eval_str("s(3)", &mut env), "9");
+    assert_eq!(eval_str("s", &mut env), r"x \mapsto x^{2}");
+    assert_eq!(eval_str(r"(x \mapsto x + 1)(4)", &mut env), "5");
+    evaluate(r"g(a) := x \mapsto x + a", &mut env).unwrap();
+    evaluate("h := g(5)", &mut env).unwrap();
+    assert_eq!(eval_str("h(1)", &mut env), "6");
+    evaluate("c(f) := f(f(2))", &mut env).unwrap();
+    assert_eq!(eval_str(r"c(t \mapsto 3t)", &mut env), "18");
+    assert!(evaluate(r"2 \mapsto 3", &mut env).is_err());
+}
+
+#[test]
+fn integral_differential_ends_the_integrand() {
+    let mut env = Environment::new();
+    assert_eq!(eval_str(r"\int_{0}^{1} x^2 dx", &mut env), r"\frac{1}{3}");
+    assert_eq!(eval_str(r"\int_{0}^{1} x^2 \,dx", &mut env), r"\frac{1}{3}");
+    assert_eq!(eval_str(r"\int_{0}^{3} 3t^2 dt", &mut env), "27");
+    assert_eq!(eval_str(r"\int_{0}^{1} 2x dx + 1", &mut env), "2");
+    assert_eq!(eval_str(r"\int x^2 dx", &mut env), r"\frac{x^{3}}{3}");
+    assert!(evaluate(r"\int_{x=0}^{1} x dt", &mut env).is_err());
 }

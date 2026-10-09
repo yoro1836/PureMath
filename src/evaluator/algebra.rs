@@ -39,7 +39,11 @@ pub(super) fn polynomial(
             Value::Rational(r) => Some(vec![r]),
             _ => None,
         },
-        Expr::Unary { expr, .. } => {
+        Expr::Unary {
+            op: crate::ast::UnaryOp::Neg,
+            expr,
+            ..
+        } => {
             let mut p = polynomial(expr, var, evaluator, locals)?;
             for c in &mut p {
                 c.num = c.num.checked_neg()?;

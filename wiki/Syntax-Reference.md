@@ -27,10 +27,18 @@ Standard words such as `sin`, `gcd`, `det`, `in` and `pi` stay whole without a b
 |---|---|
 | `+` | Addition |
 | `-` | Subtraction / negation |
-| `*` | Multiplication |
-| `/` | Division |
+| `*`, `\times`, juxtaposition (`2x`) | Multiplication |
+| `/`, `\div` | Division |
 | `^` | Power |
 | `=` | Equality |
+| `\neq` / `\ne` | Inequality |
+| `<`, `\lt` | Less than |
+| `<=`, `\le`, `\leq` | Less than or equal |
+| `>`, `\gt` | Greater than |
+| `>=`, `\ge`, `\geq` | Greater than or equal |
+| `\land` / `\wedge` | Conjunction |
+| `\lor` / `\vee` | Disjunction |
+| `\neg` / `\lnot` | Negation |
 | `\in` / `in` | Membership |
 | `\subset` / `subset` | Proper subset |
 | `\subseteq` / `subseteq` | Subset or equal |
@@ -38,6 +46,35 @@ Standard words such as `sin`, `gcd`, `det`, `in` and `pi` stay whole without a b
 | `\cap` / `cap` | Intersection |
 | `\setminus` / `setminus` | Set difference |
 | `\cdot` / `cdot` | Dot/scalar multiplication notation |
+| `x \mapsto E` | Function value |
+
+Relations bind tighter than `\land`, which binds tighter than `\lor`:
+
+```latex
+\print{1 < 2 \land 2 \le 3 \lor 1 \neq 1}
+\print{\neg 1 = 2}
+```
+
+## Literals and sets
+
+```latex
+\print{0.1 + 0.2 = 0.3}
+A := \{1, 2, 3\}
+\print{\{x \in A \mid x \ge 2\}}
+\print{\emptyset \subseteq A}
+```
+
+Decimal literals are exact rationals: `3.7` is `\frac{37}{10}`. Set literals use `\{ \}` as in LaTeX (plain `{ }` also works), and comprehensions separate the condition with `\mid` or `|`.
+
+`\left`, `\right`, `\big` and spacing commands such as `\,` only affect typesetting and are ignored.
+
+## Function values
+
+```latex
+s := x \mapsto x^2
+\print{s(3)}
+\print{(t \mapsto t + 1)(4)}
+```
 
 ## Braced commands
 
@@ -101,11 +138,15 @@ prod_{i=1}^{5} i
 
 ## Integrals
 
-The current prototype uses an indexed integral form:
+Integrals take optional bounds and an optional differential:
 
 ```latex
-\int_{0}^{1} x^2
+\print{\int_{0}^{1} x^2 \,dx}
+\print{\int_{0}^{3} 3t^2 dt}
+\print{\int x^2 dx}
 ```
+
+Inside an integrand, `d` followed by a name is the differential; it ends the integrand and names the integration variable. Without it, the variable is inferred from the integrand.
 
 ## Limits
 
@@ -151,7 +192,7 @@ For example, the canonical derivative form remains:
 \diff{x}{x^2 + 1}
 ```
 
-The current prototype also accepts the argument order expression, variable for derivative handling, but the braced command form is the documented surface syntax.
+The variable comes first, as `d/dx` is read; `\diff{x^2 + 1}{x}` is rejected with a hint.
 
 ## Optional command backslashes
 

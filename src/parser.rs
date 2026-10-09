@@ -6,11 +6,17 @@ use crate::names;
 pub struct Parser {
     tokens: Vec<Token>,
     pos: usize,
+    /// Nesting depth of integrands, where `d x` ends the body as a differential.
+    integral_depth: usize,
 }
 
 impl Parser {
     pub fn new(tokens: Vec<Token>) -> Self {
-        Self { tokens, pos: 0 }
+        Self {
+            tokens,
+            pos: 0,
+            integral_depth: 0,
+        }
     }
 
     pub fn parse_program(&mut self) -> Result<Program, Diagnostic> {
@@ -116,9 +122,35 @@ impl Parser {
     fn parse_expr(&mut self, min_bp: u8) -> Result<Expr, Diagnostic> {
         let mut lhs = self.parse_prefix()?;
         loop {
+            // `x \mapsto E` binds loosest; its body extends as far as possible.
+            if min_bp <= 1 && self.command_is("mapsto") {
+                let Expr::Symbol { name, span } = &lhs else {
+                    return Err(
+                        self.error_at(lhs.span(), "\\mapsto requires a variable on its left")
+                    );
+                };
+                let (param, start) = (name.clone(), span.start);
+                self.take();
+                let body = self.parse_expr(0)?;
+                lhs = Expr::Lambda {
+                    params: vec![param],
+                    span: Span::new(start, body.span().end),
+                    body: Box::new(body),
+                };
+                continue;
+            }
             let (op, lbp, rbp) = match self.peek_kind() {
                 Some(TokenKind::Eq) => (BinOp::Eq, 5, 6),
                 Some(TokenKind::Lt) => (BinOp::Lt, 5, 6),
+                Some(TokenKind::Command(c)) if c == "lt" => (BinOp::Lt, 5, 6),
+                Some(TokenKind::Command(c)) if c == "le" || c == "leq" => (BinOp::Le, 5, 6),
+                Some(TokenKind::Command(c)) if c == "gt" => (BinOp::Gt, 5, 6),
+                Some(TokenKind::Command(c)) if c == "ge" || c == "geq" => (BinOp::Ge, 5, 6),
+                Some(TokenKind::Command(c)) if c == "ne" || c == "neq" => (BinOp::Ne, 5, 6),
+                Some(TokenKind::Command(c)) if c == "lor" || c == "vee" => (BinOp::Or, 2, 3),
+                Some(TokenKind::Command(c)) if c == "land" || c == "wedge" => (BinOp::And, 3, 4),
+                Some(TokenKind::Command(c)) if c == "times" => (BinOp::Mul, 20, 21),
+                Some(TokenKind::Command(c)) if c == "div" => (BinOp::Div, 20, 21),
                 Some(TokenKind::Le) => (BinOp::Le, 5, 6),
                 Some(TokenKind::Gt) => (BinOp::Gt, 5, 6),
                 Some(TokenKind::Ge) => (BinOp::Ge, 5, 6),
@@ -148,7 +180,9 @@ impl Parser {
                     (BinOp::Mul, 20, 21)
                 }
                 Some(TokenKind::Caret) => (BinOp::Pow, 30, 30),
-                Some(TokenKind::Int(_)) if matches!(lhs, Expr::Symbol { .. }) => {
+                Some(TokenKind::Int(_) | TokenKind::Decimal { .. })
+                    if matches!(lhs, Expr::Symbol { .. }) =>
+                {
                     return Err(self.error_here(
                         "a number cannot follow a name; write x_{2} for a subscripted name \
                          or 2x for a product",
@@ -195,6 +229,12 @@ impl Parser {
         };
         let expr = match token_kind {
             TokenKind::Int(n) => Expr::Integer(n, token.span),
+            // A decimal is an exact rational: 3.7 is 37/10.
+            TokenKind::Decimal { digits, scale } => Expr::Rational {
+                numerator: Box::new(Expr::Integer(digits, token.span)),
+                denominator: Box::new(Expr::Integer(10i128.pow(scale), token.span)),
+                span: token.span,
+            },
             TokenKind::Ident(name) if self.bare_prefix_command(&name) => {
                 self.parse_command_application(name, token.span.start)?
             }
@@ -215,7 +255,20 @@ impl Parser {
                 self.expect(TokenKind::RParen)?;
                 inner
             }
-            TokenKind::LBrace => self.parse_set_body(token.span.start)?,
+            TokenKind::LBrace => self.parse_set_body(token.span.start, TokenKind::RBrace)?,
+            TokenKind::SetOpen => self.parse_set_body(token.span.start, TokenKind::SetClose)?,
+            TokenKind::Command(c) if c == "neg" || c == "lnot" => {
+                let inner = self.parse_expr(5)?;
+                Expr::Unary {
+                    op: UnaryOp::Not,
+                    span: Span::new(token.span.start, inner.span().end),
+                    expr: Box::new(inner),
+                }
+            }
+            TokenKind::Command(c) if c == "emptyset" || c == "varnothing" => Expr::Set {
+                elements: Vec::new(),
+                span: token.span,
+            },
             TokenKind::Command(c) if c == "frac" => {
                 let a = self.parse_group_expr()?;
                 let b = self.parse_group_expr()?;
@@ -254,11 +307,14 @@ impl Parser {
         self.parse_postfix(expr)
     }
 
-    /// Function application `f(x)` applies only to names; after any other
-    /// expression a parenthesis starts an implicit product, as in `2(x+1)`.
+    /// Function application `f(x)` applies only to names and function values
+    /// (`(x \mapsto x^2)(3)`); after any other expression a parenthesis starts
+    /// an implicit product, as in `2(x+1)`.
     fn parse_postfix(&mut self, mut expr: Expr) -> Result<Expr, Diagnostic> {
         loop {
-            if self.at(&TokenKind::LParen) && matches!(expr, Expr::Symbol { .. }) {
+            if self.at(&TokenKind::LParen)
+                && matches!(expr, Expr::Symbol { .. } | Expr::Lambda { .. })
+            {
                 let start = self.take().span.start;
                 let mut args = Vec::new();
                 if !self.at(&TokenKind::RParen) {
@@ -299,7 +355,7 @@ impl Parser {
         Ok(expr)
     }
 
-    fn parse_set_body(&mut self, start: usize) -> Result<Expr, Diagnostic> {
+    fn parse_set_body(&mut self, start: usize, close: TokenKind) -> Result<Expr, Diagnostic> {
         if let Some(TokenKind::Ident(var)) | Some(TokenKind::Command(var)) =
             self.peek_kind().cloned()
         {
@@ -309,10 +365,10 @@ impl Parser {
                 self.take();
                 self.take();
                 let domain = self.parse_expr(6)?;
-                if self.at(&TokenKind::Pipe) {
+                if self.at(&TokenKind::Pipe) || self.command_is("mid") {
                     self.take();
                     let condition = self.parse_expr(0)?;
-                    let end = self.expect(TokenKind::RBrace)?.end;
+                    let end = self.expect(close)?.end;
                     return Ok(Expr::SetComprehension {
                         var,
                         domain: Box::new(domain),
@@ -335,7 +391,7 @@ impl Parser {
                 break;
             }
         }
-        let end = self.expect(TokenKind::RBrace)?.end;
+        let end = self.expect(close)?.end;
         Ok(Expr::Set {
             elements,
             span: Span::new(start, end),
@@ -479,6 +535,7 @@ impl Parser {
         let mut lower = None;
         let mut upper = None;
         let mut var = "x".to_owned();
+        let mut declared = None;
 
         if self.at(&TokenKind::Underscore) {
             self.take();
@@ -491,7 +548,8 @@ impl Parser {
             } = group
             {
                 if let Expr::Symbol { name, .. } = *lhs {
-                    var = name;
+                    var = name.clone();
+                    declared = Some(name);
                 }
                 lower = Some(rhs);
             } else {
@@ -502,8 +560,25 @@ impl Parser {
             self.take();
             upper = Some(Box::new(self.parse_group_expr()?));
         }
-        let body = self.parse_expr(0)?;
-        if var == "x" {
+        self.integral_depth += 1;
+        let body = self.parse_expr(0);
+        let differential = body.is_ok() && self.at_differential();
+        self.integral_depth -= 1;
+        let body = body?;
+        if differential {
+            self.take();
+            let (differential, span) = self.parse_name()?.expect("differential variable");
+            if declared.as_ref().is_some_and(|name| *name != differential) {
+                return Err(self.error_at(
+                    span,
+                    format!(
+                        "integration variable {} does not match d{}",
+                        var, differential
+                    ),
+                ));
+            }
+            var = differential;
+        } else if var == "x" {
             if let Some(candidate) = Self::first_non_constant_symbol(&body) {
                 var = candidate;
             }
@@ -616,6 +691,9 @@ impl Parser {
                 Self::first_non_constant_symbol(&b.value)
                     .or_else(|| Self::first_non_constant_symbol(&b.condition))
             }),
+            Expr::Lambda { body, params, .. } => {
+                Self::first_non_constant_symbol(body).filter(|name| !params.contains(name))
+            }
             Expr::Integer(..) | Expr::Opaque { .. } => None,
         }
     }
@@ -820,8 +898,21 @@ impl Parser {
         )
     }
 
+    /// `d` followed by a name inside an integrand: the differential `dx`.
+    fn at_differential(&self) -> bool {
+        self.integral_depth > 0
+            && matches!(self.peek_kind(), Some(TokenKind::Ident(d)) if d == "d")
+            && matches!(
+                self.tokens.get(self.pos + 1).map(|token| &token.kind),
+                Some(TokenKind::Ident(name)) if name.len() == 1
+            )
+    }
+
     /// Juxtaposed operands multiply (`2x`, `xy`, `2\pi`, `(a+b)(a-b)`).
     fn starts_implicit_operand(&self) -> bool {
+        if self.at_differential() {
+            return false;
+        }
         match self.peek_kind() {
             Some(TokenKind::Ident(word)) | Some(TokenKind::Command(word)) => {
                 !names::is_infix_word(word)

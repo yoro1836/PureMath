@@ -2524,6 +2524,13 @@ Program {
                     },
                 },
                 args: [
+                    Symbol {
+                        name: "x",
+                        span: Span {
+                            start: 2206,
+                            end: 2207,
+                        },
+                    },
                     Binary {
                         op: Add,
                         lhs: Binary {
@@ -2531,20 +2538,20 @@ Program {
                             lhs: Symbol {
                                 name: "x",
                                 span: Span {
-                                    start: 2206,
-                                    end: 2207,
+                                    start: 2209,
+                                    end: 2210,
                                 },
                             },
                             rhs: Integer(
                                 3,
                                 Span {
-                                    start: 2208,
-                                    end: 2209,
+                                    start: 2211,
+                                    end: 2212,
                                 },
                             ),
                             span: Span {
-                                start: 2206,
-                                end: 2209,
+                                start: 2209,
+                                end: 2212,
                             },
                         },
                         rhs: Binary {
@@ -2552,43 +2559,36 @@ Program {
                             lhs: Integer(
                                 2,
                                 Span {
-                                    start: 2212,
-                                    end: 2213,
+                                    start: 2215,
+                                    end: 2216,
                                 },
                             ),
                             rhs: Symbol {
                                 name: "x",
                                 span: Span {
-                                    start: 2214,
-                                    end: 2215,
+                                    start: 2216,
+                                    end: 2217,
                                 },
                             },
                             span: Span {
-                                start: 2212,
-                                end: 2215,
+                                start: 2215,
+                                end: 2217,
                             },
                         },
                         span: Span {
-                            start: 2206,
-                            end: 2215,
-                        },
-                    },
-                    Symbol {
-                        name: "x",
-                        span: Span {
-                            start: 2217,
-                            end: 2218,
+                            start: 2209,
+                            end: 2217,
                         },
                     },
                 ],
                 span: Span {
                     start: 2200,
-                    end: 2219,
+                    end: 2218,
                 },
             },
             span: Span {
                 start: 2193,
-                end: 2219,
+                end: 2218,
             },
         },
         Print {
@@ -2598,8 +2598,8 @@ Program {
                     Integer(
                         0,
                         Span {
-                            start: 2234,
-                            end: 2235,
+                            start: 2233,
+                            end: 2234,
                         },
                     ),
                 ),
@@ -2607,8 +2607,8 @@ Program {
                     Integer(
                         3,
                         Span {
-                            start: 2238,
-                            end: 2239,
+                            start: 2237,
+                            end: 2238,
                         },
                     ),
                 ),
@@ -2617,30 +2617,30 @@ Program {
                     lhs: Symbol {
                         name: "x",
                         span: Span {
-                            start: 2241,
-                            end: 2242,
+                            start: 2240,
+                            end: 2241,
                         },
                     },
                     rhs: Integer(
                         2,
                         Span {
-                            start: 2243,
-                            end: 2244,
+                            start: 2242,
+                            end: 2243,
                         },
                     ),
                     span: Span {
-                        start: 2241,
-                        end: 2244,
+                        start: 2240,
+                        end: 2243,
                     },
                 },
                 span: Span {
-                    start: 2228,
-                    end: 2244,
+                    start: 2227,
+                    end: 2243,
                 },
             },
             span: Span {
-                start: 2221,
-                end: 2244,
+                start: 2220,
+                end: 2243,
             },
         },
         Print {
@@ -2649,8 +2649,8 @@ Program {
                 target: Integer(
                     2,
                     Span {
-                        start: 2264,
-                        end: 2265,
+                        start: 2263,
+                        end: 2264,
                     },
                 ),
                 body: Binary {
@@ -2658,30 +2658,30 @@ Program {
                     lhs: Symbol {
                         name: "x",
                         span: Span {
-                            start: 2267,
-                            end: 2268,
+                            start: 2266,
+                            end: 2267,
                         },
                     },
                     rhs: Integer(
                         2,
                         Span {
-                            start: 2269,
-                            end: 2270,
+                            start: 2268,
+                            end: 2269,
                         },
                     ),
                     span: Span {
-                        start: 2267,
-                        end: 2270,
+                        start: 2266,
+                        end: 2269,
                     },
                 },
                 span: Span {
-                    start: 2253,
-                    end: 2270,
+                    start: 2252,
+                    end: 2269,
                 },
             },
             span: Span {
-                start: 2246,
-                end: 2270,
+                start: 2245,
+                end: 2269,
             },
         },
         Print {
@@ -2689,8 +2689,8 @@ Program {
                 callee: Symbol {
                     name: "\\solve",
                     span: Span {
-                        start: 2323,
-                        end: 2329,
+                        start: 2322,
+                        end: 2328,
                     },
                 },
                 args: [
@@ -2703,62 +2703,62 @@ Program {
                                 lhs: Integer(
                                     3,
                                     Span {
-                                        start: 2330,
-                                        end: 2331,
+                                        start: 2329,
+                                        end: 2330,
                                     },
                                 ),
                                 rhs: Symbol {
                                     name: "x",
                                     span: Span {
-                                        start: 2332,
-                                        end: 2333,
+                                        start: 2331,
+                                        end: 2332,
                                     },
                                 },
                                 span: Span {
-                                    start: 2330,
-                                    end: 2333,
+                                    start: 2329,
+                                    end: 2332,
                                 },
                             },
                             rhs: Integer(
                                 6,
                                 Span {
-                                    start: 2336,
-                                    end: 2337,
+                                    start: 2335,
+                                    end: 2336,
                                 },
                             ),
                             span: Span {
-                                start: 2330,
-                                end: 2337,
+                                start: 2329,
+                                end: 2336,
                             },
                         },
                         rhs: Integer(
                             0,
                             Span {
-                                start: 2340,
-                                end: 2341,
+                                start: 2339,
+                                end: 2340,
                             },
                         ),
                         span: Span {
-                            start: 2330,
-                            end: 2341,
+                            start: 2329,
+                            end: 2340,
                         },
                     },
                     Symbol {
                         name: "x",
                         span: Span {
-                            start: 2343,
-                            end: 2344,
+                            start: 2342,
+                            end: 2343,
                         },
                     },
                 ],
                 span: Span {
-                    start: 2323,
-                    end: 2345,
+                    start: 2322,
+                    end: 2344,
                 },
             },
             span: Span {
-                start: 2316,
-                end: 2345,
+                start: 2315,
+                end: 2344,
             },
         },
         Print {
@@ -2766,8 +2766,8 @@ Program {
                 callee: Symbol {
                     name: "\\solve",
                     span: Span {
-                        start: 2354,
-                        end: 2360,
+                        start: 2353,
+                        end: 2359,
                     },
                 },
                 args: [
@@ -2782,20 +2782,20 @@ Program {
                                     lhs: Symbol {
                                         name: "x",
                                         span: Span {
-                                            start: 2361,
-                                            end: 2362,
+                                            start: 2360,
+                                            end: 2361,
                                         },
                                     },
                                     rhs: Integer(
                                         2,
                                         Span {
-                                            start: 2363,
-                                            end: 2364,
+                                            start: 2362,
+                                            end: 2363,
                                         },
                                     ),
                                     span: Span {
-                                        start: 2361,
-                                        end: 2364,
+                                        start: 2360,
+                                        end: 2363,
                                     },
                                 },
                                 rhs: Binary {
@@ -2803,67 +2803,67 @@ Program {
                                     lhs: Integer(
                                         5,
                                         Span {
-                                            start: 2367,
-                                            end: 2368,
+                                            start: 2366,
+                                            end: 2367,
                                         },
                                     ),
                                     rhs: Symbol {
                                         name: "x",
                                         span: Span {
-                                            start: 2369,
-                                            end: 2370,
+                                            start: 2368,
+                                            end: 2369,
                                         },
                                     },
                                     span: Span {
-                                        start: 2367,
-                                        end: 2370,
+                                        start: 2366,
+                                        end: 2369,
                                     },
                                 },
                                 span: Span {
-                                    start: 2361,
-                                    end: 2370,
+                                    start: 2360,
+                                    end: 2369,
                                 },
                             },
                             rhs: Integer(
                                 6,
                                 Span {
-                                    start: 2373,
-                                    end: 2374,
+                                    start: 2372,
+                                    end: 2373,
                                 },
                             ),
                             span: Span {
-                                start: 2361,
-                                end: 2374,
+                                start: 2360,
+                                end: 2373,
                             },
                         },
                         rhs: Integer(
                             0,
                             Span {
-                                start: 2377,
-                                end: 2378,
+                                start: 2376,
+                                end: 2377,
                             },
                         ),
                         span: Span {
-                            start: 2361,
-                            end: 2378,
+                            start: 2360,
+                            end: 2377,
                         },
                     },
                     Symbol {
                         name: "x",
                         span: Span {
-                            start: 2380,
-                            end: 2381,
+                            start: 2379,
+                            end: 2380,
                         },
                     },
                 ],
                 span: Span {
-                    start: 2354,
-                    end: 2382,
+                    start: 2353,
+                    end: 2381,
                 },
             },
             span: Span {
-                start: 2347,
-                end: 2382,
+                start: 2346,
+                end: 2381,
             },
         },
         Print {
@@ -2871,27 +2871,27 @@ Program {
                 callee: Symbol {
                     name: "\\sin",
                     span: Span {
-                        start: 2441,
-                        end: 2445,
+                        start: 2440,
+                        end: 2444,
                     },
                 },
                 args: [
                     Symbol {
                         name: "x",
                         span: Span {
-                            start: 2446,
-                            end: 2447,
+                            start: 2445,
+                            end: 2446,
                         },
                     },
                 ],
                 span: Span {
-                    start: 2441,
-                    end: 2448,
+                    start: 2440,
+                    end: 2447,
                 },
             },
             span: Span {
-                start: 2434,
-                end: 2448,
+                start: 2433,
+                end: 2447,
             },
         },
         Print {
@@ -2904,30 +2904,30 @@ Program {
                     lhs: Symbol {
                         name: "x",
                         span: Span {
-                            start: 2462,
-                            end: 2463,
+                            start: 2461,
+                            end: 2462,
                         },
                     },
                     rhs: Integer(
                         2,
                         Span {
-                            start: 2464,
-                            end: 2465,
+                            start: 2463,
+                            end: 2464,
                         },
                     ),
                     span: Span {
-                        start: 2462,
-                        end: 2465,
+                        start: 2461,
+                        end: 2464,
                     },
                 },
                 span: Span {
-                    start: 2457,
-                    end: 2465,
+                    start: 2456,
+                    end: 2464,
                 },
             },
             span: Span {
-                start: 2450,
-                end: 2465,
+                start: 2449,
+                end: 2464,
             },
         },
     ],

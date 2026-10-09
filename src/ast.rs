@@ -113,6 +113,12 @@ pub enum Expr {
         text: String,
         span: Span,
     },
+    /// `x \mapsto E`, a function value.
+    Lambda {
+        params: Vec<String>,
+        body: Box<Expr>,
+        span: Span,
+    },
 }
 
 #[derive(Clone, Debug, PartialEq)]
@@ -125,6 +131,7 @@ pub struct PiecewiseBranch {
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum UnaryOp {
     Neg,
+    Not,
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -135,6 +142,7 @@ pub enum BinOp {
     Div,
     Pow,
     Eq,
+    Ne,
     Lt,
     Le,
     Gt,
@@ -145,6 +153,8 @@ pub enum BinOp {
     In,
     Subset,
     SubsetEq,
+    And,
+    Or,
 }
 
 impl Expr {
@@ -167,7 +177,8 @@ impl Expr {
             | Expr::Abs { span, .. }
             | Expr::Sqrt { span, .. }
             | Expr::Piecewise { span, .. }
-            | Expr::Rational { span, .. } => *span,
+            | Expr::Rational { span, .. }
+            | Expr::Lambda { span, .. } => *span,
         }
     }
 }

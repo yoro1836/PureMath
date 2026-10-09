@@ -29,7 +29,7 @@ fn version_does_not_start_repl() {
 
     assert!(output.status.success());
     let stdout = String::from_utf8_lossy(&output.stdout);
-    assert!(stdout.contains("PureMath 0.1.0-dev"));
+    assert!(stdout.contains("PureMath 0.1.1"));
     assert!(!stdout.contains("> "));
 }
 

@@ -82,7 +82,7 @@ The exact surface argument order follows the current parser/evaluator implementa
 The current prototype supports exact polynomial integration for its implemented polynomial subset.
 
 ```latex
-\int_{0}^{1} x^2
+\int_{0}^{1} x^2 \,dx
 ```
 
 This is intentionally narrower than a general-purpose symbolic integration system.

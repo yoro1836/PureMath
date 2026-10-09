@@ -44,6 +44,22 @@ impl<'a> Evaluator<'a> {
                     })
                 })),
             Expr::Unary {
+                op: crate::ast::UnaryOp::Not,
+                expr: inner,
+                span,
+            } => match self.eval_expr(inner, locals)? {
+                Value::Bool(value) => Ok(Value::Bool(!value)),
+                Value::Symbolic(v) => Ok(Value::Symbolic(Expr::Unary {
+                    op: crate::ast::UnaryOp::Not,
+                    expr: Box::new(v),
+                    span: *span,
+                })),
+                other => Err(Diagnostic::at(
+                    format!("\\neg requires a proposition, got {}", other),
+                    *span,
+                )),
+            },
+            Expr::Unary {
                 expr: inner, span, ..
             } => match self.eval_expr(inner, locals)? {
                 Value::Rational(v) => Rational::integer(-1)
@@ -242,6 +258,25 @@ impl<'a> Evaluator<'a> {
                 ))
             }
             Expr::Opaque { .. } => Ok(Value::Symbolic(expr.clone())),
+            Expr::Lambda { params, body, .. } => {
+                // Capture the exact values of enclosing local names so the
+                // function keeps its meaning outside the scope it was made in.
+                let mut captured = body.as_ref().clone();
+                for (name, value) in locals {
+                    if params.contains(name) {
+                        continue;
+                    }
+                    let symbol = Expr::Symbol {
+                        name: name.clone(),
+                        span: body.span(),
+                    };
+                    captured = substitute(&captured, name, &value_to_expr(value, &symbol));
+                }
+                Ok(Value::Function(std::rc::Rc::new(FunctionValue {
+                    params: params.clone(),
+                    body: captured,
+                })))
+            }
         }
     }
 
@@ -337,6 +372,7 @@ impl<'a> Evaluator<'a> {
         let b = self.eval_expr(rhs, locals)?;
         match op {
             BinOp::Eq
+            | BinOp::Ne
             | BinOp::Lt
             | BinOp::Le
             | BinOp::Gt
@@ -355,6 +391,7 @@ impl<'a> Evaluator<'a> {
             BinOp::Union | BinOp::Intersect | BinOp::Difference => {
                 set_binary(op, &a, &b, lhs, rhs, span)
             }
+            BinOp::And | BinOp::Or => connective(op, a, b, lhs, rhs, span),
             BinOp::Add | BinOp::Sub => Ok(structured_add_sub(op, &a, &b, lhs, rhs, span)),
             BinOp::Mul => Ok(structured_mul(&a, &b, lhs, rhs, span)),
             BinOp::Div => numeric_or_symbolic(BinOp::Div, a, b, lhs, rhs, |x, y| x.div(y)),
@@ -438,4 +475,42 @@ impl<'a> Evaluator<'a> {
             _ => Ok(Value::Symbolic(original.clone())),
         }
     }
+}
+
+/// `\land` / `\lor` over propositions. A decided operand settles the result
+/// when it can (`false \land p` is `false`); otherwise the connective stays
+/// symbolic.
+fn connective(
+    op: BinOp,
+    a: Value,
+    b: Value,
+    lhs: &Expr,
+    rhs: &Expr,
+    span: crate::diagnostics::Span,
+) -> Result<Value, Diagnostic> {
+    let absorbing = op == BinOp::Or;
+    for value in [&a, &b] {
+        match value {
+            Value::Bool(_) | Value::Symbolic(_) => {}
+            other => {
+                return Err(Diagnostic::at(
+                    format!("logical connective requires propositions, got {}", other),
+                    span,
+                ))
+            }
+        }
+    }
+    Ok(match (&a, &b) {
+        (Value::Bool(x), Value::Bool(y)) => {
+            Value::Bool(if absorbing { *x || *y } else { *x && *y })
+        }
+        (Value::Bool(x), _) | (_, Value::Bool(x)) if *x == absorbing => Value::Bool(absorbing),
+        (Value::Bool(_), other) | (other, Value::Bool(_)) => other.clone(),
+        _ => Value::Symbolic(Expr::Binary {
+            op,
+            lhs: Box::new(value_to_expr(&a, lhs)),
+            rhs: Box::new(value_to_expr(&b, rhs)),
+            span,
+        }),
+    })
 }

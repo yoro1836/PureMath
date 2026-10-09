@@ -248,18 +248,21 @@ The current AST includes:
 
 ```text
 Program
-Definition
-Import
+Statement
+  Definition        x := E,  f(x) := E
+  Import            \import{m}
+  Print             \print{E}   (runtime)
+  Expression
 Expression
-  Integer
-  Rational
-  Symbol
-  Unary
-  Binary
-  Call
-  Set
-  Sum
-  Sqrt
+  Integer, Rational, Symbol
+  Unary             -E, \neg E
+  Binary            + - \cdot / ^, = \neq < \le > \ge,
+                    \in \subset \subseteq \cup \cap \setminus, \land \lor
+  Call              f(x), builtin commands
+  Lambda            x \mapsto E
+  Set, SetComprehension, Vector, Matrix
+  Sum, Product, Integral, Limit
+  Abs, Sqrt
   Piecewise
   Opaque
 ```

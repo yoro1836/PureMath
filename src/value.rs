@@ -163,7 +163,9 @@ impl fmt::Display for Value {
                     .join(" \\\\ ");
                 write!(f, "\\begin{{pmatrix}} {} \\end{{pmatrix}}", body)
             }
-            Value::Function(fun) => write!(f, "function({})", fun.params.join(", ")),
+            Value::Function(fun) => {
+                write!(f, "{}", crate::render::function(&fun.params, &fun.body))
+            }
             Value::Symbolic(e) => write!(f, "{}", crate::render::expr(e)),
             Value::Unit => Ok(()),
         }
@@ -179,7 +181,38 @@ pub fn value_to_expr(value: &Value, fallback: &Expr) -> Expr {
             span: fallback.span(),
         },
         Value::Symbolic(expr) => expr.clone(),
+        Value::Vector(xs) | Value::Set(xs) if xs.iter().all(is_expressible) => {
+            let elements = xs.iter().map(|x| value_to_expr(x, fallback)).collect();
+            if matches!(value, Value::Vector(_)) {
+                Expr::Vector {
+                    elements,
+                    span: fallback.span(),
+                }
+            } else {
+                Expr::Set {
+                    elements,
+                    span: fallback.span(),
+                }
+            }
+        }
+        Value::Matrix(rows) if rows.iter().flatten().all(is_expressible) => Expr::Matrix {
+            rows: rows
+                .iter()
+                .map(|row| row.iter().map(|x| value_to_expr(x, fallback)).collect())
+                .collect(),
+            span: fallback.span(),
+        },
         _ => fallback.clone(),
+    }
+}
+
+/// Whether `value_to_expr` can rebuild the value without its fallback.
+fn is_expressible(value: &Value) -> bool {
+    match value {
+        Value::Rational(_) | Value::Symbolic(_) => true,
+        Value::Vector(xs) | Value::Set(xs) => xs.iter().all(is_expressible),
+        Value::Matrix(rows) => rows.iter().flatten().all(is_expressible),
+        _ => false,
     }
 }
 

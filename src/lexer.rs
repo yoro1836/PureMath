@@ -9,6 +9,11 @@ pub struct Token {
 #[derive(Clone, Debug, PartialEq)]
 pub enum TokenKind {
     Int(i128),
+    /// A decimal literal `digits / 10^scale`, kept exact.
+    Decimal {
+        digits: i128,
+        scale: u32,
+    },
     Ident(String),
     Command(String),
     Plus,
@@ -24,6 +29,10 @@ pub enum TokenKind {
     Underscore,
     Ampersand,
     RowSep,
+    /// `\{`, the LaTeX spelling of a set's opening brace.
+    SetOpen,
+    /// `\}`.
+    SetClose,
     Assign,
     Eq,
     Lt,
@@ -68,6 +77,27 @@ pub fn lex(input: &str) -> Result<Vec<Token>, Diagnostic> {
                         span: Span::new(i, i + 2),
                     });
                     i += 2;
+                } else if i + 1 < bytes.len() && matches!(bytes[i + 1], b'{' | b'}') {
+                    let opening = bytes[i + 1] == b'{';
+                    if opening {
+                        brace_depth += 1;
+                    } else {
+                        brace_depth = brace_depth.saturating_sub(1);
+                    }
+                    out.push(Token {
+                        kind: if opening {
+                            TokenKind::SetOpen
+                        } else {
+                            TokenKind::SetClose
+                        },
+                        span: Span::new(i, i + 2),
+                    });
+                    i += 2;
+                } else if i + 1 < bytes.len()
+                    && matches!(bytes[i + 1], b',' | b';' | b':' | b'!' | b' ')
+                {
+                    // Spacing commands carry no mathematical meaning.
+                    i += 2;
                 } else {
                     i += 1;
                     let command_start = i;
@@ -81,6 +111,16 @@ pub fn lex(input: &str) -> Result<Vec<Token>, Diagnostic> {
                         ));
                     }
                     let command = input[command_start..i].to_owned();
+                    if is_presentation_command(&command) {
+                        // `\left.` / `\right.` use `.` as an empty delimiter.
+                        if matches!(command.as_str(), "left" | "right")
+                            && i < bytes.len()
+                            && bytes[i] == b'.'
+                        {
+                            i += 1;
+                        }
+                        continue;
+                    }
                     out.push(Token {
                         kind: TokenKind::Command(command),
                         span: Span::new(start, i),
@@ -236,12 +276,33 @@ pub fn lex(input: &str) -> Result<Vec<Token>, Diagnostic> {
                 while i < bytes.len() && (bytes[i] as char).is_ascii_digit() {
                     i += 1;
                 }
-                let raw = &input[number_start..i];
-                let n = raw.parse::<i128>().map_err(|_| {
-                    Diagnostic::at("integer literal overflow", Span::new(number_start, i))
+                let mut scale = 0u32;
+                if i + 1 < bytes.len() && bytes[i] == b'.' && bytes[i + 1].is_ascii_digit() {
+                    i += 1;
+                    while i < bytes.len() && bytes[i].is_ascii_digit() {
+                        i += 1;
+                        scale += 1;
+                    }
+                }
+                let digits: String = input[number_start..i]
+                    .chars()
+                    .filter(char::is_ascii_digit)
+                    .collect();
+                let n = digits.parse::<i128>().map_err(|_| {
+                    Diagnostic::at("numeric literal overflow", Span::new(number_start, i))
                 })?;
+                if scale > 0 && 10i128.checked_pow(scale).is_none() {
+                    return Err(Diagnostic::at(
+                        "numeric literal overflow",
+                        Span::new(number_start, i),
+                    ));
+                }
                 out.push(Token {
-                    kind: TokenKind::Int(n),
+                    kind: if scale == 0 {
+                        TokenKind::Int(n)
+                    } else {
+                        TokenKind::Decimal { digits: n, scale }
+                    },
                     span: Span::new(number_start, i),
                 });
             }
@@ -280,4 +341,23 @@ pub fn lex(input: &str) -> Result<Vec<Token>, Diagnostic> {
         span: Span::new(input.len(), input.len()),
     });
     Ok(out)
+}
+
+/// Delimiter sizing and spacing commands affect only typesetting.
+fn is_presentation_command(command: &str) -> bool {
+    matches!(
+        command,
+        "left"
+            | "right"
+            | "big"
+            | "Big"
+            | "bigg"
+            | "Bigg"
+            | "bigl"
+            | "bigr"
+            | "Bigl"
+            | "Bigr"
+            | "quad"
+            | "qquad"
+    )
 }

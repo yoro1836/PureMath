@@ -46,6 +46,9 @@ pub(super) fn contains_symbol(expr: &Expr, var: &str) -> bool {
         Expr::Piecewise { branches, .. } => branches
             .iter()
             .any(|b| contains_symbol(&b.value, var) || contains_symbol(&b.condition, var)),
+        Expr::Lambda { params, body, .. } => {
+            !params.iter().any(|p| p == var) && contains_symbol(body, var)
+        }
         Expr::Integer(..) | Expr::Opaque { .. } => false,
     }
 }
@@ -57,7 +60,11 @@ pub(super) fn differentiate(expr: &Expr, var: &str) -> Option<Expr> {
     match expr {
         Expr::Integer(..) | Expr::Rational { .. } if !contains_symbol(expr, var) => Some(zero()),
         Expr::Symbol { name, .. } => Some(if name == var { one() } else { zero() }),
-        Expr::Unary { expr, .. } => differentiate(expr, var).map(|d| Expr::Unary {
+        Expr::Unary {
+            op: crate::ast::UnaryOp::Neg,
+            expr,
+            ..
+        } => differentiate(expr, var).map(|d| Expr::Unary {
             op: crate::ast::UnaryOp::Neg,
             expr: Box::new(d),
             span,
@@ -211,6 +218,12 @@ pub(super) fn differentiate(expr: &Expr, var: &str) -> Option<Expr> {
 pub(super) fn substitute(expr: &Expr, var: &str, replacement: &Expr) -> Expr {
     match expr {
         Expr::Symbol { name, .. } if name == var => replacement.clone(),
+        Expr::Lambda { params, .. } if params.iter().any(|p| p == var) => expr.clone(),
+        Expr::Lambda { params, body, span } => Expr::Lambda {
+            params: params.clone(),
+            body: Box::new(substitute(body, var, replacement)),
+            span: *span,
+        },
         Expr::Unary { op, expr, span } => Expr::Unary {
             op: *op,
             expr: Box::new(substitute(expr, var, replacement)),
@@ -390,7 +403,11 @@ pub(super) fn integrate_expr(expr: &Expr, var: &str) -> Option<Expr> {
             }),
             span,
         }),
-        Expr::Unary { expr, .. } => integrate_expr(expr, var).map(|inner| Expr::Unary {
+        Expr::Unary {
+            op: crate::ast::UnaryOp::Neg,
+            expr,
+            ..
+        } => integrate_expr(expr, var).map(|inner| Expr::Unary {
             op: crate::ast::UnaryOp::Neg,
             expr: Box::new(inner),
             span,
