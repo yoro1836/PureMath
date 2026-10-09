@@ -1,4 +1,4 @@
 % Standard-library style module
-square(x) := x^2
-cube(x) := x^3
-double(x) := 2 * x
+\operatorname{square}(x) := x^2
+\operatorname{cube}(x) := x^3
+\operatorname{double}(x) := 2 * x

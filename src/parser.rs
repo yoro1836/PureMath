@@ -1,6 +1,7 @@
 use crate::ast::{BinOp, Expr, PiecewiseBranch, Program, Stmt, UnaryOp};
 use crate::diagnostics::{Diagnostic, Span};
 use crate::lexer::{Token, TokenKind};
+use crate::names;
 
 pub struct Parser {
     tokens: Vec<Token>,
@@ -52,9 +53,8 @@ impl Parser {
             });
         }
 
-        if let Some(TokenKind::Ident(name)) = self.peek_kind().cloned() {
-            let save = self.pos;
-            let name_span = self.take().span;
+        let save = self.pos;
+        if let Some((name, name_span)) = self.parse_name()? {
             let mut params = Vec::new();
             let mut is_definition_candidate = true;
 
@@ -62,18 +62,13 @@ impl Parser {
                 self.take();
                 if !self.at(&TokenKind::RParen) {
                     loop {
-                        match self.peek_kind().cloned() {
-                            Some(TokenKind::Ident(_)) => {
-                                if let TokenKind::Ident(param) = self.take().kind {
-                                    params.push(param);
-                                }
-                            }
-                            _ => {
+                        match self.parse_name()? {
+                            Some((param, _)) => params.push(param),
+                            None => {
                                 is_definition_candidate = false;
                                 break;
                             }
                         }
-
                         if self.at(&TokenKind::Comma) {
                             self.take();
                             continue;
@@ -81,11 +76,9 @@ impl Parser {
                         break;
                     }
                 }
-
                 if is_definition_candidate && !self.at(&TokenKind::RParen) {
                     is_definition_candidate = false;
                 }
-
                 if is_definition_candidate {
                     self.expect(TokenKind::RParen)?;
                 }
@@ -105,11 +98,17 @@ impl Parser {
                     body,
                 });
             }
-
-            self.pos = save;
         }
+        self.pos = save;
 
         let expr = self.parse_expr(0)?;
+        if self.at(&TokenKind::Assign) {
+            return Err(self.error_at(
+                expr.span(),
+                "the left side of := must be a name or a function head; adjacent letters \
+                 are a product, so multi-letter names are written \\operatorname{name}",
+            ));
+        }
         self.expect_eof_or("expression")?;
         Ok(Stmt::Expression(expr))
     }
@@ -149,14 +148,32 @@ impl Parser {
                     (BinOp::Mul, 20, 21)
                 }
                 Some(TokenKind::Caret) => (BinOp::Pow, 30, 30),
+                Some(TokenKind::Int(_)) if matches!(lhs, Expr::Symbol { .. }) => {
+                    return Err(self.error_here(
+                        "a number cannot follow a name; write x_{2} for a subscripted name \
+                         or 2x for a product",
+                    ));
+                }
+                _ if self.starts_implicit_operand() && is_function_word(&lhs) => {
+                    return Err(self.error_here(
+                        "a function name cannot be applied by juxtaposition yet; \
+                         write \\sin{x} or \\sin(x)",
+                    ));
+                }
+                _ if self.starts_implicit_operand() => (BinOp::Mul, 20, 21),
                 _ => break,
             };
             if lbp < min_bp {
                 break;
             }
-            let op_span = self.take().span;
+            let implicit = op == BinOp::Mul && self.starts_implicit_operand();
+            let op_end = if implicit {
+                lhs.span().end
+            } else {
+                self.take().span.end
+            };
             let rhs = self.parse_expr(rbp)?;
-            let span = Span::new(lhs.span().start, rhs.span().end.max(op_span.end));
+            let span = Span::new(lhs.span().start, rhs.span().end.max(op_end));
             lhs = Expr::Binary {
                 op,
                 lhs: Box::new(lhs),
@@ -168,12 +185,15 @@ impl Parser {
     }
 
     fn parse_prefix(&mut self) -> Result<Expr, Diagnostic> {
+        if let Some((name, span)) = self.parse_name()? {
+            return self.parse_postfix(Expr::Symbol { name, span });
+        }
         let token = self.take();
         let token_kind = match token.kind {
             TokenKind::Ident(name) if self.bare_prefix_command(&name) => TokenKind::Command(name),
             kind => kind,
         };
-        let mut expr = match token_kind {
+        let expr = match token_kind {
             TokenKind::Int(n) => Expr::Integer(n, token.span),
             TokenKind::Ident(name) if self.bare_prefix_command(&name) => {
                 self.parse_command_application(name, token.span.start)?
@@ -231,9 +251,14 @@ impl Parser {
                 )
             }
         };
+        self.parse_postfix(expr)
+    }
 
+    /// Function application `f(x)` applies only to names; after any other
+    /// expression a parenthesis starts an implicit product, as in `2(x+1)`.
+    fn parse_postfix(&mut self, mut expr: Expr) -> Result<Expr, Diagnostic> {
         loop {
-            if self.at(&TokenKind::LParen) {
+            if self.at(&TokenKind::LParen) && matches!(expr, Expr::Symbol { .. }) {
                 let start = self.take().span.start;
                 let mut args = Vec::new();
                 if !self.at(&TokenKind::RParen) {
@@ -495,12 +520,7 @@ impl Parser {
     fn parse_limit(&mut self, start: usize) -> Result<Expr, Diagnostic> {
         self.expect(TokenKind::Underscore)?;
         self.expect(TokenKind::LBrace)?;
-        let var = match self.take().kind {
-            TokenKind::Ident(name) => name,
-            other => {
-                return Err(self.error_here(format!("expected limit variable, got {:?}", other)))
-            }
-        };
+        let var = self.parse_bound_variable("limit")?;
         match self.take().kind {
             TokenKind::Command(name) | TokenKind::Ident(name) if name == "to" => {}
             other => {
@@ -603,12 +623,7 @@ impl Parser {
     fn parse_product(&mut self, start: usize) -> Result<Expr, Diagnostic> {
         self.expect(TokenKind::Underscore)?;
         self.expect(TokenKind::LBrace)?;
-        let var = match self.take().kind {
-            TokenKind::Ident(name) => name,
-            other => {
-                return Err(self.error_here(format!("expected product variable, got {:?}", other)))
-            }
-        };
+        let var = self.parse_bound_variable("product")?;
         self.expect(TokenKind::Eq)?;
         let lower = self.parse_expr(0)?;
         self.expect(TokenKind::RBrace)?;
@@ -628,12 +643,7 @@ impl Parser {
     fn parse_sum(&mut self, start: usize) -> Result<Expr, Diagnostic> {
         self.expect(TokenKind::Underscore)?;
         self.expect(TokenKind::LBrace)?;
-        let var = match self.take().kind {
-            TokenKind::Ident(name) => name,
-            other => {
-                return Err(self.error_here(format!("expected summation variable, got {:?}", other)))
-            }
-        };
+        let var = self.parse_bound_variable("summation")?;
         self.expect(TokenKind::Eq)?;
         let lower = self.parse_expr(0)?;
         self.expect(TokenKind::RBrace)?;
@@ -652,12 +662,114 @@ impl Parser {
 
     fn parse_group_name(&mut self) -> Result<String, Diagnostic> {
         self.expect(TokenKind::LBrace)?;
-        let value = match self.take().kind {
-            TokenKind::Ident(s) | TokenKind::Command(s) => s,
-            other => return Err(self.error_here(format!("expected group name, got {:?}", other))),
-        };
+        let mut value = String::new();
+        loop {
+            match self.peek_kind().cloned() {
+                Some(TokenKind::Ident(part)) => value.push_str(&part),
+                Some(TokenKind::Int(n)) => value.push_str(&n.to_string()),
+                Some(TokenKind::Underscore) => value.push('_'),
+                _ => break,
+            }
+            self.take();
+        }
+        if value.is_empty() {
+            return Err(self.error_here("expected a name"));
+        }
         self.expect(TokenKind::RBrace)?;
         Ok(value)
+    }
+
+    /// Parses a mathematical name if one starts here, without consuming
+    /// anything otherwise: a single letter or Greek letter with an optional
+    /// subscript, or an upright operator name such as `\operatorname{fact}`.
+    fn parse_name(&mut self) -> Result<Option<(String, Span)>, Diagnostic> {
+        let start = match self.tokens.get(self.pos) {
+            Some(token) => token.span.start,
+            None => return Ok(None),
+        };
+        let base = match self.peek_kind().cloned() {
+            Some(TokenKind::Ident(letter)) if letter.len() == 1 => {
+                self.take();
+                letter
+            }
+            Some(TokenKind::Command(c)) if names::is_greek_letter(&c) => {
+                self.take();
+                format!("\\{}", c)
+            }
+            Some(TokenKind::Command(c)) | Some(TokenKind::Ident(c))
+                if names::is_operator_name_command(&c)
+                    && self
+                        .tokens
+                        .get(self.pos + 1)
+                        .is_some_and(|token| token.kind == TokenKind::LBrace) =>
+            {
+                self.take();
+                let name = self.parse_group_name()?;
+                return Ok(Some((
+                    format!("\\operatorname{{{}}}", name),
+                    Span::new(start, self.previous_span().end),
+                )));
+            }
+            _ => return Ok(None),
+        };
+        if !self.at(&TokenKind::Underscore) {
+            return Ok(Some((base, Span::new(start, self.previous_span().end))));
+        }
+        self.take();
+        let subscript = self.parse_subscript()?;
+        Ok(Some((
+            format!("{}_{{{}}}", base, subscript),
+            Span::new(start, self.previous_span().end),
+        )))
+    }
+
+    /// Subscript text of a name. Following LaTeX, an unbraced subscript is a
+    /// single character; longer subscripts need braces (`x_{12}`, `x_{max}`).
+    fn parse_subscript(&mut self) -> Result<String, Diagnostic> {
+        let token = self.take();
+        match token.kind {
+            TokenKind::Int(n) if token.span.end - token.span.start == 1 => Ok(n.to_string()),
+            TokenKind::Ident(letter) if letter.len() == 1 => Ok(letter),
+            TokenKind::Command(c) if names::is_greek_letter(&c) => Ok(format!("\\{}", c)),
+            TokenKind::Int(_) | TokenKind::Ident(_) => Err(self.error_at(
+                token.span,
+                "an unbraced subscript is a single character; use braces, e.g. x_{12}",
+            )),
+            TokenKind::LBrace => {
+                let mut text = String::new();
+                loop {
+                    let part = self.take();
+                    let piece =
+                        match part.kind {
+                            TokenKind::RBrace if !text.is_empty() => break,
+                            TokenKind::Ident(word) => word,
+                            TokenKind::Int(n) => n.to_string(),
+                            TokenKind::Comma => ",".to_owned(),
+                            TokenKind::Command(c) if names::is_greek_letter(&c) => {
+                                format!("\\{} ", c)
+                            }
+                            _ => return Err(self.error_at(
+                                part.span,
+                                "a subscript may contain letters, digits, Greek letters and commas",
+                            )),
+                        };
+                    text.push_str(&piece);
+                }
+                Ok(text.trim_end().to_owned())
+            }
+            _ => Err(self.error_at(token.span, "expected a subscript")),
+        }
+    }
+
+    fn parse_bound_variable(&mut self, what: &str) -> Result<String, Diagnostic> {
+        match self.parse_name()? {
+            Some((name, _)) => Ok(name),
+            None => Err(self.error_here(format!(
+                "expected {} variable, got {:?}",
+                what,
+                self.peek_kind().cloned().unwrap_or(TokenKind::Eof)
+            ))),
+        }
     }
 
     fn expect_eof_or(&self, what: &str) -> Result<(), Diagnostic> {
@@ -708,6 +820,17 @@ impl Parser {
         )
     }
 
+    /// Juxtaposed operands multiply (`2x`, `xy`, `2\pi`, `(a+b)(a-b)`).
+    fn starts_implicit_operand(&self) -> bool {
+        match self.peek_kind() {
+            Some(TokenKind::Ident(word)) | Some(TokenKind::Command(word)) => {
+                !names::is_infix_word(word)
+            }
+            Some(TokenKind::LParen) => true,
+            _ => false,
+        }
+    }
+
     fn bare_prefix_command(&self, name: &str) -> bool {
         match name {
             "frac" | "sqrt" | "abs" | "vec" | "set" | "tuple" | "dot" | "norm" | "det"
@@ -737,5 +860,16 @@ impl Parser {
     }
     fn error_at(&self, span: Span, message: impl Into<String>) -> Diagnostic {
         Diagnostic::at(message, span)
+    }
+}
+
+/// Standard function names such as `\sin` or `gcd` (but not the constant `\pi`).
+fn is_function_word(expr: &Expr) -> bool {
+    match expr {
+        Expr::Symbol { name, .. } => {
+            let word = name.strip_prefix('\\').unwrap_or(name);
+            word != "pi" && names::is_reserved_word(word)
+        }
+        _ => false,
     }
 }

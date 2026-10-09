@@ -1,38 +1,7 @@
 Program {
     statements: [
         Definition {
-            name: "square",
-            params: [
-                "x",
-            ],
-            body: Binary {
-                op: Pow,
-                lhs: Symbol {
-                    name: "x",
-                    span: Span {
-                        start: 45,
-                        end: 46,
-                    },
-                },
-                rhs: Integer(
-                    2,
-                    Span {
-                        start: 47,
-                        end: 48,
-                    },
-                ),
-                span: Span {
-                    start: 45,
-                    end: 48,
-                },
-            },
-            span: Span {
-                start: 32,
-                end: 48,
-            },
-        },
-        Definition {
-            name: "cube",
+            name: "\\operatorname{square}",
             params: [
                 "x",
             ],
@@ -46,7 +15,7 @@ Program {
                     },
                 },
                 rhs: Integer(
-                    3,
+                    2,
                     Span {
                         start: 62,
                         end: 63,
@@ -58,12 +27,43 @@ Program {
                 },
             },
             span: Span {
-                start: 49,
+                start: 32,
                 end: 63,
             },
         },
         Definition {
-            name: "double",
+            name: "\\operatorname{cube}",
+            params: [
+                "x",
+            ],
+            body: Binary {
+                op: Pow,
+                lhs: Symbol {
+                    name: "x",
+                    span: Span {
+                        start: 90,
+                        end: 91,
+                    },
+                },
+                rhs: Integer(
+                    3,
+                    Span {
+                        start: 92,
+                        end: 93,
+                    },
+                ),
+                span: Span {
+                    start: 90,
+                    end: 93,
+                },
+            },
+            span: Span {
+                start: 64,
+                end: 93,
+            },
+        },
+        Definition {
+            name: "\\operatorname{double}",
             params: [
                 "x",
             ],
@@ -72,25 +72,25 @@ Program {
                 lhs: Integer(
                     2,
                     Span {
-                        start: 77,
-                        end: 78,
+                        start: 122,
+                        end: 123,
                     },
                 ),
                 rhs: Symbol {
                     name: "x",
                     span: Span {
-                        start: 81,
-                        end: 82,
+                        start: 126,
+                        end: 127,
                     },
                 },
                 span: Span {
-                    start: 77,
-                    end: 82,
+                    start: 122,
+                    end: 127,
                 },
             },
             span: Span {
-                start: 64,
-                end: 82,
+                start: 94,
+                end: 127,
             },
         },
     ],

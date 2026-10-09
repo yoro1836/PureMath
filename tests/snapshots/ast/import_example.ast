@@ -10,48 +10,48 @@ Program {
         Expression(
             Call {
                 callee: Symbol {
-                    name: "square",
+                    name: "\\operatorname{square}",
                     span: Span {
                         start: 17,
-                        end: 23,
+                        end: 38,
                     },
                 },
                 args: [
                     Integer(
                         12,
                         Span {
-                            start: 24,
-                            end: 26,
+                            start: 39,
+                            end: 41,
                         },
                     ),
                 ],
                 span: Span {
                     start: 17,
-                    end: 27,
+                    end: 42,
                 },
             },
         ),
         Expression(
             Call {
                 callee: Symbol {
-                    name: "cube",
+                    name: "\\operatorname{cube}",
                     span: Span {
-                        start: 28,
-                        end: 32,
+                        start: 43,
+                        end: 62,
                     },
                 },
                 args: [
                     Integer(
                         4,
                         Span {
-                            start: 33,
-                            end: 34,
+                            start: 63,
+                            end: 64,
                         },
                     ),
                 ],
                 span: Span {
-                    start: 28,
-                    end: 35,
+                    start: 43,
+                    end: 65,
                 },
             },
         ),

@@ -4,6 +4,7 @@ pub mod env;
 pub mod evaluator;
 pub mod lexer;
 pub mod module;
+pub mod names;
 pub mod parser;
 pub mod render;
 pub mod repl;

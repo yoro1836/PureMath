@@ -1,16 +1,16 @@
 % Recursive mathematical definitions
-fact(n) :=
+\operatorname{fact}(n) :=
 \begin{cases}
 1 & n = 0 \\
-n \cdot fact(n-1) & n > 0
+n \cdot \operatorname{fact}(n-1) & n > 0
 \end{cases}
 
-fib(n) :=
+\operatorname{fib}(n) :=
 \begin{cases}
 0 & n = 0 \\
 1 & n = 1 \\
-fib(n-1) + fib(n-2) & n > 1
+\operatorname{fib}(n-1) + \operatorname{fib}(n-2) & n > 1
 \end{cases}
 
-\print{fact(6)}
-\print{fib(10)}
+\print{\operatorname{fact}(6)}
+\print{\operatorname{fib}(10)}

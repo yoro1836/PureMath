@@ -46,11 +46,16 @@ fn finite_sum() {
 fn recursive_piecewise() {
     let mut env = Environment::new();
     evaluate(
-        r"fact(n) := \begin{cases} 1 & n = 0 \\ n \cdot fact(n-1) & n > 0 \end{cases}",
+        r"\operatorname{fact}(n) := \begin{cases} 1 & n = 0 \\ n \cdot \operatorname{fact}(n-1) & n > 0 \end{cases}",
         &mut env,
     )
     .unwrap();
-    assert_eq!(evaluate("fact(5)", &mut env).unwrap().to_string(), "120");
+    assert_eq!(
+        evaluate(r"\operatorname{fact}(5)", &mut env)
+            .unwrap()
+            .to_string(),
+        "120"
+    );
 }
 
 #[test]
@@ -119,8 +124,8 @@ fn module_import_loads_definitions_once() {
     let _ = fs::create_dir_all(&dir);
     let module = dir.join("algebra.pmath");
     let main = dir.join("main.pmath");
-    fs::write(&module, "square(x) := x^2\n").unwrap();
-    fs::write(&main, "\\import{algebra}\nsquare(7)\n").unwrap();
+    fs::write(&module, "\\operatorname{square}(x) := x^2\n").unwrap();
+    fs::write(&main, "\\import{algebra}\n\\operatorname{square}(7)\n").unwrap();
 
     let source = fs::read_to_string(&main).unwrap();
     let tokens = lexer::lex(&source).unwrap();
@@ -149,8 +154,12 @@ fn symbolic_simplifier_removes_identity() {
 #[test]
 fn recursive_call_depth_is_bounded() {
     let mut env = Environment::new();
-    evaluate("loop(x) := loop(x)", &mut env).unwrap();
-    let program = puremath::parse("loop(0)").unwrap();
+    evaluate(
+        r"\operatorname{loop}(x) := \operatorname{loop}(x)",
+        &mut env,
+    )
+    .unwrap();
+    let program = puremath::parse(r"\operatorname{loop}(0)").unwrap();
     let mut evaluator = puremath::Evaluator::with_limits(&mut env, 8, 100);
     assert!(evaluator
         .execute(&program.statements[0], std::path::Path::new("."))
@@ -378,11 +387,11 @@ fn bare_parenthesized_builtins_work_without_backslashes() {
 fn bare_begin_environment_works_without_backslash() {
     let mut env = Environment::new();
     evaluate(
-        r"fact(n) := begin{cases} 1 & n = 0 \\ n * fact(n-1) & n > 0 \\ end{cases}",
+        r"f(n) := begin{cases} 1 & n = 0 \\ n * f(n-1) & n > 0 \\ end{cases}",
         &mut env,
     )
     .unwrap();
-    assert_eq!(evaluate("fact(5)", &mut env).unwrap().to_string(), "120");
+    assert_eq!(evaluate("f(5)", &mut env).unwrap().to_string(), "120");
 }
 
 #[test]
@@ -541,4 +550,85 @@ fn finite_set_comprehension_evaluates_and_renders() {
             .to_string(),
         r"\{\}"
     );
+}
+
+fn eval_str(source: &str, env: &mut Environment) -> String {
+    evaluate(source, env).unwrap().to_string()
+}
+
+#[test]
+fn adjacent_factors_multiply() {
+    let mut env = Environment::new();
+    evaluate("x := 3\ny := 4", &mut env).unwrap();
+    assert_eq!(eval_str("xy", &mut env), "12");
+    assert_eq!(eval_str("2xy", &mut env), "24");
+    assert_eq!(eval_str("2x^2", &mut env), "18");
+    assert_eq!(eval_str("2(x + 1)", &mut env), "8");
+    assert_eq!(eval_str("(x + 1)(y - 1)", &mut env), "12");
+    assert_eq!(eval_str(r"\frac{1}{2}x", &mut env), r"\frac{3}{2}");
+    assert_eq!(eval_str("x(y + 1)", &mut env), "15");
+}
+
+#[test]
+fn unknown_adjacent_letters_stay_a_symbolic_product() {
+    let mut env = Environment::new();
+    assert_eq!(eval_str("ab", &mut env), r"a \cdot b");
+    assert_eq!(eval_str("f(x)", &mut env), "f(x)");
+}
+
+#[test]
+fn subscripted_and_greek_names() {
+    let mut env = Environment::new();
+    evaluate("x_1 := 2\nx_{12} := 5\na_n := 7", &mut env).unwrap();
+    assert_eq!(eval_str("x_{1}", &mut env), "2");
+    assert_eq!(eval_str("x_1 x_{12}", &mut env), "10");
+    assert_eq!(eval_str("a_n", &mut env), "7");
+    evaluate(
+        "\\alpha := 2\n\\theta_0 := 3\n\\lambda(t) := t + 1",
+        &mut env,
+    )
+    .unwrap();
+    assert_eq!(eval_str(r"\alpha\theta_0", &mut env), "6");
+    assert_eq!(eval_str(r"\lambda(2)", &mut env), "3");
+}
+
+#[test]
+fn operator_names_are_multi_letter_names() {
+    let mut env = Environment::new();
+    evaluate(r"\mathrm{double}(t) := 2t", &mut env).unwrap();
+    assert_eq!(eval_str(r"\operatorname{double}(21)", &mut env), "42");
+    assert_eq!(eval_str("operatorname{double}(4)", &mut env), "8");
+}
+
+#[test]
+fn standard_function_words_stay_whole() {
+    let mut env = Environment::new();
+    assert_eq!(eval_str("sin(0)", &mut env), "0");
+    assert_eq!(eval_str("gcd(84, 30)", &mut env), "6");
+    assert_eq!(eval_str("2 in {1,2}", &mut env), "true");
+}
+
+#[test]
+fn multi_letter_definition_points_to_operatorname() {
+    let mut env = Environment::new();
+    let error = evaluate("fact(n) := n", &mut env).unwrap_err().to_string();
+    assert!(error.contains(r"\operatorname"), "{}", error);
+}
+
+#[test]
+fn number_after_name_is_rejected() {
+    let mut env = Environment::new();
+    let error = evaluate("x2", &mut env).unwrap_err().to_string();
+    assert!(error.contains("x_{2}"), "{}", error);
+    let error = evaluate("x_12 := 1", &mut env).unwrap_err().to_string();
+    assert!(error.contains("x_{12}"), "{}", error);
+}
+
+#[test]
+fn function_name_juxtaposition_is_rejected() {
+    let mut env = Environment::new();
+    let error = evaluate(r"\sin x", &mut env).unwrap_err().to_string();
+    assert!(error.contains(r"\sin{x}"), "{}", error);
+    assert_eq!(eval_str(r"\sin(0)", &mut env), "0");
+    assert_eq!(eval_str(r"2\pi", &mut env), r"2 \cdot \pi");
 }

@@ -246,35 +246,25 @@ pub fn lex(input: &str) -> Result<Vec<Token>, Diagnostic> {
                 });
             }
             c if c.is_ascii_alphabetic() => {
-                let ident_start = i;
-                while i < bytes.len() {
-                    let c = bytes[i] as char;
-                    if c.is_ascii_alphanumeric() || c == '_' {
-                        i += 1;
-                    } else {
-                        break;
+                let word_start = i;
+                while i < bytes.len() && (bytes[i] as char).is_ascii_alphabetic() {
+                    i += 1;
+                }
+                let word = &input[word_start..i];
+                if word.len() == 1 || crate::names::is_reserved_word(word) {
+                    out.push(Token {
+                        kind: TokenKind::Ident(word.to_owned()),
+                        span: Span::new(word_start, i),
+                    });
+                } else {
+                    // Adjacent letters are separate single-letter names (`xy` is x·y).
+                    for (offset, letter) in word.char_indices() {
+                        out.push(Token {
+                            kind: TokenKind::Ident(letter.to_string()),
+                            span: Span::new(word_start + offset, word_start + offset + 1),
+                        });
                     }
                 }
-
-                let word = &input[ident_start..i];
-                if let Some(command) = word.strip_suffix('_') {
-                    if matches!(command, "sum" | "prod" | "lim" | "int") {
-                        out.push(Token {
-                            kind: TokenKind::Ident(command.to_owned()),
-                            span: Span::new(ident_start, i - 1),
-                        });
-                        out.push(Token {
-                            kind: TokenKind::Underscore,
-                            span: Span::new(i - 1, i),
-                        });
-                        continue;
-                    }
-                }
-
-                out.push(Token {
-                    kind: TokenKind::Ident(word.to_owned()),
-                    span: Span::new(ident_start, i),
-                });
             }
             _ => {
                 return Err(Diagnostic::at(
