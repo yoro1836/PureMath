@@ -125,6 +125,7 @@ pub struct PiecewiseBranch {
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum UnaryOp {
     Neg,
+    Not,
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -146,6 +147,8 @@ pub enum BinOp {
     In,
     Subset,
     SubsetEq,
+    And,
+    Or,
 }
 
 impl Expr {

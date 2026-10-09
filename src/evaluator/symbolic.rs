@@ -57,7 +57,11 @@ pub(super) fn differentiate(expr: &Expr, var: &str) -> Option<Expr> {
     match expr {
         Expr::Integer(..) | Expr::Rational { .. } if !contains_symbol(expr, var) => Some(zero()),
         Expr::Symbol { name, .. } => Some(if name == var { one() } else { zero() }),
-        Expr::Unary { expr, .. } => differentiate(expr, var).map(|d| Expr::Unary {
+        Expr::Unary {
+            op: crate::ast::UnaryOp::Neg,
+            expr,
+            ..
+        } => differentiate(expr, var).map(|d| Expr::Unary {
             op: crate::ast::UnaryOp::Neg,
             expr: Box::new(d),
             span,
@@ -390,7 +394,11 @@ pub(super) fn integrate_expr(expr: &Expr, var: &str) -> Option<Expr> {
             }),
             span,
         }),
-        Expr::Unary { expr, .. } => integrate_expr(expr, var).map(|inner| Expr::Unary {
+        Expr::Unary {
+            op: crate::ast::UnaryOp::Neg,
+            expr,
+            ..
+        } => integrate_expr(expr, var).map(|inner| Expr::Unary {
             op: crate::ast::UnaryOp::Neg,
             expr: Box::new(inner),
             span,

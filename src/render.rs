@@ -22,6 +22,11 @@ fn expr_inner(node: &Expr) -> String {
             expr: inner,
             ..
         } => format!("-{}", parenthesize(inner)),
+        Expr::Unary {
+            op: UnaryOp::Not,
+            expr: inner,
+            ..
+        } => format!("\\neg {}", format_child(inner, 6, false)),
         Expr::Binary { op, lhs, rhs, .. } => match op {
             BinOp::Div => format!("\\frac{{{}}}{{{}}}", expr_inner(lhs), expr_inner(rhs)),
             BinOp::Pow => format!("{}^{{{}}}", format_child(lhs, 30, false), expr_inner(rhs)),
@@ -68,6 +73,16 @@ fn expr_inner(node: &Expr) -> String {
             BinOp::In => format!("{} \\in {}", parenthesize(lhs), parenthesize(rhs)),
             BinOp::Subset => format!("{} \\subset {}", parenthesize(lhs), parenthesize(rhs)),
             BinOp::SubsetEq => format!("{} \\subseteq {}", parenthesize(lhs), parenthesize(rhs)),
+            BinOp::And => format!(
+                "{} \\land {}",
+                format_child(lhs, 3, false),
+                format_child(rhs, 4, true)
+            ),
+            BinOp::Or => format!(
+                "{} \\lor {}",
+                format_child(lhs, 2, false),
+                format_child(rhs, 3, true)
+            ),
         },
         Expr::Call { callee, args, .. } => format!(
             "{}({})",
@@ -187,6 +202,8 @@ fn format_child(node: &Expr, parent_precedence: u8, right_side: bool) -> String 
             | BinOp::Subset
             | BinOp::SubsetEq => 5,
             BinOp::Union => 7,
+            BinOp::Or => 2,
+            BinOp::And => 3,
             BinOp::Add | BinOp::Sub => 10,
             BinOp::Intersect | BinOp::Difference => 8,
             BinOp::Mul | BinOp::Div => 20,

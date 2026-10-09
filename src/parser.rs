@@ -124,6 +124,8 @@ impl Parser {
                 Some(TokenKind::Command(c)) if c == "gt" => (BinOp::Gt, 5, 6),
                 Some(TokenKind::Command(c)) if c == "ge" || c == "geq" => (BinOp::Ge, 5, 6),
                 Some(TokenKind::Command(c)) if c == "ne" || c == "neq" => (BinOp::Ne, 5, 6),
+                Some(TokenKind::Command(c)) if c == "lor" || c == "vee" => (BinOp::Or, 2, 3),
+                Some(TokenKind::Command(c)) if c == "land" || c == "wedge" => (BinOp::And, 3, 4),
                 Some(TokenKind::Command(c)) if c == "times" => (BinOp::Mul, 20, 21),
                 Some(TokenKind::Command(c)) if c == "div" => (BinOp::Div, 20, 21),
                 Some(TokenKind::Le) => (BinOp::Le, 5, 6),
@@ -224,6 +226,14 @@ impl Parser {
             }
             TokenKind::LBrace => self.parse_set_body(token.span.start, TokenKind::RBrace)?,
             TokenKind::SetOpen => self.parse_set_body(token.span.start, TokenKind::SetClose)?,
+            TokenKind::Command(c) if c == "neg" || c == "lnot" => {
+                let inner = self.parse_expr(5)?;
+                Expr::Unary {
+                    op: UnaryOp::Not,
+                    span: Span::new(token.span.start, inner.span().end),
+                    expr: Box::new(inner),
+                }
+            }
             TokenKind::Command(c) if c == "emptyset" || c == "varnothing" => Expr::Set {
                 elements: Vec::new(),
                 span: token.span,

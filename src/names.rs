@@ -106,6 +106,8 @@ pub fn is_infix_word(word: &str) -> bool {
             | "gt"
             | "land"
             | "lor"
+            | "wedge"
+            | "vee"
             | "mapsto"
     )
 }

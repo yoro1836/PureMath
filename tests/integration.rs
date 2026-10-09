@@ -672,3 +672,20 @@ fn latex_relations_and_operators() {
     .unwrap();
     assert_eq!(eval_str("f(-3)", &mut env), "3");
 }
+
+#[test]
+fn logical_connectives() {
+    let mut env = Environment::new();
+    assert_eq!(eval_str(r"1 < 2 \land 2 < 3", &mut env), "true");
+    assert_eq!(eval_str(r"1 > 2 \lor 2 < 3", &mut env), "true");
+    assert_eq!(eval_str(r"\neg 1 = 2", &mut env), "true");
+    assert_eq!(eval_str(r"x > 0 \land 2 < 1", &mut env), "false");
+    assert_eq!(eval_str(r"x > 0 \land 1 < 2", &mut env), "x > 0");
+    assert_eq!(eval_str(r"x > 0 \lor y > 0", &mut env), r"x > 0 \lor y > 0");
+    assert_eq!(eval_str(r"\neg x > 0", &mut env), r"\neg (x > 0)");
+    assert_eq!(
+        eval_str(r"(a \lor b) \land c", &mut env),
+        r"(a \lor b) \land c"
+    );
+    assert!(evaluate(r"1 \land 2", &mut env).is_err());
+}
