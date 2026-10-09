@@ -60,7 +60,8 @@ impl<'a> Evaluator<'a> {
             Expr::Binary { op, lhs, rhs, span } => self.eval_binary(*op, lhs, rhs, *span, locals),
             Expr::Call { callee, args, span } => {
                 if let Expr::Symbol { name, .. } = callee.as_ref() {
-                    if name.starts_with('\\') {
+                    let user_defined = locals.contains_key(name) || self.env.get(name).is_some();
+                    if name.starts_with('\\') && !user_defined {
                         return super::builtins::eval_builtin(self, name, args, *span, locals);
                     }
                     if self.env.get(name).is_none() {
@@ -108,6 +109,10 @@ impl<'a> Evaluator<'a> {
                         args: args.clone(),
                         span: *span,
                     })),
+                    // `a(b + 1)` where `a` names a number, vector or matrix is a product.
+                    Value::Rational(_) | Value::Vector(_) | Value::Matrix(_) if args.len() == 1 => {
+                        self.eval_binary(BinOp::Mul, callee, &args[0], *span, locals)
+                    }
                     other => Err(Diagnostic::at(format!("{} is not callable", other), *span)),
                 }
             }

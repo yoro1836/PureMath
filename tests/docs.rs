@@ -1,8 +1,7 @@
 //! Executable documentation tests.
 //!
-//! Every ```latex code block in README.md (and in the GitHub Wiki when
-//! `PUREMATH_WIKI_DIR` points at a checkout of it) is executed as a PureMath
-//! program. A block must run without error unless it is listed in
+//! Every ```latex code block in README.md and in the Wiki source under
+//! `wiki/` is executed as a PureMath program. A block must run without error unless it is listed in
 //! `tests/docs_known_failures.txt`.
 //!
 //! The known-failures list tracks documentation drift. It must only shrink:
@@ -157,16 +156,15 @@ fn readme_code_blocks_run() {
 
 #[test]
 fn wiki_code_blocks_run() {
-    let Some(dir) = std::env::var_os("PUREMATH_WIKI_DIR") else {
-        eprintln!("PUREMATH_WIKI_DIR is not set; skipping Wiki code blocks");
-        return;
-    };
-    let mut pages: Vec<PathBuf> = fs::read_dir(dir)
+    let mut pages: Vec<PathBuf> = fs::read_dir(root().join("wiki"))
         .unwrap()
         .map(|entry| entry.unwrap().path())
-        .filter(|path| path.extension().is_some_and(|ext| ext == "md"))
+        .filter(|path| {
+            path.extension().is_some_and(|ext| ext == "md")
+                && path.file_name().is_some_and(|name| name != "README.md")
+        })
         .collect();
     pages.sort();
-    assert!(!pages.is_empty(), "PUREMATH_WIKI_DIR contains no pages");
+    assert!(!pages.is_empty(), "wiki/ contains no pages");
     check_documents(&pages);
 }

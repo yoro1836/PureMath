@@ -13,8 +13,7 @@ matrices, and a small symbolic layer.
 Known gaps found by running the documented examples:
 
 - Documented syntax that does not run: `\{1,2,3\}`, `\le \ge \leq \geq \neq`,
-  `\times`, `\left( \right)`, implicit multiplication (`2x`), `\mapsto`,
-  decimal literals (`3.7`). Wiki code blocks use a doubled `\\print`.
+  `\times`, `\left( \right)`, `\mapsto`, decimal literals (`3.7`).
 - Finite sets keep duplicates (`{1,1,2}`) and set equality is not decided
   (`{1,2} = {2,1}` stays symbolic).
 - Integers are fixed `i128` (`2^200`, `\factorial{40}` overflow).
@@ -29,6 +28,8 @@ Known gaps found by running the documented examples:
 
 - [x] Restore green CI (rustfmt, clippy); run CI on `dev` as well as `main`.
 - [ ] Require CI on `main` (repository settings).
+- [x] Wiki source lives in `wiki/` and is mirrored to the GitHub Wiki from
+  `main`.
 - [x] Executable documentation: `latex` code blocks from README and Wiki run
   as tests (`tests/docs.rs`); current drift is recorded in
   `tests/docs_known_failures.txt`, which may only shrink.
@@ -39,10 +40,13 @@ Known gaps found by running the documented examples:
 - Surface syntax: `\{ \}`, `\le \ge \leq \geq \neq \lt \gt`, `\times`,
   `\left \right`, `\mid`, `\land \lor \neg`.
 - Decimal literals as exact rationals (`3.7` = 37/10).
-- Implicit multiplication with a numeric left operand (`2x`, `2(x+1)`).
+- [x] Mathematical identifier model: single-letter and Greek names with
+  subscripts, implicit multiplication (`xy`, `2x`, `(a+b)(a-b)`), and
+  `\operatorname{...}` / `\mathrm{...}` for multi-letter names.
 - `\mapsto` function values.
 - One canonical `\diff` argument order.
-- Fix Wiki escaping; refresh STATUS, SPEC §12 and MODULE-ARCHITECTURE.
+- [x] Fix Wiki and README escaping.
+- Refresh STATUS, SPEC §12 and MODULE-ARCHITECTURE.
 
 Exit criterion: `tests/docs_known_failures.txt` is empty.
 
@@ -88,6 +92,10 @@ backend later depends on.
 - Probability, random variables and pseudo-random sequences as library
   semantics; only OS entropy for seeding is a Runtime capability.
 - Dependency graph, versioned packages, documentation generation.
+
+Follow-ups from the identifier model: `\mathbf{v}` / `\mathcal{A}` /
+accent decorations as names, a `\DeclareMathOperator`-style shorthand for
+user operator names, and `f'` as derivative notation.
 
 ## v0.6 — Tooling
 
@@ -146,9 +154,9 @@ environment.
 
 ## Open decisions
 
-1. Identifier model: whether `xy` means `x \cdot y` (conflicts with
-   multi-letter names such as `fact`). Proposed: keep multi-letter
-   identifiers; implicit multiplication only with a numeric left operand.
+1. ~~Identifier model~~ — decided: mathematical convention (`xy` is
+   `x \cdot y`; multi-letter names via `\operatorname`). See
+   `SYNTAX-DECISIONS.md`.
 2. Free-name binding in function bodies: at definition or at call time.
 3. Canonical `\diff` argument order.
 4. Arbitrary-precision arithmetic: self-implemented (dependency-free) or an

@@ -119,6 +119,8 @@ x = y
 
 Identifiers denote mathematical names/references. They are not mutable storage locations.
 
+Names follow mathematical convention: a single letter or Greek letter with an optional subscript (`x`, `x_1`, `x_{max}`, `\alpha`). Adjacent letters and juxtaposed factors denote a product (`xy`, `2x`, `2(x+1)`). Multi-letter names are upright operator names (`\operatorname{fact}`, `\mathrm{fact}`). See `SYNTAX-DECISIONS.md` for the full rule.
+
 The prototype rejects a second definition of an existing name in the same environment.
 
 ```text
